@@ -1,0 +1,3 @@
+pyyaml==5.1
+jinja2==2.10.1
+python-jenkins==1.5.0
