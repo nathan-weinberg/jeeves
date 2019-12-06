@@ -111,8 +111,7 @@ for job in jobs[::-1]:
 		bug_url = None
 	elif lcb_result == "UNSTABLE":
 		num_unstable += 1
-		bug_name = "No bug on file"
-		bug_url = None
+		bug_name, bug_url = get_bug()
 	elif lcb_result == "FAILURE":
 		num_failure += 1
 		bug_name, bug_url = get_bug()
