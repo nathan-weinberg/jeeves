@@ -31,11 +31,16 @@
 				
 				<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
 
-				{% if row.bug_url != None %}
-				<td style="text-align: center;"><a href="{{row.bug_url}}">{{row.bug_name}}</a></td>
-				{% else %}
-				<td style="text-align: center;">{{row.bug_name}}</td>
-				{% endif %}
+				<td style="text-align: center;">
+					{% for bug in row.bug_list %}
+						{% if bug.bug_url != None %}
+							<a href="{{bug.bug_url}}">{{bug.bug_name}}</a>
+						{% else %}
+							{{bug.bug_name}}
+						{% endif %}
+						<br>
+					{% endfor %}
+				</td>				
 
 			</tr>
 			{% endfor %}

@@ -14,36 +14,45 @@ from email.mime.multipart import MIMEMultipart
 # function definitions
 def get_bug():
 
-	# get all bugs from YAML file
+	# get all bugs for job from YAML file
 	try:
 		with open("bugzilla.yaml", 'r') as file:
 			bug_file = yaml.safe_load(file)
 			bugs = bug_file[job_name]
 	except Exception as e:
 		print("Error loading configuration data: ", e)
-		bug_name = "Could not find relevant bug"
-		bug_url = None
+		bug_list = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
 	else:
+
+		# initialize bug list
+		bug_list = []
 
 		# get bugzilla info from bugzilla API
 		for bug_id in bugs:
 
 			# 0 should be default in YAML file (i.e. no bugs recorded)
+			# if there is a 0 entry then that should be the only "bug", so break
 			if bug_id == 0:
-				bug_name = "No bug on file"
-				bug_url = None
-			else:
-				try:
-					bz_api = bugzilla.Bugzilla(config['bugzilla_url'])
-					bug = bz_api.getbug(bug_id)
-					bug_name = bug.summary
-				except Exception as e:
-					print("Bugzilla API Call Error: ", e)
-					bug_name = "{}: Bugzilla API Call Error".format(bug_id)
-				finally:
-					bug_url = config['bugzilla_url'] + "/show_bug.cgi?id=" + str(bug_id)
+				bug_list = [{'bug_name': 'No bug on file', 'bug_url': None}]
+				break
 
-	return bug_name, bug_url
+			try:
+				bz_api = bugzilla.Bugzilla(config['bugzilla_url'])
+				bug = bz_api.getbug(bug_id)
+				bug_name = bug.summary
+			except Exception as e:
+				print("Bugzilla API Call Error: ", e)
+				bug_name = "{}: Bugzilla API Call Error".format(bug_id)
+			finally:
+				bug_url = config['bugzilla_url'] + "/show_bug.cgi?id=" + str(bug_id)
+				bug_list.append(
+					{
+						'bug_name': bug_name, 
+						'bug_url': bug_url
+					}
+				)
+
+	return bug_list
 
 def get_osp_version(job_name):
 	x = len(config['job_search_field']) + 1
@@ -107,14 +116,13 @@ for job in jobs[::-1]:
 
 	if lcb_result == "SUCCESS":
 		num_success += 1
-		bug_name = "N/A"
-		bug_url = None
+		bug_list = [{'bug_name': 'N/A', 'bug_url': None}]
 	elif lcb_result == "UNSTABLE":
 		num_unstable += 1
-		bug_name, bug_url = get_bug()
+		bug_list = get_bug()
 	elif lcb_result == "FAILURE":
 		num_failure += 1
-		bug_name, bug_url = get_bug()
+		bug_list = get_bug()
 	else:
 		num_error += 1
 
@@ -124,8 +132,7 @@ for job in jobs[::-1]:
 			'lcb_num': lcb_num,
 			'lcb_url': lcb_url,
 			'lcb_result': lcb_result,
-			'bug_name': bug_name,
-			'bug_url': bug_url
+			'bug_list': bug_list
 	}
 
 	rows.append(row)
