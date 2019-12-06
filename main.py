@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
+import sys
 import yaml
 import jinja2
 import jenkins
+import bugzilla
 import datetime
 
 from smtplib import SMTP
@@ -10,13 +12,55 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 # function definitions
-def percent(part, whole):
-	return round(100 * float(part)/float(whole), 1)
+def get_bug():
+
+	# get all bugs for job from YAML file
+	try:
+		with open("bugzilla.yaml", 'r') as file:
+			bug_file = yaml.safe_load(file)
+			bugs = bug_file[job_name]
+	except Exception as e:
+		print("Error loading configuration data: ", e)
+		bug_list = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
+	else:
+
+		# initialize bug list
+		bug_list = []
+
+		# get bugzilla info from bugzilla API
+		for bug_id in bugs:
+
+			# 0 should be default in YAML file (i.e. no bugs recorded)
+			# if there is a 0 entry then that should be the only "bug", so break
+			if bug_id == 0:
+				bug_list = [{'bug_name': 'No bug on file', 'bug_url': None}]
+				break
+
+			try:
+				bz_api = bugzilla.Bugzilla(config['bugzilla_url'])
+				bug = bz_api.getbug(bug_id)
+				bug_name = bug.summary
+			except Exception as e:
+				print("Bugzilla API Call Error: ", e)
+				bug_name = "{}: Bugzilla API Call Error".format(bug_id)
+			finally:
+				bug_url = config['bugzilla_url'] + "/show_bug.cgi?id=" + str(bug_id)
+				bug_list.append(
+					{
+						'bug_name': bug_name, 
+						'bug_url': bug_url
+					}
+				)
+
+	return bug_list
 
 def get_osp_version(job_name):
 	x = len(config['job_search_field']) + 1
 	y = len(config['job_search_field']) + 3
 	return job_name[x:y]
+
+def percent(part, whole):
+	return round(100 * float(part)/float(whole), 1)
 
 # initialize jinja2 vars
 loader = jinja2.FileSystemLoader('./template.html')
@@ -66,20 +110,34 @@ for job in jobs[::-1]:
 		lcb_url = job_info['lastCompletedBuild']['url']
 		build_info = server.get_build_info(job_name, lcb_num)
 		lcb_result = build_info['result']
-		if lcb_result == "SUCCESS":
-			num_success += 1
-		elif lcb_result == "UNSTABLE":
-			num_unstable += 1
-		elif lcb_result == "FAILURE":
-			num_failure += 1
-		else:
-			num_error += 1	
-		row = {'osp_version': osp_version, 'job_name': job_name, 'job_url': job_url, 'lcb_num': lcb_num, 'lcb_url': lcb_url, 'lcb_result': lcb_result}
-		rows.append(row)
 	except Exception as e:
 		print("Jenkins API call error: ", e)
 		continue
 
+	if lcb_result == "SUCCESS":
+		num_success += 1
+		bug_list = [{'bug_name': 'N/A', 'bug_url': None}]
+	elif lcb_result == "UNSTABLE":
+		num_unstable += 1
+		bug_list = get_bug()
+	elif lcb_result == "FAILURE":
+		num_failure += 1
+		bug_list = get_bug()
+	else:
+		num_error += 1
+
+	row = {'osp_version': osp_version,
+			'job_name': job_name,
+			'job_url': job_url,
+			'lcb_num': lcb_num,
+			'lcb_url': lcb_url,
+			'lcb_result': lcb_result,
+			'bug_list': bug_list
+	}
+
+	rows.append(row)
+
+# calculate summary
 total_success = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 total_unstable = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 total_failure = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))

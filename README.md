@@ -12,6 +12,9 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **smtp_host**: SMTP host of your email
 - **email_subject**: Subject of your email report
 - **email_to**: Email address you would like to send your report to
+- **bugzilla_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
+
+Create a file named "bugzilla.yaml" based off "bugzilla.yaml.example" with each job containing bugs and a list of their IDs. If you know a bug exists for a job but it is not yet filed in Bugzilla, you can use an ID of 0 as a placeholder.
 
 ## Usage
 To run:
@@ -22,6 +25,7 @@ To run:
 - [PyYAML](https://pyyaml.org/) for parsing config YAML
 - [Jinja2](https://jinja.palletsprojects.com/en/2.10.x/) for generating HTML
 - [Python Jenkins](https://python-jenkins.readthedocs.io/en/latest/) for interacting with Jenkins
+- [python-bugzilla](https://github.com/python-bugzilla/python-bugzilla) for interacting with Bugzilla
 
 To install packages run:
 
