@@ -9,6 +9,7 @@
 				<th style="text-align: center;">Last Build Number</th>		
 				<th style="text-align: center;">Result</th>
 				<th style="text-align: center;">Bugzilla</th>
+				<th style="text-align: center;">Jira</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -40,6 +41,17 @@
 						<br>
 					{% endfor %}
 				</td>				
+
+				<td style="text-align: center;">
+					{% for ticket in row.ticket_list %}
+						{% if ticket.ticket_url != None %}
+							<a href="{{ticket.ticket_url}}">{{ticket.ticket_name}}</a>
+						{% else %}
+							{{ticket.ticket_name}}
+						{% endif %}
+						<br>
+					{% endfor %}
+				</td>			
 
 			</tr>
 			{% endfor %}

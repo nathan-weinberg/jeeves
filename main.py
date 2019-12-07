@@ -6,6 +6,7 @@ import jinja2
 import jenkins
 import bugzilla
 import datetime
+from jira import JIRA
 
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -20,7 +21,7 @@ def get_bug():
 			bug_file = yaml.safe_load(file)
 			bugs = bug_file[job_name]
 	except Exception as e:
-		print("Error loading configuration data: ", e)
+		print("Error loading Bugzilla configuration data: ", e)
 		bug_list = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
 	else:
 
@@ -54,6 +55,47 @@ def get_bug():
 
 	return bug_list
 
+def get_jira():
+
+	# get all tickets for job from YAML file
+	try:
+		with open("jira.yaml", 'r') as file:
+			jira_file = yaml.safe_load(file)
+			tickets = jira_file[job_name]
+	except Exception as e:
+		print("Error loading Jira configuration data: ", e)
+		ticket_list = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
+	else:
+
+		# initialize bug list
+		ticket_list = []
+
+		# get bugzilla info from bugzilla API
+		for ticket_id in tickets:
+
+			# 0 should be default in YAML file (i.e. no tickers recorded)
+			# if there is a 0 entry then that should be the only "ticket", so break
+			if ticket_id == 0:
+				ticket_list = [{'ticket_name': 'No ticket on file', 'ticket_url': None}]
+				break
+
+			try:
+				issue = jira.issue(ticket_id)
+				ticket_name = issue.fields.summary
+			except Exception as e:
+				print("Jira API Call Error: ", e)
+				ticket_name = "{}: Jira API Call Error".format(ticket_id)
+			finally:
+				ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
+				ticket_list.append(
+					{
+						'ticket_name': ticket_name, 
+						'ticket_url': ticket_url
+					}
+				)
+
+	return ticket_list
+
 def get_osp_version(job_name):
 	x = len(config['job_search_field']) + 1
 	y = len(config['job_search_field']) + 3
@@ -76,6 +118,17 @@ try:
 		config = yaml.safe_load(file)
 except Exception as e:
 	print("Error loading configuration data: ", e)
+	sys.exit()
+
+# connect to Jira
+try:
+	options = {
+				"server": config['jira_url'],
+				"verify": config['certificate']
+	}
+	jira = JIRA(options)
+except Exception as e:
+	print("Error connecting to Jira: ", e)
 	sys.exit()
 
 # connect to jenkins server
@@ -120,12 +173,15 @@ for job in jobs[::-1]:
 	if lcb_result == "SUCCESS":
 		num_success += 1
 		bug_list = [{'bug_name': 'N/A', 'bug_url': None}]
+		ticket_list = [{'ticket_name': 'N/A', 'ticket_url': None}]
 	elif lcb_result == "UNSTABLE":
 		num_unstable += 1
 		bug_list = get_bug()
+		ticket_list = get_jira()
 	elif lcb_result == "FAILURE":
 		num_failure += 1
 		bug_list = get_bug()
+		ticket_list = get_jira()
 	else:
 		num_error += 1
 
@@ -135,7 +191,8 @@ for job in jobs[::-1]:
 			'lcb_num': lcb_num,
 			'lcb_url': lcb_url,
 			'lcb_result': lcb_result,
-			'bug_list': bug_list
+			'bug_list': bug_list,
+			'ticket_list': ticket_list
 	}
 
 	rows.append(row)
