@@ -14,12 +14,15 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **email_to**: Email address you would like to send your report to
 - **bugzilla_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
 
+If you wish to use a different configuration file, you can specify it as a command line argument.
+
+#### Bugzilla
 Create a file named "bugzilla.yaml" based off "bugzilla.yaml.example" with each job containing bugs and a list of their IDs. If you know a bug exists for a job but it is not yet filed in Bugzilla, you can use an ID of 0 as a placeholder.
 
 ## Usage
 To run:
-- `$ ./main.py` if `/usr/bin/python3` is a valid path
-- `$ python3 main.py` otherwise
+- `$ ./main.py [optional: config file]` if `/usr/bin/python3` is a valid path
+- `$ python3 main.py [optional: config file]` otherwise
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML

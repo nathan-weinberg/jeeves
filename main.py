@@ -62,14 +62,17 @@ def get_osp_version(job_name):
 def percent(part, whole):
 	return round(100 * float(part)/float(whole), 1)
 
-# initialize jinja2 vars
-loader = jinja2.FileSystemLoader('./template.html')
-env = jinja2.Environment(loader=loader)
-template = env.get_template('')
-
 # load configuration data
+if len(sys.argv) == 1:
+	conf = "config.yaml"
+elif len(sys.argv) == 2:
+	conf = sys.argv[1]
+else:
+	print("Improper number of arguments - please see README")
+	sys.exit()
+
 try:
-	with open("config.yaml", 'r') as file:
+	with open(conf, 'r') as file:
 		config = yaml.safe_load(file)
 except Exception as e:
 	print("Error loading configuration data: ", e)
@@ -81,7 +84,7 @@ try:
 	user = server.get_whoami()
 	version = server.get_version()
 except Exception as e:
-	print("Error loading configuration data: ", e)
+	print("Error connecting to Jenkins server: ", e)
 	sys.exit()
 else:
 	user_email_address = user['property'][-1]['address']
@@ -145,6 +148,11 @@ if num_error > 0:
 	total_error = "Total ERROR:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_error, num_jobs))
 else:
 	total_error = False
+
+# initialize jinja2 vars
+loader = jinja2.FileSystemLoader('./template.html')
+env = jinja2.Environment(loader=loader)
+template = env.get_template('')
 
 # generate HTML report
 htmlcode = template.render(header=header, rows=rows, total_success=total_success, total_unstable=total_unstable, total_failure=total_failure, total_error=total_error)
