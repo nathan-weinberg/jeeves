@@ -13,11 +13,16 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **email_subject**: Subject of your email report
 - **email_to**: Email address you would like to send your report to
 - **bugzilla_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
+- **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
+- **certficate**: CRT file to authenticate with Jira server
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
 #### Bugzilla
 Create a file named "bugzilla.yaml" based off "bugzilla.yaml.example" with each job containing bugs and a list of their IDs. If you know a bug exists for a job but it is not yet filed in Bugzilla, you can use an ID of 0 as a placeholder.
+
+#### Jira
+Create a file named "jira.yaml" based off "jira.yaml.example" with each job containing tickets and a list of their IDs. If you know a ticket exists for a job but it is not yet filed in Jira, you can use an ID of 0 as a placeholder.
 
 ## Usage
 To run:
@@ -29,6 +34,7 @@ To run:
 - [Jinja2](https://jinja.palletsprojects.com/en/2.10.x/) for generating HTML
 - [Python Jenkins](https://python-jenkins.readthedocs.io/en/latest/) for interacting with Jenkins
 - [python-bugzilla](https://github.com/python-bugzilla/python-bugzilla) for interacting with Bugzilla
+- [jira-python](https://jira.readthedocs.io/en/master/index.html) for interacting with Jira
 
 To install packages run:
 

@@ -1,3 +1,5 @@
 bugzilla.yaml
 config.yaml
+jira.yaml
 dev.py
+*.crt
