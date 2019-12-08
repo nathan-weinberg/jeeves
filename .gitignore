@@ -1,5 +1,4 @@
-bugzilla.yaml
+blockers.yaml
 config.yaml
-jira.yaml
 dev.py
 *.crt

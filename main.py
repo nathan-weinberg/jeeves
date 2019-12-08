@@ -17,11 +17,11 @@ def get_bug():
 
 	# get all bugs for job from YAML file
 	try:
-		with open("bugzilla.yaml", 'r') as file:
+		with open("blockers.yaml", 'r') as file:
 			bug_file = yaml.safe_load(file)
-			bugs = bug_file[job_name]
+			bugs = bug_file[job_name]['bz']
 	except Exception as e:
-		print("Error loading Bugzilla configuration data: ", e)
+		print("Error loading blocker configuration data: ", e)
 		bug_list = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
 	else:
 
@@ -59,11 +59,11 @@ def get_jira():
 
 	# get all tickets for job from YAML file
 	try:
-		with open("jira.yaml", 'r') as file:
+		with open("blockers.yaml", 'r') as file:
 			jira_file = yaml.safe_load(file)
-			tickets = jira_file[job_name]
+			tickets = jira_file[job_name]['jira']
 	except Exception as e:
-		print("Error loading Jira configuration data: ", e)
+		print("Error loading blocker configuration data: ", e)
 		ticket_list = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
 	else:
 
