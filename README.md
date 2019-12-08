@@ -18,11 +18,8 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
-#### Bugzilla
-Create a file named "bugzilla.yaml" based off "bugzilla.yaml.example" with each job containing bugs and a list of their IDs. If you know a bug exists for a job but it is not yet filed in Bugzilla, you can use an ID of 0 as a placeholder.
-
-#### Jira
-Create a file named "jira.yaml" based off "jira.yaml.example" with each job containing tickets and a list of their IDs. If you know a ticket exists for a job but it is not yet filed in Jira, you can use an ID of 0 as a placeholder.
+#### Tracking Blockers
+Create a file named "blockers.yaml" based off "blockers.yaml.example" with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
 
 ## Usage
 To run:

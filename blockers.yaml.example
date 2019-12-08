@@ -1,0 +1,21 @@
+---
+job1:
+    bz:
+        - 123
+    jira:
+        - 'RHOSINFRA-123'
+
+# 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
+job2:
+    bz:
+        - 0
+    jira:
+        - 0
+
+job3:
+    bz:
+        - 456
+        - 789
+    jira:
+        - 'RHOSINFRA-456'
+        - 'RHOSINFRA-789'
