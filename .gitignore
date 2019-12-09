@@ -1,5 +1,6 @@
-blockers.yaml
-config.yaml
+*.yaml
+!blockers.yaml.example
+!config.yaml.example
 dev.py
 *.crt
 .venv/
