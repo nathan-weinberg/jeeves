@@ -2,3 +2,5 @@ blockers.yaml
 config.yaml
 dev.py
 *.crt
+.venv/
+.vscode/
