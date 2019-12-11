@@ -187,7 +187,10 @@ for job in jobs[::-1]:
 		bug_list = get_bug()
 		ticket_list = get_jira()
 	else:
+		lcb_result = "ERROR"
 		num_error += 1
+		bug_list = [{'bug_name': 'N/A', 'bug_url': None}]
+		ticket_list = [{'ticket_name': 'N/A', 'ticket_url': None}]
 
 	row = {'osp_version': osp_version,
 			'job_name': job_name,
@@ -206,7 +209,7 @@ total_success = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, perc
 total_unstable = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 total_failure = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
 if num_error > 0:
-	total_error = "Total ERROR:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_error, num_jobs))
+	total_error = "Total ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
 else:
 	total_error = False
 
