@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import re
 import sys
 import yaml
 import jinja2
@@ -100,9 +101,8 @@ def get_jira():
 	return ticket_list
 
 def get_osp_version(job_name):
-	x = len(config['job_search_field']) + 1
-	y = len(config['job_search_field']) + 3
-	return job_name[x:y]
+	version = re.search(r'\d+', job_name).group()
+	return version
 
 def percent(part, whole):
 	return round(100 * float(part)/float(whole), 1)
