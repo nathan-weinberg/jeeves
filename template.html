@@ -31,6 +31,10 @@
 					<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
 				{% endif %}
 
+				{% if row.lcb_result == "ERROR" %}
+					<td style="text-align: center;" bgcolor="#808080">{{row.lcb_result}}</td>
+				{% endif %}
+
 				<td style="text-align: center;">
 					{% for bug in row.bug_list %}
 						{% if bug.bug_url != None %}
