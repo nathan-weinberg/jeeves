@@ -42,7 +42,11 @@ def get_bug():
 				break
 
 			try:
-				bz_api = bugzilla.Bugzilla(config['bugzilla_url'])
+				
+				# hotfix: API call does not work if '/' present at end of URL string
+				parsed_bz_url = config['bugzilla_url'].rstrip('/')
+
+				bz_api = bugzilla.Bugzilla(parsed_bz_url)
 				bug = bz_api.getbug(bug_id)
 				bug_name = bug.summary
 			except Exception as e:
