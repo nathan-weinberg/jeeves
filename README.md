@@ -14,7 +14,7 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **email_to**: Email address you would like to send your report to
 - **bugzilla_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
 - **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
-- **certficate**: CRT file to authenticate with Jira server
+- **certificate**: CRT file to authenticate with Jira server
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
 

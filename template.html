@@ -36,7 +36,7 @@
 				{% endif %}
 
 				<td style="text-align: center;">
-					{% for bug in row.bug_list %}
+					{% for bug in row.bugs %}
 						{% if bug.bug_url != None %}
 							<a href="{{bug.bug_url}}">{{bug.bug_name}}</a>
 						{% else %}
@@ -47,7 +47,7 @@
 				</td>				
 
 				<td style="text-align: center;">
-					{% for ticket in row.ticket_list %}
+					{% for ticket in row.tickets %}
 						{% if ticket.ticket_url != None %}
 							<a href="{{ticket.ticket_url}}">{{ticket.ticket_name}}</a>
 						{% else %}
