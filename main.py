@@ -6,6 +6,7 @@ import sys
 import yaml
 import jinja2
 import jenkins
+import argparse
 import bugzilla
 import datetime
 from jira import JIRA
@@ -21,7 +22,7 @@ def get_bugzilla(job_name):
 
 	# get all bug ids for job from blocker file
 	try:
-		with open("blockers.yaml", 'r') as file:
+		with open(blockers, 'r') as file:
 			bug_file = yaml.safe_load(file)
 			bug_ids = bug_file[job_name]['bz']
 	except Exception as e:
@@ -68,7 +69,7 @@ def get_jira(job_name):
 
 	# get all tickets for job from YAML file
 	try:
-		with open("blockers.yaml", 'r') as file:
+		with open(blockers, 'r') as file:
 			jira_file = yaml.safe_load(file)
 			ticket_ids = jira_file[job_name]['jira']
 	except Exception as e:
@@ -121,14 +122,13 @@ def percent(part, whole):
 # main script execution
 if __name__ == '__main__':
 
-	# determine config file
-	if len(sys.argv) == 1:
-		conf = "config.yaml"
-	elif len(sys.argv) == 2:
-		conf = sys.argv[1]
-	else:
-		print("Improper number of arguments - please see README")
-		sys.exit()
+	# argument parsing
+	parser = argparse.ArgumentParser(description='An automated report generator for Jenkins CI')
+	parser.add_argument("--config", default="config.yaml", type=str, help="Configuration YAML file to use")
+	parser.add_argument("--blockers", default="blockers.yaml", type=str, help="Blockers YAML file to use")
+	args = parser.parse_args()
+	conf = args.config
+	blockers = args.blockers
 
 	# load configuration data
 	try:
