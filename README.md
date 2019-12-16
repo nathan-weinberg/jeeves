@@ -21,10 +21,12 @@ If you wish to use a different configuration file, you can specify it as a comma
 #### Tracking Blockers
 Create a file named "blockers.yaml" based off "blockers.yaml.example" with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
 
+If you wish to use a different blockers file, you can specify it as a command line argument.
+
 ## Usage
 To run:
-- `$ ./main.py [optional: config file]` if `/usr/bin/python3` is a valid path
-- `$ python3 main.py [optional: config file]` otherwise
+- `$ ./main.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` if `/usr/bin/python3` is a valid path
+- `$ python3 main.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` otherwise
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML
