@@ -5,3 +5,4 @@ dev.py
 *.crt
 .venv/
 .vscode/
+report.html
