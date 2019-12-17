@@ -232,14 +232,19 @@ if __name__ == '__main__':
 	msg['To'] = config['email_to']
 	msg.attach(MIMEText(htmlcode, 'html'))
 
-	# create SMTP session
-	with SMTP(config['smtp_host']) as smtp:
+	# create SMTP session - if jeeves is unable to do so an HTML file will be generated
+	try:
+		with SMTP(config['smtp_host']) as smtp:
 
-		# start TLS for security
-		smtp.starttls()
+			# start TLS for security
+			smtp.starttls()
 
-		# use ehlo or helo if needed
-		smtp.ehlo_or_helo_if_needed()
+			# use ehlo or helo if needed
+			smtp.ehlo_or_helo_if_needed()
 
-		# send email
-		smtp.sendmail(msg["From"], msg["To"], msg.as_string())
+			# send email
+			smtp.sendmail(msg["From"], msg["To"], msg.as_string())
+	except:
+		with open("report.html", "w") as file:
+			print("Error sending email report - HTML file generated")
+			file.write(htmlcode)
