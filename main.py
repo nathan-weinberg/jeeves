@@ -42,6 +42,9 @@ def get_bugzilla(job_name):
 				bugs = [{'bug_name': 'No bug on file', 'bug_url': None}]
 				break
 
+			if bug_id not in all_bugs:
+				all_bugs.append(bug_id)
+
 			# get bug info from bugzilla API
 			try:
 
@@ -88,6 +91,9 @@ def get_jira(job_name):
 			if ticket_id == 0:
 				tickets = [{'ticket_name': 'No ticket on file', 'ticket_url': None}]
 				break
+
+			if ticket_id not in all_tickets:
+				all_tickets.append(ticket_id)
 
 			# get ticket info from jira API
 			try:
@@ -161,6 +167,8 @@ if __name__ == '__main__':
 	num_unstable = 0
 	num_failure = 0
 	num_error = 0
+	all_bugs = []
+	all_tickets = []
 	rows = []
 
 	# collect info from all relevant jobs
@@ -209,13 +217,16 @@ if __name__ == '__main__':
 		rows.append(row)
 
 	# calculate summary
-	total_success = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
-	total_unstable = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
-	total_failure = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
+	summary = {}
+	summary['total_success'] = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
+	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
+	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
+	summary['total_bugs'] = "Total Blocker Bugs: {}".format(len(all_bugs))
+	summary['total_tickets'] = "Total Blocker Tickets: {}".format(len(all_tickets))
 	if num_error > 0:
-		total_error = "Total ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
+		summary['total_error'] = "Total ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
 	else:
-		total_error = False
+		summary['total_error'] = False
 
 	# initialize jinja2 vars
 	loader = jinja2.FileSystemLoader('./template.html')
@@ -223,7 +234,11 @@ if __name__ == '__main__':
 	template = env.get_template('')
 
 	# generate HTML report
-	htmlcode = template.render(header=header, rows=rows, total_success=total_success, total_unstable=total_unstable, total_failure=total_failure, total_error=total_error)
+	htmlcode = template.render(
+		header=header,
+		rows=rows,
+		summary=summary
+	)
 
 	# construct email
 	msg = MIMEMultipart()
