@@ -42,8 +42,8 @@ def get_bugzilla(job_name):
 				bugs = [{'bug_name': 'No bug on file', 'bug_url': None}]
 				break
 
-			if bug_id not in all_bugs:
-				all_bugs.append(bug_id)
+			# otherwise record real bug in overall list
+			all_bugs.append(bug_id)
 
 			# get bug info from bugzilla API
 			try:
@@ -92,8 +92,8 @@ def get_jira(job_name):
 				tickets = [{'ticket_name': 'No ticket on file', 'ticket_url': None}]
 				break
 
-			if ticket_id not in all_tickets:
-				all_tickets.append(ticket_id)
+			# otherwise record real ticket in overall list
+			all_tickets.append(ticket_id)
 
 			# get ticket info from jira API
 			try:
@@ -221,8 +221,19 @@ if __name__ == '__main__':
 	summary['total_success'] = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
-	summary['total_bugs'] = "Total Blocker Bugs: {}".format(len(all_bugs))
-	summary['total_tickets'] = "Total Blocker Tickets: {}".format(len(all_tickets))
+	
+	if len(all_bugs) == 0: 
+		summary['total_bugs'] = "Blocker Bugs: 0 total"
+	else:
+		unique_bugs = set(all_bugs)
+		summary['total_bugs'] = "Blocker Bugs: {} total, {} unique".format(len(all_bugs), len(unique_bugs))
+		
+	if len(all_tickets) == 0:
+		summary['total_tickets'] = "Blocker Tickets: 0 total"
+	else:
+		unique_tickets = set(all_tickets)
+		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
+		
 	if num_error > 0:
 		summary['total_error'] = "Total ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
 	else:
