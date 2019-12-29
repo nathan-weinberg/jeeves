@@ -6,3 +6,4 @@ dev.py
 .venv/
 .vscode/
 report.html
+__pycache__/
