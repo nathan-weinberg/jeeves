@@ -6,15 +6,17 @@ Jeeves is an automated report generator for Jenkins CI. It generates an HTML rep
 ## Setup
 Create a file named "config.yaml" based off "config.yaml.example" with the following fields filled in:
 - **jenkins_url**: URL of your Jenkins server
-- **username**: Your Jenkins username
-- **api_token**: Your Jenkins API token
+- **jenkins_username**: Your Jenkins username
+- **jenkins_api_token**: Your Jenkins API token
 - **job_search_field**: Filter of Jenkins Jobs to included in report, e.g. DFG-ceph-rhos
+- **bz_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
+- **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
+- **jira_username**: Your Jira username (note: this field is only required of the tickets you wish to access have restricted view permissions)
+- **jira_password**: Your Jira password (note: this field is only required of the tickets you wish to access have restricted view permissions)
+- **certificate**: CRT file to authenticate with Jira server
 - **smtp_host**: SMTP host of your email
 - **email_subject**: Subject of your email report
 - **email_to**: Email address you would like to send your report to
-- **bugzilla_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
-- **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
-- **certificate**: CRT file to authenticate with Jira server
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
