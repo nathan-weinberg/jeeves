@@ -49,7 +49,7 @@ def get_bugzilla(job_name):
 			try:
 
 				# hotfix: API call does not work if '/' present at end of URL string
-				parsed_bz_url = config['bugzilla_url'].rstrip('/')
+				parsed_bz_url = config['bz_url'].rstrip('/')
 
 				bz_api = bugzilla.Bugzilla(parsed_bz_url)
 				bug = bz_api.getbug(bug_id)
@@ -58,7 +58,7 @@ def get_bugzilla(job_name):
 				print("Bugzilla API Call Error: ", e)
 				bug_name = "{}: Bugzilla API Call Error".format(bug_id)
 			finally:
-				bug_url = config['bugzilla_url'] + "/show_bug.cgi?id=" + str(bug_id)
+				bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
 				bugs.append(
 					{
 						'bug_name': bug_name, 
@@ -97,11 +97,12 @@ def get_jira(job_name):
 
 			# get ticket info from jira API
 			try:
+				auth=(config['jira_username'], config['jira_password'])
 				options = {
 					"server": config['jira_url'],
 					"verify": config['certificate']
 				}
-				jira = JIRA(options)
+				jira = JIRA(auth=auth, options=options)
 				issue = jira.issue(ticket_id)
 				ticket_name = issue.fields.summary
 			except Exception as e:
@@ -146,7 +147,7 @@ if __name__ == '__main__':
 
 	# connect to jenkins server
 	try:
-		server = jenkins.Jenkins(config['jenkins_url'], username=config['username'], password=config['api_token'])
+		server = jenkins.Jenkins(config['jenkins_url'], username=config['jenkins_username'], password=config['jenkins_api_token'])
 		user = server.get_whoami()
 		version = server.get_version()
 	except Exception as e:
