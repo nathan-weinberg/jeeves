@@ -56,7 +56,7 @@ def get_bugzilla(job_name):
 				bug_name = bug.summary
 			except Exception as e:
 				print("Bugzilla API Call Error: ", e)
-				bug_name = "{}: Bugzilla API Call Error".format(bug_id)
+				bug_name = bug_id
 			finally:
 				bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
 				bugs.append(
@@ -107,7 +107,7 @@ def get_jira(job_name):
 				ticket_name = issue.fields.summary
 			except Exception as e:
 				print("Jira API Call Error: ", e)
-				ticket_name = "{}: Jira API Call Error".format(ticket_id)
+				ticket_name = ticket_id
 			finally:
 				ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
 				tickets.append(
