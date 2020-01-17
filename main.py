@@ -16,106 +16,88 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 os.environ['PYTHONHTTPSVERIFY'] = '0'
+all_bugs = []
+all_tickets = []
 
 # function definitions
-def get_bugzilla(job_name):
+def get_bugzilla(job_name, bug_ids):
 
-	# get all bug ids for job from blocker file
-	try:
-		with open(blockers, 'r') as file:
-			bug_file = yaml.safe_load(file)
-			bug_ids = bug_file[job_name]['bz']
-	except Exception as e:
-		print("Error loading blocker configuration data (Bugzilla): ", e)
-		bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
-	else:
+	# initialize bug list
+	bugs = []
 
-		# initialize bug list
-		bugs = []
+	# iterate through bug ids from blocker file
+	for bug_id in bug_ids:
 
-		# iterate through bug ids from blocker file
-		for bug_id in bug_ids:
+		# 0 should be default in YAML file (i.e. no bugs recorded)
+		# if there is a 0 entry then that should be the only "bug", so break
+		if bug_id == 0:
+			bugs = [{'bug_name': 'No bug on file', 'bug_url': None}]
+			break
 
-			# 0 should be default in YAML file (i.e. no bugs recorded)
-			# if there is a 0 entry then that should be the only "bug", so break
-			if bug_id == 0:
-				bugs = [{'bug_name': 'No bug on file', 'bug_url': None}]
-				break
+		# otherwise record real bug in overall list
+		all_bugs.append(bug_id)
 
-			# otherwise record real bug in overall list
-			all_bugs.append(bug_id)
+		# get bug info from bugzilla API
+		try:
 
-			# get bug info from bugzilla API
-			try:
+			# hotfix: API call does not work if '/' present at end of URL string
+			parsed_bz_url = config['bz_url'].rstrip('/')
 
-				# hotfix: API call does not work if '/' present at end of URL string
-				parsed_bz_url = config['bz_url'].rstrip('/')
-
-				bz_api = bugzilla.Bugzilla(parsed_bz_url)
-				bug = bz_api.getbug(bug_id)
-				bug_name = bug.summary
-			except Exception as e:
-				print("Bugzilla API Call Error: ", e)
-				bug_name = bug_id
-			finally:
-				bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
-				bugs.append(
-					{
-						'bug_name': bug_name, 
-						'bug_url': bug_url
-					}
-				)
+			bz_api = bugzilla.Bugzilla(parsed_bz_url)
+			bug = bz_api.getbug(bug_id)
+			bug_name = bug.summary
+		except Exception as e:
+			print("Bugzilla API Call Error: ", e)
+			bug_name = "BZ#" + str(bug_id)
+		finally:
+			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
+			bugs.append(
+				{
+					'bug_name': bug_name, 
+					'bug_url': bug_url
+				}
+			)
 
 	return bugs
 
-def get_jira(job_name):
+def get_jira(job_name, ticket_ids):
 
-	# get all tickets for job from YAML file
-	try:
-		with open(blockers, 'r') as file:
-			jira_file = yaml.safe_load(file)
-			ticket_ids = jira_file[job_name]['jira']
-	except Exception as e:
-		print("Error loading blocker configuration data (Jira): ", e)
-		tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
-	else:
+	# initialize ticket list
+	tickets = []
 
-		# initialize ticket list
-		tickets = []
+	# iterate through ticket ids from blocker file
+	for ticket_id in ticket_ids:
 
-		# iterate through ticket ids from blocker file
-		for ticket_id in ticket_ids:
+		# 0 should be default in YAML file (i.e. no tickers recorded)
+		# if there is a 0 entry then that should be the only "ticket", so break
+		if ticket_id == 0:
+			tickets = [{'ticket_name': 'No ticket on file', 'ticket_url': None}]
+			break
 
-			# 0 should be default in YAML file (i.e. no tickers recorded)
-			# if there is a 0 entry then that should be the only "ticket", so break
-			if ticket_id == 0:
-				tickets = [{'ticket_name': 'No ticket on file', 'ticket_url': None}]
-				break
+		# otherwise record real ticket in overall list
+		all_tickets.append(ticket_id)
 
-			# otherwise record real ticket in overall list
-			all_tickets.append(ticket_id)
-
-			# get ticket info from jira API
-			try:
-				auth=(config['jira_username'], config['jira_password'])
-				options = {
-					"server": config['jira_url'],
-					"verify": config['certificate']
+		# get ticket info from jira API
+		try:
+			auth=(config['jira_username'], config['jira_password'])
+			options = {
+				"server": config['jira_url'],
+				"verify": config['certificate']
+			}
+			jira = JIRA(auth=auth, options=options)
+			issue = jira.issue(ticket_id)
+			ticket_name = issue.fields.summary
+		except Exception as e:
+			print("Jira API Call Error: ", e)
+			ticket_name = ticket_id
+		finally:
+			ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
+			tickets.append(
+				{
+					'ticket_name': ticket_name, 
+					'ticket_url': ticket_url
 				}
-				jira = JIRA(auth=auth, options=options)
-				issue = jira.issue(ticket_id)
-				ticket_name = issue.fields.summary
-			except Exception as e:
-				print("Jira API Call Error: ", e)
-				ticket_name = ticket_id
-			finally:
-				ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
-				tickets.append(
-					{
-						'ticket_name': ticket_name, 
-						'ticket_url': ticket_url
-					}
-				)
+			)
 
 	return tickets
 
@@ -134,15 +116,23 @@ if __name__ == '__main__':
 	parser.add_argument("--config", default="config.yaml", type=str, help="Configuration YAML file to use")
 	parser.add_argument("--blockers", default="blockers.yaml", type=str, help="Blockers YAML file to use")
 	args = parser.parse_args()
-	conf = args.config
-	blockers = args.blockers
+	config_file = args.config
+	blocker_file = args.blockers
 
 	# load configuration data
 	try:
-		with open(conf, 'r') as file:
+		with open(config_file, 'r') as file:
 			config = yaml.safe_load(file)
 	except Exception as e:
 		print("Error loading configuration data: ", e)
+		sys.exit()
+
+	# load blocker data
+	try:
+		with open(blocker_file, 'r') as file:
+			blockers = yaml.safe_load(file)
+	except Exception as e:
+		print("Error loading blocker configuration data: ", e)
 		sys.exit()
 
 	# connect to jenkins server
@@ -171,15 +161,14 @@ if __name__ == '__main__':
 	num_unstable = 0
 	num_failure = 0
 	num_error = 0
-	all_bugs = []
-	all_tickets = []
 	rows = []
 
-	# collect info from all relevant jobs
+	# iterate through all relevant jobs
 	for job in jobs[::-1]:
 		job_name = job['name']
 		osp_version = get_osp_version(job_name)
 		
+		# get all relevant info from jenkins
 		try:
 			job_info = server.get_job_info(job_name)
 			job_url = job_info['url']
@@ -191,24 +180,52 @@ if __name__ == '__main__':
 			print("Jenkins API call error: ", e)
 			continue
 
+		# take action based on last completed build result
 		if lcb_result == "SUCCESS":
 			num_success += 1
 			bugs = [{'bug_name': 'N/A', 'bug_url': None}]
 			tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
 		elif lcb_result == "UNSTABLE":
 			num_unstable += 1
-			bugs = get_bugzilla(job_name)
-			tickets = get_jira(job_name)
+
+			# get all related bugs to job 
+			try:
+				bug_ids = blockers[job_name]['bz']
+				bugs = get_bugzilla(job_name, bug_ids)
+			except:
+				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
+
+			# get all related tickets to job
+			try:
+				ticket_ids = blockers[job_name]['jira']
+				tickets = get_jira(job_name, ticket_ids)
+			except:
+				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
+
 		elif lcb_result == "FAILURE":
 			num_failure += 1
-			bugs = get_bugzilla(job_name)
-			tickets = get_jira(job_name)
+
+			# get all related bugs to job 
+			try:
+				bug_ids = blockers[job_name]['bz']
+				bugs = get_bugzilla(job_name, bug_ids)
+			except:
+				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
+
+			# get all related tickets to job
+			try:
+				ticket_ids = blockers[job_name]['jira']
+				tickets = get_jira(job_name, ticket_ids)
+			except:
+				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
+
 		else:
 			lcb_result = "ERROR"
 			num_error += 1
 			bugs = [{'bug_name': 'N/A', 'bug_url': None}]
 			tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
 
+		# build row
 		row = {'osp_version': osp_version,
 				'job_name': job_name,
 				'job_url': job_url,
@@ -219,26 +236,32 @@ if __name__ == '__main__':
 				'tickets': tickets
 		}
 
+		# append row to rows
 		rows.append(row)
 
 	# calculate summary
 	summary = {}
+
+	# job result metrics
 	summary['total_success'] = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
 	
+	# bug metrics
 	if len(all_bugs) == 0: 
 		summary['total_bugs'] = "Blocker Bugs: 0 total"
 	else:
 		unique_bugs = set(all_bugs)
 		summary['total_bugs'] = "Blocker Bugs: {} total, {} unique".format(len(all_bugs), len(unique_bugs))
 		
+	# ticket metrics
 	if len(all_tickets) == 0:
 		summary['total_tickets'] = "Blocker Tickets: 0 total"
 	else:
 		unique_tickets = set(all_tickets)
 		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
 		
+	# include error report if needed
 	if num_error > 0:
 		summary['total_error'] = "Total ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
 	else:
@@ -275,6 +298,7 @@ if __name__ == '__main__':
 
 			# send email
 			smtp.sendmail(msg["From"], msg["To"], msg.as_string())
+
 	except:
 		with open("report.html", "w") as file:
 			print("Error sending email report - HTML file generated")
