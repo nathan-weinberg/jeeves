@@ -41,5 +41,11 @@ To install packages run:
 
 `$ pip install -r requirements.txt`
 
+## Testing
+
+Jeeves has a small but growing test suite driven by [pytest](https://docs.pytest.org/en/latest/index.html). Currently all tests reside in the `test_main.py` file.
+
+To run tests simply run the `pytest` command within the Jeeves directory.
+
 ## Notes
 Jeeves was designed for use by Red Hat OpenStack QE and the organization's production CI environment - while the project can be used for other Jenkins environments, it may require some tweaking to work as expected.
