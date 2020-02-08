@@ -115,9 +115,11 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='An automated report generator for Jenkins CI')
 	parser.add_argument("--config", default="config.yaml", type=str, help="Configuration YAML file to use")
 	parser.add_argument("--blockers", default="blockers.yaml", type=str, help="Blockers YAML file to use")
+	parser.add_argument("--test", default=False, action='store_true', help="Flag to send email to test address")
 	args = parser.parse_args()
 	config_file = args.config
 	blocker_file = args.blockers
+	test = args.test
 
 	# load configuration data
 	try:
@@ -283,7 +285,10 @@ if __name__ == '__main__':
 	msg = MIMEMultipart()
 	msg['From'] = user_email_address
 	msg['Subject'] = config['email_subject']
-	msg['To'] = config['email_to']
+	if test:
+		msg['To'] = config['email_to_test']
+	else:
+		msg['To'] = config['email_to']
 	msg.attach(MIMEText(htmlcode, 'html'))
 
 	# create SMTP session - if jeeves is unable to do so an HTML file will be generated
