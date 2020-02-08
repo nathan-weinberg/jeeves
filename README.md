@@ -17,6 +17,7 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **smtp_host**: SMTP host of your email
 - **email_subject**: Subject of your email report
 - **email_to**: Email address you would like to send your report to
+- **email_to_test**: Email address to send test reports to (note: this field is only required if you run Jeeves with the `--test` flag)
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
@@ -29,6 +30,7 @@ If you wish to use a different blockers file, you can specify it as a command li
 To run:
 - `$ ./main.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` if `/usr/bin/python3` is a valid path
 - `$ python3 main.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` otherwise
+- To send report to email specified in `email_to_test` field, add `--test`
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML
