@@ -177,6 +177,8 @@ if __name__ == '__main__':
 			lcb_num = job_info['lastCompletedBuild']['number']
 			lcb_url = job_info['lastCompletedBuild']['url']
 			build_info = server.get_build_info(job_name, lcb_num)
+			build_actions = build_info['actions']
+			compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')][0]
 			lcb_result = build_info['result']
 		except Exception as e:
 			print("Jenkins API call error: ", e)
@@ -233,6 +235,7 @@ if __name__ == '__main__':
 				'job_url': job_url,
 				'lcb_num': lcb_num,
 				'lcb_url': lcb_url,
+				'compose': compose,
 				'lcb_result': lcb_result,
 				'bugs': bugs,
 				'tickets': tickets
