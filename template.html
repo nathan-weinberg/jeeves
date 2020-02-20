@@ -6,7 +6,8 @@
 			<tr>
 				<th style="text-align: center;">OSP Version </th>
 				<th style="text-align: center;">Job Name</th>
-				<th style="text-align: center;">Last Build Number</th>		
+				<th style="text-align: center;">Last Build Number</th>
+				<th style="text-align: center;">Compose</th>
 				<th style="text-align: center;">Result</th>
 				<th style="text-align: center;">Bugzilla</th>
 				<th style="text-align: center;">Jira</th>
@@ -18,6 +19,7 @@
 				<td style="text-align: center;">{{row.osp_version}}</td>
 				<td style="text-align: left;"><a href="{{row.job_url}}">{{row.job_name}}</a></td>				
 				<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
+				<td style="text-align: center;">{{row.compose}}</td>
 
 				{% if row.lcb_result == "SUCCESS" %}
 					<td style="text-align: center;" bgcolor="#4646ff"><a href="https://www.youtube.com/watch?v=68ugkg9RePc" style="text-decoration: none; color: #000;">{{row.lcb_result}}</a></td>
