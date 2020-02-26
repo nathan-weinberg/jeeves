@@ -102,8 +102,11 @@ def get_jira(job_name, ticket_ids):
 	return tickets
 
 def get_osp_version(job_name):
-	version = re.search(r'\d+', job_name).group()
-	return version
+	version = re.search(r'\d+', job_name)
+	if version is None:
+		return None
+	else:
+		return version.group()
 
 def percent(part, whole):
 	return round(100 * float(part)/float(whole), 1)
@@ -154,8 +157,8 @@ if __name__ == '__main__':
 	# fetch all jobs from server
 	jobs = server.get_jobs()
 
-	# parse out all jobs that do not contain the search field and/or are OSP14 jobs
-	jobs = [job for job in jobs if config['job_search_field'] in job['name'] and '14' not in job['name']]
+	# parse out all jobs that do not contain the search field and/or are OSP11, OSP12, or OSP14 jobs
+	jobs = [job for job in jobs if config['job_search_field'] in job['name'] and '11' not in job['name'] and '12' not in job['name'] and '14' not in job['name']]
 
 	# initialize python variables
 	num_jobs = len(jobs)
@@ -165,11 +168,20 @@ if __name__ == '__main__':
 	num_error = 0
 	rows = []
 
+	# exit if no jobs found
+	if num_jobs == 0:
+		print("No jobs found with given search field. Exiting...")
+		sys.exit()
+
 	# iterate through all relevant jobs
 	for job in jobs[::-1]:
 		job_name = job['name']
 		osp_version = get_osp_version(job_name)
-		
+
+		# skip if no OSP version could be found
+		if osp_version == None:
+			continue
+
 		# get all relevant info from jenkins
 		try:
 			job_info = server.get_job_info(job_name)

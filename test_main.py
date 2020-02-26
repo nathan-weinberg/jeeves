@@ -12,6 +12,7 @@ def test_get_osp_version_func():
 	assert get_osp_version('DFG-pidone-sanity-16_director-rhel-virthost-3cont_2comp-ipv4-geneve-tobiko_faults-sanity') == '16'
 	assert get_osp_version('DFG-security-keystone-16_director-rhel-virthost-1cont_1comp-ipv4-geneve-lvm-containers') == '16'
 	assert get_osp_version('DFG-upgrades-updates-16-from-passed_phase1-HA-ipv4') == '16'
+	assert get_osp_version('DFG-all-unified-weekly-multijob') is None
 
 def test_percent_func():
 	assert percent(0, 1) == 0.0
