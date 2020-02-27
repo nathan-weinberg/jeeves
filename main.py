@@ -120,10 +120,10 @@ def get_jenkins_jobs(server, job_search_fields):
 	# fetch all jobs from server
 	all_jobs = server.get_jobs()
 
-	# parse out all jobs that do not contain any search field and/or are OSP11, OSP12, or OSP14 jobs
+	# parse out all jobs that do not contain any search field and/or are not OSP10, OSP13, OSP15 or OSP16 jobs
 	relevant_jobs = []
 	for job in all_jobs:
-		if ('11' in job['name']) or ('12' in job['name']) or ('14' in job['name']):
+		if ('10' not in job['name']) and ('13' not in job['name']) and ('15' not in job['name']) and ('16' not in job['name']):
 			continue
 		else:
 			for field in fields:
