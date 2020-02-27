@@ -2,7 +2,7 @@
 jenkins_url: 
 jenkins_username: 
 jenkins_api_token: 
-job_search_field: 
+job_search_fields: 
 bz_url: 
 jira_url: 
 jira_username: 
