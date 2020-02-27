@@ -186,26 +186,25 @@ if __name__ == '__main__':
 	# fetch all relevant jobs
 	jobs = get_jenkins_jobs(server, config['job_search_fields'])
 
-	# initialize python variables
+	# exit if no jobs found
 	num_jobs = len(jobs)
+	if num_jobs == 0:
+		print("No jobs found with given search field. Exiting...")
+		sys.exit()
+
+	# iterate through all relevant jobs and build report rows
 	num_success = 0
 	num_unstable = 0
 	num_failure = 0
 	num_error = 0
 	rows = []
-
-	# exit if no jobs found
-	if num_jobs == 0:
-		print("No jobs found with given search field. Exiting...")
-		sys.exit()
-
-	# iterate through all relevant jobs
 	for job in jobs[::-1]:
 		job_name = job['name']
 		osp_version = get_osp_version(job_name)
 
 		# skip if no OSP version could be found
 		if osp_version == None:
+			print('No OSP version could be found in job {}. Skipping...'.format(job_name))
 			continue
 
 		# get all relevant info from jenkins
