@@ -19,7 +19,7 @@ os.environ['PYTHONHTTPSVERIFY'] = '0'
 all_bugs = []
 all_tickets = []
 
-# function definitions
+
 def get_bugzilla(bug_ids):
 
 	# initialize bug dictionary
@@ -51,6 +51,7 @@ def get_bugzilla(bug_ids):
 
 	return bugs
 
+
 def get_jira(job_name, ticket_ids):
 
 	# initialize ticket list
@@ -70,7 +71,7 @@ def get_jira(job_name, ticket_ids):
 
 		# get ticket info from jira API
 		try:
-			auth=(config['jira_username'], config['jira_password'])
+			auth = (config['jira_username'], config['jira_password'])
 			options = {
 				"server": config['jira_url'],
 				"verify": config['certificate']
@@ -85,12 +86,13 @@ def get_jira(job_name, ticket_ids):
 			ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
 			tickets.append(
 				{
-					'ticket_name': ticket_name, 
+					'ticket_name': ticket_name,
 					'ticket_url': ticket_url
 				}
 			)
 
 	return tickets
+
 
 def generate_header(user, job_search_fields):
 	user_properties = user['property']
@@ -102,6 +104,7 @@ def generate_header(user, job_search_fields):
 		'job_search_fields': job_search_fields
 	}
 	return header
+
 
 def get_jenkins_jobs(server, job_search_fields):
 
@@ -124,6 +127,7 @@ def get_jenkins_jobs(server, job_search_fields):
 
 	return relevant_jobs
 
+
 def get_bugs_set(blockers):
 	''' Takes in blockers object and generates a set of all unique bug ids including 0 if it is present
 	'''
@@ -136,6 +140,7 @@ def get_bugs_set(blockers):
 
 	return set(bug_list)
 
+
 def get_osp_version(job_name):
 	version = re.search(r'\d+', job_name)
 	if version is None:
@@ -143,8 +148,10 @@ def get_osp_version(job_name):
 	else:
 		return version.group()
 
+
 def percent(part, whole):
-	return round(100 * float(part)/float(whole), 1)
+	return round(100 * float(part) / float(whole), 1)
+
 
 # main script execution
 if __name__ == '__main__':
@@ -175,7 +182,7 @@ if __name__ == '__main__':
 		print("Error loading blocker configuration data: ", e)
 		sys.exit()
 
-    # Get set from the list of all bugs in all jobs
+	# Get set from the list of all bugs in all jobs
 	all_bugs_set = get_bugs_set(blockers)
 
 	# Create dictionary the set of all bugs (key) with name and link as value
@@ -212,7 +219,7 @@ if __name__ == '__main__':
 		osp_version = get_osp_version(job_name)
 
 		# skip if no OSP version could be found
-		if osp_version == None:
+		if osp_version is None:
 			print('No OSP version could be found in job {}. Skipping...'.format(job_name))
 			continue
 
@@ -238,10 +245,10 @@ if __name__ == '__main__':
 		elif lcb_result == "UNSTABLE":
 			num_unstable += 1
 
-			# get all related bugs to job 
+			# get all related bugs to job
 			try:
 				bug_ids = blockers[job_name]['bz']
-				bugs = list(map(all_bugs_dict.get,bug_ids))
+				bugs = list(map(all_bugs_dict.get, bug_ids))
 			except:
 				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
 
@@ -255,10 +262,10 @@ if __name__ == '__main__':
 		elif lcb_result == "FAILURE":
 			num_failure += 1
 
-			# get all related bugs to job 
+			# get all related bugs to job
 			try:
 				bug_ids = blockers[job_name]['bz']
-				bugs = list(map(all_bugs_dict.get,bug_ids))
+				bugs = list(map(all_bugs_dict.get, bug_ids))
 			except:
 				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
 
@@ -276,15 +283,16 @@ if __name__ == '__main__':
 			tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
 
 		# build row
-		row = {'osp_version': osp_version,
-				'job_name': job_name,
-				'job_url': job_url,
-				'lcb_num': lcb_num,
-				'lcb_url': lcb_url,
-				'compose': compose,
-				'lcb_result': lcb_result,
-				'bugs': bugs,
-				'tickets': tickets
+		row = {
+			'osp_version': osp_version,
+			'job_name': job_name,
+			'job_url': job_url,
+			'lcb_num': lcb_num,
+			'lcb_url': lcb_url,
+			'compose': compose,
+			'lcb_result': lcb_result,
+			'bugs': bugs,
+			'tickets': tickets,
 		}
 
 		# append row to rows
@@ -297,21 +305,21 @@ if __name__ == '__main__':
 	summary['total_success'] = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
-	
+
 	# bug metrics
-	if len(all_bugs) == 0: 
+	if len(all_bugs) == 0:
 		summary['total_bugs'] = "Blocker Bugs: 0 total"
 	else:
 		unique_bugs = set(all_bugs)
 		summary['total_bugs'] = "Blocker Bugs: {} total, {} unique".format(len(all_bugs), len(unique_bugs))
-		
+
 	# ticket metrics
 	if len(all_tickets) == 0:
 		summary['total_tickets'] = "Blocker Tickets: 0 total"
 	else:
 		unique_tickets = set(all_tickets)
 		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
-		
+
 	# include error report if needed
 	if num_error > 0:
 		summary['total_error'] = "Total ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
