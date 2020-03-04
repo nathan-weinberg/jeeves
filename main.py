@@ -20,22 +20,18 @@ all_bugs = []
 all_tickets = []
 
 # function definitions
-def get_bugzilla(job_name, bug_ids):
+def get_bugzilla(bug_ids):
 
-	# initialize bug list
-	bugs = []
+	# initialize bug dictionary
+	bugs = {}
 
 	# iterate through bug ids from blocker file
 	for bug_id in bug_ids:
 
 		# 0 should be default in YAML file (i.e. no bugs recorded)
-		# if there is a 0 entry then that should be the only "bug", so break
 		if bug_id == 0:
-			bugs = [{'bug_name': 'No bug on file', 'bug_url': None}]
-			break
-
-		# otherwise record real bug in overall list
-		all_bugs.append(bug_id)
+			bugs[0] = {'bug_name': 'No bug on file', 'bug_url': None}
+			continue
 
 		# get bug info from bugzilla API
 		try:
@@ -51,12 +47,7 @@ def get_bugzilla(job_name, bug_ids):
 			bug_name = "BZ#" + str(bug_id)
 		finally:
 			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
-			bugs.append(
-				{
-					'bug_name': bug_name, 
-					'bug_url': bug_url
-				}
-			)
+			bugs[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
 
 	return bugs
 
@@ -133,6 +124,18 @@ def get_jenkins_jobs(server, job_search_fields):
 
 	return relevant_jobs
 
+def get_bugs_set(blockers):
+	''' Takes in blockers object and generates a set of all unique bug ids including 0 if it is present
+	'''
+	bug_list = []
+	for job in blockers:
+		bz = blockers[job]['bz']
+		if bz != [0]:
+			all_bugs.extend(bz)
+		bug_list.extend(bz)
+
+	return set(bug_list)
+
 def get_osp_version(job_name):
 	version = re.search(r'\d+', job_name)
 	if version is None:
@@ -171,6 +174,12 @@ if __name__ == '__main__':
 	except Exception as e:
 		print("Error loading blocker configuration data: ", e)
 		sys.exit()
+
+    # Get set from the list of all bugs in all jobs
+	all_bugs_set = get_bugs_set(blockers)
+
+	# Create dictionary the set of all bugs (key) with name and link as value
+	all_bugs_dict = get_bugzilla(all_bugs_set)
 
 	# connect to jenkins server
 	try:
@@ -232,7 +241,7 @@ if __name__ == '__main__':
 			# get all related bugs to job 
 			try:
 				bug_ids = blockers[job_name]['bz']
-				bugs = get_bugzilla(job_name, bug_ids)
+				bugs = list(map(all_bugs_dict.get,bug_ids))
 			except:
 				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
 
@@ -249,7 +258,7 @@ if __name__ == '__main__':
 			# get all related bugs to job 
 			try:
 				bug_ids = blockers[job_name]['bz']
-				bugs = get_bugzilla(job_name, bug_ids)
+				bugs = list(map(all_bugs_dict.get,bug_ids))
 			except:
 				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
 
