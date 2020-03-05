@@ -1,4 +1,5 @@
 # Jeeves
+![](https://github.com/nathan-weinberg/jeeves/workflows/flake8/badge.svg)
 ![](https://github.com/nathan-weinberg/jeeves/workflows/pytest/badge.svg)
 
 ## Purpose
