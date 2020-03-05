@@ -20,38 +20,6 @@ all_bugs = []
 all_tickets = []
 
 
-def get_bugzilla(bug_ids):
-
-	# initialize bug dictionary
-	bugs = {}
-
-	# iterate through bug ids from blocker file
-	for bug_id in bug_ids:
-
-		# 0 should be default in YAML file (i.e. no bugs recorded)
-		if bug_id == 0:
-			bugs[0] = {'bug_name': 'No bug on file', 'bug_url': None}
-			continue
-
-		# get bug info from bugzilla API
-		try:
-
-			# hotfix: API call does not work if '/' present at end of URL string
-			parsed_bz_url = config['bz_url'].rstrip('/')
-
-			bz_api = bugzilla.Bugzilla(parsed_bz_url)
-			bug = bz_api.getbug(bug_id)
-			bug_name = bug.summary
-		except Exception as e:
-			print("Bugzilla API Call Error: ", e)
-			bug_name = "BZ#" + str(bug_id)
-		finally:
-			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
-			bugs[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
-
-	return bugs
-
-
 def get_jira(job_name, ticket_ids):
 
 	# initialize ticket list
@@ -128,8 +96,45 @@ def get_jenkins_jobs(server, job_search_fields):
 	return relevant_jobs
 
 
+def get_bugs_dict(bug_ids):
+	''' takes in set of bug_ids and returns dictionary with
+		bug_ids as keys and API data as values
+	'''
+
+	# initialize bug dictionary
+	bugs = {}
+
+	# iterate through bug ids from set
+	for bug_id in bug_ids:
+
+		# 0 should be default in YAML file (i.e. no bugs recorded)
+		# if present reference should be made in bug dict
+		if bug_id == 0:
+			bugs[0] = {'bug_name': 'No bug on file', 'bug_url': None}
+			continue
+
+		# get bug info from bugzilla API
+		try:
+
+			# hotfix: API call does not work if '/' present at end of URL string
+			parsed_bz_url = config['bz_url'].rstrip('/')
+
+			bz_api = bugzilla.Bugzilla(parsed_bz_url)
+			bug = bz_api.getbug(bug_id)
+			bug_name = bug.summary
+		except Exception as e:
+			print("Bugzilla API Call Error: ", e)
+			bug_name = "BZ#" + str(bug_id)
+		finally:
+			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
+			bugs[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
+
+	return bugs
+
+
 def get_bugs_set(blockers):
-	''' Takes in blockers object and generates a set of all unique bug ids including 0 if it is present
+	''' Takes in blockers object and generates a set of all unique bug ids
+		including 0 if it is present
 	'''
 	bug_list = []
 	for job in blockers:
@@ -186,7 +191,7 @@ if __name__ == '__main__':
 	all_bugs_set = get_bugs_set(blockers)
 
 	# Create dictionary the set of all bugs (key) with name and link as value
-	all_bugs_dict = get_bugzilla(all_bugs_set)
+	all_bugs_dict = get_bugs_dict(all_bugs_set)
 
 	# connect to jenkins server
 	try:
