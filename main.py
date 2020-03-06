@@ -233,10 +233,19 @@ if __name__ == '__main__':
 			job_info = server.get_job_info(job_name)
 			job_url = job_info['url']
 			lcb_num = job_info['lastCompletedBuild']['number']
-			lcb_url = job_info['lastCompletedBuild']['url']
 			build_info = server.get_build_info(job_name, lcb_num)
 			build_actions = build_info['actions']
+			component = [action['text'] for action in build_actions if 'COMPONENT' in action.get('text', '')]
+
+			# if build was testing specific component, find next most recent build not testing a component
+			while component != []:
+				lcb_num = lcb_num - 1
+				build_info = server.get_build_info(job_name, lcb_num)
+				build_actions = build_info['actions']
+				component = [action['text'] for action in build_actions if 'COMPONENT' in action.get('text', '')]
+
 			compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')][0]
+			lcb_url = build_info['url']
 			lcb_result = build_info['result']
 		except Exception as e:
 			print("Jenkins API call error: ", e)
