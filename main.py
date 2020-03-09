@@ -20,10 +20,21 @@ all_bugs = []
 all_tickets = []
 
 
-def get_jira(job_name, ticket_ids):
+def get_jira_dict(ticket_ids):
+	''' takes in set of ticket_ids and returns dictionary with
+		ticket_ids as keys and API data as values
+	'''
 
 	# initialize ticket list
-	tickets = []
+	tickets = {}
+
+	# Initialize connection
+	auth = (config['jira_username'], config['jira_password'])
+	options = {
+		"server": config['jira_url'],
+		"verify": config['certificate']
+	}
+	jira = JIRA(auth=auth, options=options)
 
 	# iterate through ticket ids from blocker file
 	for ticket_id in ticket_ids:
@@ -31,20 +42,14 @@ def get_jira(job_name, ticket_ids):
 		# 0 should be default in YAML file (i.e. no tickers recorded)
 		# if there is a 0 entry then that should be the only "ticket", so break
 		if ticket_id == 0:
-			tickets = [{'ticket_name': 'No ticket on file', 'ticket_url': None}]
-			break
+			tickets[0] = {'ticket_name': 'No ticket on file', 'ticket_url': None}
+			continue
 
 		# otherwise record real ticket in overall list
 		all_tickets.append(ticket_id)
 
 		# get ticket info from jira API
 		try:
-			auth = (config['jira_username'], config['jira_password'])
-			options = {
-				"server": config['jira_url'],
-				"verify": config['certificate']
-			}
-			jira = JIRA(auth=auth, options=options)
 			issue = jira.issue(ticket_id)
 			ticket_name = issue.fields.summary
 		except Exception as e:
@@ -52,12 +57,11 @@ def get_jira(job_name, ticket_ids):
 			ticket_name = ticket_id
 		finally:
 			ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
-			tickets.append(
-				{
-					'ticket_name': ticket_name,
-					'ticket_url': ticket_url
-				}
-			)
+			tickets[ticket_id] = {
+				'ticket_name': ticket_name,
+				'ticket_url': ticket_url
+			}
+	jira.close()
 
 	return tickets
 
@@ -146,6 +150,20 @@ def get_bugs_set(blockers):
 	return set(bug_list)
 
 
+def get_jira_set(blockers):
+	''' Takes in blockers object and generates a set of all unique jira-ticket ids
+		including 0 if it is present
+	'''
+	jira_list = []
+	for job in blockers:
+		jira = blockers[job]['jira']
+		if jira != [0]:
+			all_tickets.extend(jira)
+		jira_list.extend(jira)
+
+	return set(jira_list)
+
+
 def get_osp_version(job_name):
 	version = re.search(r'\d+', job_name)
 	if version is None:
@@ -192,6 +210,12 @@ if __name__ == '__main__':
 
 	# Create dictionary the set of all bugs (key) with name and link as value
 	all_bugs_dict = get_bugs_dict(all_bugs_set)
+
+	# Get set from the list of all jira-tickets in all jobs
+	all_tickets_set = get_jira_set(blockers)
+
+	# Create dictionary from the set of all jira tickets with ticket id as key and name and link as value
+	all_jira_dict = get_jira_dict(all_tickets_set)
 
 	# connect to jenkins server
 	try:
@@ -269,7 +293,7 @@ if __name__ == '__main__':
 			# get all related tickets to job
 			try:
 				ticket_ids = blockers[job_name]['jira']
-				tickets = get_jira(job_name, ticket_ids)
+				tickets = list(map(all_jira_dict.get, ticket_ids))
 			except:
 				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
 
@@ -286,7 +310,8 @@ if __name__ == '__main__':
 			# get all related tickets to job
 			try:
 				ticket_ids = blockers[job_name]['jira']
-				tickets = get_jira(job_name, ticket_ids)
+				tickets = list(map(all_jira_dict.get, ticket_ids))
+
 			except:
 				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
 
