@@ -10,6 +10,7 @@ import argparse
 import bugzilla
 import datetime
 from jira import JIRA
+import requests
 
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -18,6 +19,14 @@ from email.mime.multipart import MIMEMultipart
 os.environ['PYTHONHTTPSVERIFY'] = '0'
 all_bugs = []
 all_tickets = []
+
+compose_host = 'http://download-node-02.eng.bos.redhat.com/rcm-guest/puddles/OpenStack/'
+
+compose_maps = {
+	'13': '13.0-RHEL-7/',
+	'15': '15.0-RHEL-8/',
+	'16': '16.0-RHEL-8/',
+}
 
 
 def get_jira_dict(ticket_ids):
@@ -176,6 +185,43 @@ def percent(part, whole):
 	return round(100 * float(part) / float(whole), 1)
 
 
+def get_ceph_image_info(build_parameters, osp_version):
+	if 'ceph' not in job_name.lower() or compose_maps.get(osp_version) is None:
+		return ''
+
+	ceph_parameters = {
+		'namespace': build_parameters.get('IR_REGISTRY_CEPH_NAMESPACE'),
+		'image': build_parameters.get('IR_REGISTRY_CEPH_IMAGE'),
+		'tag': build_parameters.get('IR_REGISTRY_CEPH_TAG'),
+	}
+
+	# Grab the ceph image information from the container image prepare manifest
+	compose_url_base = '{}{}{}'.format(
+		compose_host, compose_maps[osp_version], compose
+	)
+	compose_url_1 = '{}/{}'.format(compose_url_base, 'container_image_prepare.yaml')
+	compose_url_2 = '{}/{}'.format(compose_url_base, 'overcloud_container_image_prepare.yaml')
+
+	container_image_prepare_yaml = requests.get(compose_url_1)
+	if container_image_prepare_yaml.status_code == 404:
+		container_image_prepare_yaml = requests.get(compose_url_2)
+
+	ceph_defaults = yaml.safe_load(container_image_prepare_yaml.content)
+
+	ceph_defaults = ceph_defaults['container-image-prepare']
+
+	# override missing ceph_parameters:
+	if ceph_parameters['namespace'] is None:
+		ceph_parameters['namespace'] = ceph_defaults['ceph-namespace']
+	if ceph_parameters['image'] is None:
+		ceph_parameters['image'] = ceph_defaults['ceph-image']
+	if ceph_parameters['tag'] is None:
+		ceph_parameters['tag'] = ceph_defaults['ceph-tag']
+
+	return '%(namespace)s/%(image)s:%(tag)s' % ceph_parameters
+
+
+
 # main script execution
 if __name__ == '__main__':
 
@@ -260,6 +306,17 @@ if __name__ == '__main__':
 			build_info = server.get_build_info(job_name, lcb_num)
 			build_actions = build_info['actions']
 			component = [action['text'] for action in build_actions if 'COMPONENT' in action.get('text', '')]
+			try:
+				build_parameters = [
+					action.get('parameters') for action in build_actions
+					if action.get('_class') == 'hudson.model.ParametersAction'
+				][0]
+				build_parameters = {
+					parameter['name']: parameter['value']
+					for parameter in build_parameters
+				}
+			except IndexError:
+				build_parameters = {}
 
 			# if build was testing specific component, find next most recent build not testing a component
 			while component != []:
@@ -274,6 +331,8 @@ if __name__ == '__main__':
 		except Exception as e:
 			print("Jenkins API call error: ", e)
 			continue
+
+		ceph_info = get_ceph_image_info(build_parameters, osp_version)
 
 		# take action based on last completed build result
 		if lcb_result == "SUCCESS":
@@ -329,6 +388,7 @@ if __name__ == '__main__':
 			'lcb_num': lcb_num,
 			'lcb_url': lcb_url,
 			'compose': compose,
+			'ceph_info': ceph_info,
 			'lcb_result': lcb_result,
 			'bugs': bugs,
 			'tickets': tickets,
