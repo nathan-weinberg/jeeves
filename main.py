@@ -206,13 +206,13 @@ if __name__ == '__main__':
 		sys.exit()
 
 	# Get set from the list of all bugs in all jobs
-	all_bugs_set = get_bugs_set(blockers)
+	all_bugs_set = get_bugs_set(blockers) if blockers else {}
 
 	# Create dictionary the set of all bugs (key) with name and link as value
 	all_bugs_dict = get_bugs_dict(all_bugs_set)
 
 	# Get set from the list of all jira-tickets in all jobs
-	all_tickets_set = get_jira_set(blockers)
+	all_tickets_set = get_jira_set(blockers) if blockers else {}
 
 	# Create dictionary from the set of all jira tickets with ticket id as key and name and link as value
 	all_jira_dict = get_jira_dict(all_tickets_set)
