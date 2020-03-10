@@ -184,7 +184,6 @@ def get_osp_version(job_name):
 def percent(part, whole):
 	return round(100 * float(part) / float(whole), 1)
 
-
 def get_ceph_image_info(build_parameters, osp_version):
 	if 'ceph' not in job_name.lower() or compose_maps.get(osp_version) is None:
 		return ''
@@ -219,7 +218,6 @@ def get_ceph_image_info(build_parameters, osp_version):
 		ceph_parameters['tag'] = ceph_defaults['ceph-tag']
 
 	return '%(namespace)s/%(image)s:%(tag)s' % ceph_parameters
-
 
 
 # main script execution
