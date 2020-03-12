@@ -337,6 +337,9 @@ if __name__ == '__main__':
 		# append row to rows
 		rows.append(row)
 
+	# sort rows by descending OSP version
+	rows = sorted(rows, key=lambda row: row['osp_version'], reverse=True)
+
 	# calculate summary
 	summary = {}
 
