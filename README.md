@@ -17,8 +17,8 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **jira_password**: Your Jira password (note: this field is only required if the tickets you wish to access have restricted view permissions)
 - **certificate**: CRT file to authenticate with Jira server
 - **smtp_host**: SMTP host of your email
-- **email_subject**: Subject of your email report
-- **email_to**: Email address you would like to send your report to
+- **email_subject**: Subject of your email report.
+- **email_to**: Email address you would like to send your report to. To send the report to multiple emails, seperate them by comma, e.g. recipient1@website1.com,recipient2@website2.org
 - **email_to_test**: Email address to send test reports to (note: this field is only required if you run Jeeves with the `--test` flag)
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
