@@ -380,14 +380,17 @@ if __name__ == '__main__':
 		summary=summary
 	)
 
+	# parse list of email addresses
+	if test:
+		recipients = config['email_to_test'].split(',')
+	else:
+		recipients = config['email_to'].split(',')
+
 	# construct email
 	msg = MIMEMultipart()
 	msg['From'] = header['user_email_address']
 	msg['Subject'] = config['email_subject']
-	if test:
-		msg['To'] = config['email_to_test']
-	else:
-		msg['To'] = config['email_to']
+	msg['To'] = ", ".join(recipients)
 	msg.attach(MIMEText(htmlcode, 'html'))
 
 	# create SMTP session - if jeeves is unable to do so an HTML file will be generated
@@ -400,10 +403,10 @@ if __name__ == '__main__':
 			# use ehlo or helo if needed
 			smtp.ehlo_or_helo_if_needed()
 
-			# send email
-			smtp.sendmail(msg["From"], msg["To"], msg.as_string())
+			# send email to all addresses
+			smtp.sendmail(msg['From'], recipients, msg.as_string())
 
-	except:
-		with open("report.html", "w") as file:
-			print("Error sending email report - HTML file generated")
+	except Exception as e:
+		with open('report.html', 'w') as file:
+			print("Error sending email report: {}\nHTML file generated".format(e))
 			file.write(htmlcode)
