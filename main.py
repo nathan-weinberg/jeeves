@@ -143,8 +143,6 @@ def get_bugs_set(blockers):
 	bug_list = []
 	for job in blockers:
 		bz = blockers[job]['bz']
-		if bz != [0]:
-			all_bugs.extend(bz)
 		bug_list.extend(bz)
 
 	return set(bug_list)
@@ -232,8 +230,8 @@ if __name__ == '__main__':
 	jobs = get_jenkins_jobs(server, config['job_search_fields'])
 
 	# exit if no jobs found
-	num_jobs = len(jobs)
-	if num_jobs == 0:
+	num_jobs_fetched = len(jobs)
+	if num_jobs_fetched == 0:
 		print("No jobs found with given search field. Exiting...")
 		sys.exit()
 
@@ -286,6 +284,7 @@ if __name__ == '__main__':
 			# get all related bugs to job
 			try:
 				bug_ids = blockers[job_name]['bz']
+				all_bugs.extend(bug_ids)
 				bugs = list(map(all_bugs_dict.get, bug_ids))
 			except:
 				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
@@ -303,6 +302,7 @@ if __name__ == '__main__':
 			# get all related bugs to job
 			try:
 				bug_ids = blockers[job_name]['bz']
+				all_bugs.extend(bug_ids)
 				bugs = list(map(all_bugs_dict.get, bug_ids))
 			except:
 				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
@@ -340,15 +340,17 @@ if __name__ == '__main__':
 	# sort rows by descending OSP version
 	rows = sorted(rows, key=lambda row: row['osp_version'], reverse=True)
 
-	# calculate summary
+	# initialize summary
 	summary = {}
 
 	# job result metrics
+	num_jobs = len(rows)
 	summary['total_success'] = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
 
 	# bug metrics
+	all_bugs = [bug_id for bug_id in all_bugs if bug_id != 0]
 	if len(all_bugs) == 0:
 		summary['total_bugs'] = "Blocker Bugs: 0 total"
 	else:
