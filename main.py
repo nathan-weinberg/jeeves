@@ -162,6 +162,16 @@ def get_jira_set(blockers):
 	return set(jira_list)
 
 
+def generate_html_file(htmlcode):
+	try:
+		os.makedirs('archive')
+	except FileExistsError:
+		pass
+	filename = './archive/report_{:%m%d%Y_%H:%M:%S}.html'.format(datetime.datetime.now())
+	with open(filename, 'w') as file:
+		file.write(htmlcode)
+
+
 def get_osp_version(job_name):
 	version = re.search(r'\d+', job_name)
 	if version is None:
@@ -182,10 +192,12 @@ if __name__ == '__main__':
 	parser.add_argument("--config", default="config.yaml", type=str, help="Configuration YAML file to use")
 	parser.add_argument("--blockers", default="blockers.yaml", type=str, help="Blockers YAML file to use")
 	parser.add_argument("--test", default=False, action='store_true', help="Flag to send email to test address")
+	parser.add_argument("--save", default=False, action='store_true', help="Flag to save report to archives")
 	args = parser.parse_args()
 	config_file = args.config
 	blocker_file = args.blockers
 	test = args.test
+	save = args.save
 
 	# load configuration data
 	try:
@@ -409,6 +421,9 @@ if __name__ == '__main__':
 			smtp.sendmail(msg['From'], recipients, msg.as_string())
 
 	except Exception as e:
-		with open('report.html', 'w') as file:
-			print("Error sending email report: {}\nHTML file generated".format(e))
-			file.write(htmlcode)
+		print("Error sending email report: {}\nHTML file generated".format(e))
+		generate_html_file(htmlcode)
+
+	else:
+		if save:
+			generate_html_file(htmlcode)
