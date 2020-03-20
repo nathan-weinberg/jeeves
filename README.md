@@ -33,6 +33,7 @@ To run:
 - `$ ./main.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` if `/usr/bin/python3` is a valid path
 - `$ python3 main.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` otherwise
 - To send report to email specified in `email_to_test` field, add `--test`
+- To save report to 'archive' folder, add `--save`
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML
