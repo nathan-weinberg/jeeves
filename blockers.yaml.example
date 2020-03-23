@@ -19,3 +19,21 @@ job3:
     jira:
         - 'RHOSINFRA-456'
         - 'RHOSINFRA-789'
+
+# Jobs with blockers that are neither blockers nor tickets can utilize the 'other' field for recording
+job4:
+    bz:
+        - 159
+    other:
+        - name: Trello Card
+          url: <URL to Trello card>
+        - name: Gerrit Patch
+          url: <Link to Gerrit patch>
+
+# You can have 'other' blockers with a name, a URL, or both
+job5:
+    jira:
+        - 'RHOSINFRA-753'
+    other:
+        - name: Experimental Job
+        - url: <URL>
