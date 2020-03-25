@@ -20,6 +20,68 @@ all_bugs = []
 all_tickets = []
 
 
+def get_bugs_set(blockers):
+	''' Takes in blockers object and generates a set of all unique bug ids
+		including 0 if it is present
+	'''
+	bug_list = []
+	for job in blockers:
+		bz = blockers[job]['bz']
+		bug_list.extend(bz)
+
+	return set(bug_list)
+
+
+def get_bugs_dict(bug_ids):
+	''' takes in set of bug_ids and returns dictionary with
+		bug_ids as keys and API data as values
+	'''
+
+	# initialize bug dictionary
+	bugs = {}
+
+	# iterate through bug ids from set
+	for bug_id in bug_ids:
+
+		# 0 should be default in YAML file (i.e. no bugs recorded)
+		# if present reference should be made in bug dict
+		if bug_id == 0:
+			bugs[0] = {'bug_name': 'No bug on file', 'bug_url': None}
+			continue
+
+		# get bug info from bugzilla API
+		try:
+
+			# hotfix: API call does not work if '/' present at end of URL string
+			parsed_bz_url = config['bz_url'].rstrip('/')
+
+			bz_api = bugzilla.Bugzilla(parsed_bz_url)
+			bug = bz_api.getbug(bug_id)
+			bug_name = bug.summary
+		except Exception as e:
+			print("Bugzilla API Call Error: ", e)
+			bug_name = "BZ#" + str(bug_id)
+		finally:
+			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
+			bugs[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
+
+	return bugs
+
+
+def get_jira_set(blockers):
+	''' Takes in blockers object and generates a set of all unique jira-ticket ids
+		including 0 if it is present
+	'''
+	jira_list = []
+	for job in blockers:
+		jira = blockers[job]['jira']
+		if jira != [0]:
+			all_tickets.extend(jira)
+		jira_list.extend(jira)
+
+	return set(jira_list)
+
+
 def get_jira_dict(ticket_ids):
 	''' takes in set of ticket_ids and returns dictionary with
 		ticket_ids as keys and API data as values
@@ -66,18 +128,6 @@ def get_jira_dict(ticket_ids):
 	return tickets
 
 
-def generate_header(user, job_search_fields):
-	user_properties = user['property']
-	user_email_address = [prop['address'] for prop in user_properties if prop['_class'] == 'hudson.tasks.Mailer$UserProperty'][0]
-	date = '{:%m/%d/%Y at %I:%M%p %Z}'.format(datetime.datetime.now())
-	header = {
-		'user_email_address': user_email_address,
-		'date': date,
-		'job_search_fields': job_search_fields
-	}
-	return header
-
-
 def get_jenkins_jobs(server, job_search_fields):
 
 	# parse list of search fields
@@ -100,66 +150,32 @@ def get_jenkins_jobs(server, job_search_fields):
 	return relevant_jobs
 
 
-def get_bugs_dict(bug_ids):
-	''' takes in set of bug_ids and returns dictionary with
-		bug_ids as keys and API data as values
-	'''
-
-	# initialize bug dictionary
-	bugs = {}
-
-	# iterate through bug ids from set
-	for bug_id in bug_ids:
-
-		# 0 should be default in YAML file (i.e. no bugs recorded)
-		# if present reference should be made in bug dict
-		if bug_id == 0:
-			bugs[0] = {'bug_name': 'No bug on file', 'bug_url': None}
-			continue
-
-		# get bug info from bugzilla API
-		try:
-
-			# hotfix: API call does not work if '/' present at end of URL string
-			parsed_bz_url = config['bz_url'].rstrip('/')
-
-			bz_api = bugzilla.Bugzilla(parsed_bz_url)
-			bug = bz_api.getbug(bug_id)
-			bug_name = bug.summary
-		except Exception as e:
-			print("Bugzilla API Call Error: ", e)
-			bug_name = "BZ#" + str(bug_id)
-		finally:
-			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
-			bugs[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
-
-	return bugs
+def get_osp_version(job_name):
+	version = re.search(r'\d+', job_name)
+	if version is None:
+		return None
+	else:
+		return version.group()
 
 
-def get_bugs_set(blockers):
-	''' Takes in blockers object and generates a set of all unique bug ids
-		including 0 if it is present
-	'''
-	bug_list = []
-	for job in blockers:
-		bz = blockers[job]['bz']
-		bug_list.extend(bz)
-
-	return set(bug_list)
+def get_other_blockers(blockers, job_name):
+	other_blockers = blockers[job_name]['other']
+	other = []
+	for blocker in other_blockers:
+		other.append({'other_name': blocker.get('name', 'Link'), 'other_url': blocker.get('url', None)})
+	return other
 
 
-def get_jira_set(blockers):
-	''' Takes in blockers object and generates a set of all unique jira-ticket ids
-		including 0 if it is present
-	'''
-	jira_list = []
-	for job in blockers:
-		jira = blockers[job]['jira']
-		if jira != [0]:
-			all_tickets.extend(jira)
-		jira_list.extend(jira)
-
-	return set(jira_list)
+def generate_header(user, job_search_fields):
+	user_properties = user['property']
+	user_email_address = [prop['address'] for prop in user_properties if prop['_class'] == 'hudson.tasks.Mailer$UserProperty'][0]
+	date = '{:%m/%d/%Y at %I:%M%p %Z}'.format(datetime.datetime.now())
+	header = {
+		'user_email_address': user_email_address,
+		'date': date,
+		'job_search_fields': job_search_fields
+	}
+	return header
 
 
 def generate_html_file(htmlcode):
@@ -170,14 +186,6 @@ def generate_html_file(htmlcode):
 	filename = './archive/report_{:%m%d%Y_%H:%M:%S}.html'.format(datetime.datetime.now())
 	with open(filename, 'w') as file:
 		file.write(htmlcode)
-
-
-def get_osp_version(job_name):
-	version = re.search(r'\d+', job_name)
-	if version is None:
-		return None
-	else:
-		return version.group()
 
 
 def percent(part, whole):
@@ -215,6 +223,23 @@ if __name__ == '__main__':
 		print("Error loading blocker configuration data: ", e)
 		sys.exit()
 
+	# connect to jenkins server
+	try:
+		server = jenkins.Jenkins(config['jenkins_url'], username=config['jenkins_username'], password=config['jenkins_api_token'])
+		user = server.get_whoami()
+	except Exception as e:
+		print("Error connecting to Jenkins server: ", e)
+		sys.exit()
+
+	# fetch all relevant jobs
+	jobs = get_jenkins_jobs(server, config['job_search_fields'])
+
+	# exit if no jobs found
+	num_jobs_fetched = len(jobs)
+	if num_jobs_fetched == 0:
+		print("No jobs found with given search field. Exiting...")
+		sys.exit()
+
 	# Get set from the list of all bugs in all jobs
 	all_bugs_set = get_bugs_set(blockers) if blockers else {}
 
@@ -227,25 +252,8 @@ if __name__ == '__main__':
 	# Create dictionary from the set of all jira tickets with ticket id as key and name and link as value
 	all_jira_dict = get_jira_dict(all_tickets_set)
 
-	# connect to jenkins server
-	try:
-		server = jenkins.Jenkins(config['jenkins_url'], username=config['jenkins_username'], password=config['jenkins_api_token'])
-		user = server.get_whoami()
-	except Exception as e:
-		print("Error connecting to Jenkins server: ", e)
-		sys.exit()
-
 	# generate report header
 	header = generate_header(user, config['job_search_fields'])
-
-	# fetch all relevant jobs
-	jobs = get_jenkins_jobs(server, config['job_search_fields'])
-
-	# exit if no jobs found
-	num_jobs_fetched = len(jobs)
-	if num_jobs_fetched == 0:
-		print("No jobs found with given search field. Exiting...")
-		sys.exit()
 
 	# iterate through all relevant jobs and build report rows
 	num_success = 0
@@ -290,6 +298,8 @@ if __name__ == '__main__':
 			num_success += 1
 			bugs = [{'bug_name': 'N/A', 'bug_url': None}]
 			tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
+			other = [{'other_name': 'N/A', 'other_url': None}]
+
 		elif lcb_result == "UNSTABLE":
 			num_unstable += 1
 
@@ -308,6 +318,12 @@ if __name__ == '__main__':
 			except:
 				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
 
+			# get any "other" artifact for job
+			try:
+				other = get_other_blockers(blockers, job_name)
+			except:
+				other = [{'other_name': 'N/A', 'other_url': None}]
+
 		elif lcb_result == "FAILURE":
 			num_failure += 1
 
@@ -323,15 +339,21 @@ if __name__ == '__main__':
 			try:
 				ticket_ids = blockers[job_name]['jira']
 				tickets = list(map(all_jira_dict.get, ticket_ids))
-
 			except:
 				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
+
+			# get any "other" artifact for job
+			try:
+				other = get_other_blockers(blockers, job_name)
+			except:
+				other = [{'other_name': 'N/A', 'other_url': None}]
 
 		else:
 			lcb_result = "ERROR"
 			num_error += 1
 			bugs = [{'bug_name': 'N/A', 'bug_url': None}]
 			tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
+			other = [{'other_name': 'N/A', 'other_url': None}]
 
 		# build row
 		row = {
@@ -344,6 +366,7 @@ if __name__ == '__main__':
 			'lcb_result': lcb_result,
 			'bugs': bugs,
 			'tickets': tickets,
+			'other': other
 		}
 
 		# append row to rows

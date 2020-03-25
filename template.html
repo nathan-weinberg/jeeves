@@ -11,6 +11,7 @@
 				<th style="text-align: center;">Result</th>
 				<th style="text-align: center;">Bugzilla</th>
 				<th style="text-align: center;">Jira</th>
+				<th style="text-align: center;">Other</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -60,6 +61,21 @@
 							{{ticket.ticket_name}}
 						{% endif %}
 						{% if loop.index == row.tickets|length %}
+							<br>
+						{% else %}
+							<hr>
+						{% endif %}
+					{% endfor %}
+				</td>
+
+				<td style="text-align: center;">
+					{% for other in row.other %}
+						{% if other.other_url != None %}
+							<a href="{{other.other_url}}">{{other.other_name}}</a>
+						{% else %}
+							{{other.other_name}}
+						{% endif %}
+						{% if loop.index == row.other|length %}
 							<br>
 						{% else %}
 							<hr>
