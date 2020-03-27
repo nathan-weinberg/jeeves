@@ -151,7 +151,7 @@ def get_jenkins_jobs(server, job_search_fields):
 
 
 def get_osp_version(job_name):
-	version = re.search(r'\d+', job_name)
+	version = re.search(r'\d+\.*\d*', job_name)
 	if version is None:
 		return None
 	else:
@@ -290,8 +290,14 @@ if __name__ == '__main__':
 			lcb_url = build_info['url']
 			lcb_result = build_info['result']
 		except Exception as e:
-			print("Jenkins API call error: ", e)
-			continue
+			if job_info['builds'] == []:
+				lcb_num = None
+				compose = "N/A"
+				lcb_url = job_url
+				lcb_result = "ERROR"			
+			else:
+				print("Jenkins API call error: ", e)
+				continue
 
 		# take action based on last completed build result
 		if lcb_result == "SUCCESS":
