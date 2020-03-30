@@ -18,23 +18,30 @@
 			{% for row in rows %}
 			<tr>
 				<td style="text-align: center;">{{row.osp_version}}</td>
-				<td style="text-align: left;"><a href="{{row.job_url}}">{{row.job_name}}</a></td>				
-				<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
-				<td style="text-align: center;">{{row.compose}}</td>
+				<td style="text-align: left;"><a href="{{row.job_url}}">{{row.job_name}}</a></td>	
 
+				<!-- LCB is "SUCCESS" -->
 				{% if row.lcb_result == "SUCCESS" %}
+					<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
+					<td style="text-align: center;">{{row.compose}}</td>
 					<td style="text-align: center;" bgcolor="#4646ff"><a href="https://www.youtube.com/watch?v=68ugkg9RePc" style="text-decoration: none; color: #000;">{{row.lcb_result}}</a></td>
-				{% endif %}
 
-				{% if row.lcb_result == "UNSTABLE" %}
+				<!-- LCB is "UNSTABLE" -->
+				{% elif row.lcb_result == "UNSTABLE" %}
+					<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
+					<td style="text-align: center;">{{row.compose}}</td>
 					<td style="text-align: center;" bgcolor="#fdd500">{{row.lcb_result}}</td>
-				{% endif %}
-				
-				{% if row.lcb_result == "FAILURE" %}
-					<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
-				{% endif %}
 
-				{% if row.lcb_result == "ERROR" %}
+				<!-- LCB is "FAILURE" -->
+				{% elif row.lcb_result == "FAILURE" %}
+					<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
+					<td style="text-align: center;">{{row.compose}}</td>
+					<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
+
+				<!-- LCB is set to any other state -->
+				{% else %}
+					<td style="text-align: center;">{{row.lcb_num}}</td>
+					<td style="text-align: center;">{{row.compose}}</td>
 					<td style="text-align: center;" bgcolor="#808080">{{row.lcb_result}}</td>
 				{% endif %}
 
@@ -92,6 +99,9 @@
 		<li>{{summary.total_success}}</li>
 		<li>{{summary.total_unstable}}</li>
 		<li>{{summary.total_failure}}</li>
+		{% if summary.total_missing %}
+		<li>{{summary.total_missing}}</li>
+		{% endif %}
 		{% if summary.total_error %}
 		<li>{{summary.total_error}}</li>
 		{% endif %}
