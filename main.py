@@ -75,8 +75,6 @@ def get_jira_set(blockers):
 	jira_list = []
 	for job in blockers:
 		jira = blockers[job]['jira']
-		if jira != [0]:
-			all_tickets.extend(jira)
 		jira_list.extend(jira)
 
 	return set(jira_list)
@@ -87,10 +85,10 @@ def get_jira_dict(ticket_ids):
 		ticket_ids as keys and API data as values
 	'''
 
-	# initialize ticket list
+	# initialize ticket dictionary
 	tickets = {}
 
-	# Initialize connection
+	# initialize connection
 	auth = (config['jira_username'], config['jira_password'])
 	options = {
 		"server": config['jira_url'],
@@ -98,7 +96,7 @@ def get_jira_dict(ticket_ids):
 	}
 	jira = JIRA(auth=auth, options=options)
 
-	# iterate through ticket ids from blocker file
+	# iterate through ticket ids from set
 	for ticket_id in ticket_ids:
 
 		# 0 should be default in YAML file (i.e. no tickers recorded)
@@ -106,9 +104,6 @@ def get_jira_dict(ticket_ids):
 		if ticket_id == 0:
 			tickets[0] = {'ticket_name': 'No ticket on file', 'ticket_url': None}
 			continue
-
-		# otherwise record real ticket in overall list
-		all_tickets.append(ticket_id)
 
 		# get ticket info from jira API
 		try:
@@ -332,6 +327,7 @@ if __name__ == '__main__':
 			# get all related tickets to job
 			try:
 				ticket_ids = blockers[job_name]['jira']
+				all_tickets.extend(ticket_ids)
 				tickets = list(map(all_jira_dict.get, ticket_ids))
 			except:
 				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
@@ -387,6 +383,7 @@ if __name__ == '__main__':
 		summary['total_bugs'] = "Blocker Bugs: {} total, {} unique".format(len(all_bugs), len(unique_bugs))
 
 	# ticket metrics
+	all_tickets = [ticket_id for ticket_id in all_tickets if ticket_id != 0]
 	if len(all_tickets) == 0:
 		summary['total_tickets'] = "Blocker Tickets: 0 total"
 	else:
