@@ -259,6 +259,7 @@ if __name__ == '__main__':
 	num_success = 0
 	num_unstable = 0
 	num_failure = 0
+	num_missing = 0
 	num_error = 0
 	rows = []
 	for job in jobs[::-1]:
@@ -289,49 +290,36 @@ if __name__ == '__main__':
 			compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')][0]
 			lcb_url = build_info['url']
 			lcb_result = build_info['result']
+
 		except Exception as e:
+			# No "Last Completed Build" found
 			if job_info['builds'] == []:
 				lcb_num = None
 				compose = "N/A"
-				lcb_url = job_url
-				lcb_result = "ERROR"			
+				lcb_url = None
+				lcb_result = "NO_KNOWN_BUILDS"
+
+			# Unknown error, skip job
 			else:
 				print("Jenkins API call error: ", e)
 				continue
 
 		# take action based on last completed build result
-		if lcb_result == "SUCCESS":
-			num_success += 1
+		if lcb_result == "SUCCESS" or lcb_result == "NO_KNOWN_BUILDS":
+			if lcb_result == "SUCCESS":
+				num_success += 1
+			if lcb_result == "NO_KNOWN_BUILDS":
+				num_missing += 1
+
 			bugs = [{'bug_name': 'N/A', 'bug_url': None}]
 			tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
 			other = [{'other_name': 'N/A', 'other_url': None}]
 
-		elif lcb_result == "UNSTABLE":
-			num_unstable += 1
-
-			# get all related bugs to job
-			try:
-				bug_ids = blockers[job_name]['bz']
-				all_bugs.extend(bug_ids)
-				bugs = list(map(all_bugs_dict.get, bug_ids))
-			except:
-				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
-
-			# get all related tickets to job
-			try:
-				ticket_ids = blockers[job_name]['jira']
-				tickets = list(map(all_jira_dict.get, ticket_ids))
-			except:
-				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
-
-			# get any "other" artifact for job
-			try:
-				other = get_other_blockers(blockers, job_name)
-			except:
-				other = [{'other_name': 'N/A', 'other_url': None}]
-
-		elif lcb_result == "FAILURE":
-			num_failure += 1
+		elif lcb_result == "UNSTABLE" or lcb_result == "FAILURE":
+			if lcb_result == "UNSTABLE":
+				num_unstable += 1
+			if lcb_result == "FAILURE":
+				num_failure += 1
 
 			# get all related bugs to job
 			try:
@@ -404,6 +392,12 @@ if __name__ == '__main__':
 	else:
 		unique_tickets = set(all_tickets)
 		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
+
+	# include missing report if needed
+	if num_missing > 0:
+		summary['total_missing'] = "Total NO_KNOWN_BUILDS:  {}/{} = {}%".format(num_missing, num_jobs, percent(num_missing, num_jobs))
+	else:
+		summary['total_missing'] = False
 
 	# include error report if needed
 	if num_error > 0:
