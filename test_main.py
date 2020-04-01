@@ -4,6 +4,7 @@ def test_get_osp_version_func():
 	assert get_osp_version('DFG-all-unified-16_director-rhel-virthost-3cont_2comp_3ceph-ipv4-geneve-ceph-native-default') == '16'
 	assert get_osp_version('DFG-backup-restore-overcloud-OSP-16-3cont_2comp_3ceph-ipv4-monolithic-broken-node') == '16'
 	assert get_osp_version('DFG-ceph-rhos-16_director-rhel-virthost-3cont_2comp_3ceph-ipv4-geneve-monolithic') == '16'
+	assert get_osp_version('DFG-ceph-rhos-16.1_director-rhel-virthost-3cont_2comp_3ceph-ipv4-geneve-monolithic') == '16.1'
 	assert get_osp_version('DFG-compute-nova-16_director-rhel-virthost-1cont_2comp_1ipa-ipv4-geneve-tls-everywhere') == '16'
 	assert get_osp_version('DFG-df-deployment-16-virthost-3cont_2comp_3ceph-ceph-ipv4-geneve-overcloud-ssl-enable') == '16'
 	assert get_osp_version('DFG-hardware_provisioning-rqci-16_director-rhel-8.1-spineleaf-provision-network-20191205-2116') == '16'
