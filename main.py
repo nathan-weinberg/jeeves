@@ -21,7 +21,7 @@ all_tickets = []
 
 
 def get_bugs_set(blockers):
-	''' Takes in blockers object and generates a set of all unique bug ids
+	''' takes in blockers object and generates a set of all unique bug ids
 		including 0 if it is present
 	'''
 	bug_list = []
@@ -69,7 +69,7 @@ def get_bugs_dict(bug_ids):
 
 
 def get_jira_set(blockers):
-	''' Takes in blockers object and generates a set of all unique jira-ticket ids
+	''' takes in blockers object and generates a set of all unique jira ticket ids
 		including 0 if it is present
 	'''
 	jira_list = []
@@ -124,6 +124,9 @@ def get_jira_dict(ticket_ids):
 
 
 def get_jenkins_jobs(server, job_search_fields):
+	''' takes in a Jenkins server object and job_search_fields string
+		returns list of jobs with given search field as part of their name
+	'''
 
 	# parse list of search fields
 	fields = job_search_fields.split(',')
@@ -146,6 +149,9 @@ def get_jenkins_jobs(server, job_search_fields):
 
 
 def get_osp_version(job_name):
+	''' gets osp version from job name via regex
+		returns None if no version is found
+	'''
 	version = re.search(r'\d+\.*\d*', job_name)
 	if version is None:
 		return None
@@ -154,6 +160,10 @@ def get_osp_version(job_name):
 
 
 def get_other_blockers(blockers, job_name):
+	''' takes in blockers object and job name
+		returns list of 'other' blockers
+	'''
+
 	other_blockers = blockers[job_name]['other']
 	other = []
 	for blocker in other_blockers:
@@ -162,6 +172,8 @@ def get_other_blockers(blockers, job_name):
 
 
 def generate_header(user, job_search_fields):
+	''' generates report header
+	'''
 	user_properties = user['property']
 	user_email_address = [prop['address'] for prop in user_properties if prop['_class'] == 'hudson.tasks.Mailer$UserProperty'][0]
 	date = '{:%m/%d/%Y at %I:%M%p %Z}'.format(datetime.datetime.now())
@@ -174,6 +186,8 @@ def generate_header(user, job_search_fields):
 
 
 def generate_html_file(htmlcode):
+	''' generates HTML file of report
+	'''
 	try:
 		os.makedirs('archive')
 	except FileExistsError:
@@ -184,6 +198,8 @@ def generate_html_file(htmlcode):
 
 
 def percent(part, whole):
+	''' basic percent function
+	'''
 	return round(100 * float(part) / float(whole), 1)
 
 
@@ -257,7 +273,7 @@ if __name__ == '__main__':
 	num_missing = 0
 	num_error = 0
 	rows = []
-	for job in jobs[::-1]:
+	for job in jobs:
 		job_name = job['name']
 		osp_version = get_osp_version(job_name)
 
@@ -282,6 +298,8 @@ if __name__ == '__main__':
 				build_actions = build_info['actions']
 				component = [action['text'] for action in build_actions if 'COMPONENT' in action.get('text', '')]
 
+			lcb_url = build_info['url']
+			lcb_result = build_info['result']
 			compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')]
 
 			# No compose could be found; likely a failed job where the 'core_puddle' var was never calculated
@@ -289,9 +307,6 @@ if __name__ == '__main__':
 				compose = "Could not find compose"
 			else:
 				compose = compose[0]
-
-			lcb_url = build_info['url']
-			lcb_result = build_info['result']
 
 		except Exception as e:
 
