@@ -282,11 +282,19 @@ if __name__ == '__main__':
 				build_actions = build_info['actions']
 				component = [action['text'] for action in build_actions if 'COMPONENT' in action.get('text', '')]
 
-			compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')][0]
+			compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')]
+
+			# No compose could be found; likely a failed job where the 'core_puddle' var was never calculated
+			if compose == []:
+				compose = "Could not find compose"
+			else:
+				compose = compose[0]
+
 			lcb_url = build_info['url']
 			lcb_result = build_info['result']
 
 		except Exception as e:
+
 			# No "Last Completed Build" found
 			if job_info['builds'] == []:
 				lcb_num = None
@@ -296,7 +304,7 @@ if __name__ == '__main__':
 
 			# Unknown error, skip job
 			else:
-				print("Jenkins API call error: ", e)
+				print("Jenkins API call error on job {}: {}".format(job_name, e))
 				continue
 
 		# take action based on last completed build result
