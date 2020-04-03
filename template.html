@@ -38,9 +38,13 @@
 					<td style="text-align: center;">{{row.compose}}</td>
 					<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
 
-				<!-- LCB is set to any other state -->
+				<!-- LCB is set to any other state ('NO_KNOWN_BUILDS', 'ERROR') -->
 				{% else %}
-					<td style="text-align: center;">{{row.lcb_num}}</td>
+					{% if row.lcb_url != None %}
+						<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
+					{% else %}
+						<td style="text-align: center;">{{row.lcb_num}}</td>
+					{% endif %}
 					<td style="text-align: center;">{{row.compose}}</td>
 					<td style="text-align: center;" bgcolor="#808080">{{row.lcb_result}}</td>
 				{% endif %}
