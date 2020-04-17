@@ -19,4 +19,7 @@ jobs:
       - name: Lint with flake8
         run: |
           pip install flake8
-          flake8 --ignore=W191,E117,E501,E722 main.py
+          flake8 --ignore=E117,E501,E722,W191 jeeves.py
+          flake8 --ignore=E117,E501,E722,W191 report.py
+          flake8 --ignore=E117,E501,E722,W191 remind.py
+          flake8 --ignore=E117,E501,E722,W191 functions.py

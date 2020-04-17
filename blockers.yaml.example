@@ -5,14 +5,7 @@ job1:
     jira:
         - 'RHOSINFRA-123'
 
-# 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
 job2:
-    bz:
-        - 0
-    jira:
-        - 0
-
-job3:
     bz:
         - 456
         - 789
@@ -20,10 +13,19 @@ job3:
         - 'RHOSINFRA-456'
         - 'RHOSINFRA-789'
 
-# Jobs with blockers that are neither blockers nor tickets can utilize the 'other' field for recording
+# 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
+job3:
+    bz:
+        - 0
+    jira:
+        - 0
+
+# Jobs with blockers that are neither bugs nor tickets can utilize the 'other' field for recording
 job4:
     bz:
         - 159
+    jira:
+        - 0
     other:
         - name: Trello Card
           url: <URL to Trello card>
@@ -32,8 +34,29 @@ job4:
 
 # You can have 'other' blockers with a name, a URL, or both
 job5:
+    bz:
+        - 0
     jira:
         - 'RHOSINFRA-753'
     other:
         - name: Experimental Job
         - url: <URL>
+
+# If you wish for a job to have an owner, you can specify this as follows
+job6:
+    owners:
+        - owner1@website.com
+    bz:
+        - 0
+    jira:
+        - 'RHOSINFRA-963'
+
+# Jobs can have multiple owners
+job7:
+    owners:
+        - owner2@website.com
+        - owner3@website.com
+    bz:
+        - 852
+    jira:
+        - 0
