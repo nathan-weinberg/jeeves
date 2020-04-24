@@ -1,4 +1,3 @@
-import sys
 import jinja2
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -17,7 +16,7 @@ def run_report(config, blockers, server, header, test, save):
 	num_jobs_fetched = len(jobs)
 	if num_jobs_fetched == 0:
 		print("No jobs found with given search field. Exiting...")
-		sys.exit()
+		return None
 
 	# Get set from the list of all bugs in all jobs
 	all_bugs_set = get_bugs_set(blockers) if blockers else {}
