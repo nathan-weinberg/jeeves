@@ -7,25 +7,32 @@ from functions import generate_html_file, get_osp_version, has_blockers
 
 def run_remind(config, blockers, server, header):
 
-	# get set of all owners in blocker file
+	# get list of all owners in blocker file
 	owner_list = []
 	for job in blockers:
 		owners = blockers[job].get('owners', False)
 		if not owners:
 			continue
 		owner_list.extend(owners)
-	owner_set = set(owner_list)
+
+	# exit if no owners are found for any jobs in blockers file
+	if owner_list == []:
+		print("No owners found in blocker file")
+		return None
 
 	# find each job with no blockers including the owner and send email with agg'd list
+	owner_set = set(owner_list)
 	for owner in owner_set:
 		rows = []
 		for job_name in blockers:
 			owners = blockers[job_name].get('owners', [])
+
+			# skip if current owner is not owner of this job
 			if owner not in owners:
 				continue
-			osp_version = get_osp_version(job_name)
 
 			# get all relevant info from jenkins
+			osp_version = get_osp_version(job_name)
 			try:
 				job_info = server.get_job_info(job_name)
 				job_url = job_info['url']

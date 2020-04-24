@@ -134,7 +134,6 @@ def get_jira_dict(ticket_ids, config):
 				'ticket_url': ticket_url
 			}
 	jira.close()
-
 	return tickets
 
 
