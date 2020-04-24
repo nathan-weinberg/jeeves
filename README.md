@@ -30,12 +30,20 @@ If you have a blocker for a job that is neither a Bugzilla bug or a Jira ticket,
 
 If you wish to use a different blockers file, you can specify it as a command line argument.
 
+#### Tracking Owners
+You can define "owners" for a job in "blockers.yaml" for use with reminder mode. To do so, simply add an "owners" subfield to a job with one or more emails. You can see some examples of this in "blockers.yaml.example". 
+
 ## Usage
 To run:
-- `$ ./main.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` if `/usr/bin/python3` is a valid path
-- `$ python3 main.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` otherwise
+- `$ ./jeeves.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` if `/usr/bin/python3` is a valid path
+- `$ python3 jeeves.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` otherwise
 - To send report to email specified in `email_to_test` field, add `--test`
 - To save report to 'archive' folder, add `--save`
+- To run Jeeves in "reminder" mode, add `--remind`
+    - Note this will override the usage of `--save` and `--test`
+
+#### Reminder Mode
+Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status and have no recorded blockers.
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML
@@ -49,8 +57,7 @@ To install packages run:
 `$ pip install -r requirements.txt`
 
 ## Testing
-
-Jeeves has a small but growing test suite driven by [pytest](https://docs.pytest.org/en/latest/index.html). Currently all tests reside in the `test_main.py` file.
+Jeeves has a small but growing test suite driven by [pytest](https://docs.pytest.org/en/latest/index.html). Currently all tests reside in the `test_functions.py` file.
 
 To run tests simply run the `pytest` command within the Jeeves directory.
 
