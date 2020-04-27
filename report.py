@@ -227,7 +227,13 @@ def run_report(config, blockers, server, header, test, save):
 			smtp.ehlo_or_helo_if_needed()
 
 			# send email to all addresses
-			smtp.sendmail(msg['From'], recipients, msg.as_string())
+			response = smtp.sendmail(msg['From'], recipients, msg.as_string())
+
+			# log success if all recipients recieved report, otherwise raise exception
+			if response == {}:
+				print("Report successfully accepted by mail server for delivery")
+			else:
+				raise Exception("Mail server cannot deliver report to following recipients: {}".format(response))
 
 	except Exception as e:
 		print("Error sending email report: {}\nHTML file generated".format(e))

@@ -118,10 +118,16 @@ def run_remind(config, blockers, server, header):
 					smtp.ehlo_or_helo_if_needed()
 
 					# send email to all addresses
-					smtp.sendmail(msg['From'], msg['To'], msg.as_string())
+					response = smtp.sendmail(msg['From'], msg['To'], msg.as_string())
+
+					# log success if all recipients recieved reminder, otherwise raise exception
+					if response == {}:
+						print("Reminder successfully accepted by mail server for delivery")
+					else:
+						raise Exception("Mail server cannot deliver reminder to following recipients: {}".format(response))
 
 			except Exception as e:
-				print("Error sending email report: {}\nHTML file generated".format(e))
+				print("Error sending email reminder: {}\nHTML file generated".format(e))
 				generate_html_file(htmlcode, remind=True)
 
 		else:
