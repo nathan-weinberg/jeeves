@@ -33,6 +33,7 @@ def generate_remind_header(user, blocker_file):
 	user_properties = user['property']
 	user_email_address = [prop['address'] for prop in user_properties if prop['_class'] == 'hudson.tasks.Mailer$UserProperty'][0]
 	date = '{:%m/%d/%Y at %I:%M%p %Z}'.format(datetime.datetime.now())
+	blocker_file = blocker_file.rsplit('/', 1)[-1]
 	header = {
 		'user_email_address': user_email_address,
 		'date': date,
