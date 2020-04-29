@@ -1,4 +1,4 @@
-''' Shared library of functions for report.py and remind.py
+''' Shared library of functions for other Python files
 '''
 
 import os
@@ -6,6 +6,25 @@ import re
 import datetime
 import bugzilla
 from jira import JIRA
+
+
+def generate_header(user, source, remind=False):
+	''' generates header
+	'''
+	user_properties = user['property']
+	user_email_address = [prop['address'] for prop in user_properties if prop['_class'] == 'hudson.tasks.Mailer$UserProperty'][0]
+	date = '{:%m/%d/%Y at %I:%M%p %Z}'.format(datetime.datetime.now())
+
+	# show only filename in remind header, not full path
+	if remind:
+		source = source.rsplit('/', 1)[-1]
+
+	header = {
+		'user_email_address': user_email_address,
+		'date': date,
+		'source': source
+	}
+	return header
 
 
 def generate_html_file(htmlcode, remind=False):
