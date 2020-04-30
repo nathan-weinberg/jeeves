@@ -5,44 +5,14 @@ import sys
 import yaml
 import jenkins
 import argparse
-import datetime
 
 from report import run_report
 from remind import run_remind
+from functions import generate_header
 
 os.environ['PYTHONHTTPSVERIFY'] = '0'
 
 
-def generate_report_header(user, job_search_fields):
-	''' generates header for report
-	'''
-	user_properties = user['property']
-	user_email_address = [prop['address'] for prop in user_properties if prop['_class'] == 'hudson.tasks.Mailer$UserProperty'][0]
-	date = '{:%m/%d/%Y at %I:%M%p %Z}'.format(datetime.datetime.now())
-	header = {
-		'user_email_address': user_email_address,
-		'date': date,
-		'job_search_fields': job_search_fields
-	}
-	return header
-
-
-def generate_remind_header(user, blocker_file):
-	''' generates header for reminder
-	'''
-	user_properties = user['property']
-	user_email_address = [prop['address'] for prop in user_properties if prop['_class'] == 'hudson.tasks.Mailer$UserProperty'][0]
-	date = '{:%m/%d/%Y at %I:%M%p %Z}'.format(datetime.datetime.now())
-	blocker_file = blocker_file.rsplit('/', 1)[-1]
-	header = {
-		'user_email_address': user_email_address,
-		'date': date,
-		'blocker_file': blocker_file
-	}
-	return header
-
-
-# main script execution
 if __name__ == '__main__':
 
 	# argument parsing
@@ -84,9 +54,11 @@ if __name__ == '__main__':
 		sys.exit()
 
 	# execute Jeeves in either 'remind' or 'report' mode
+	# if remind, header source should be blocker_file
+	# if report, header source should be job_search_fields
 	if remind_flag:
-		header = generate_remind_header(user, blocker_file)
+		header = generate_header(user, blocker_file, remind=True)
 		run_remind(config, blockers, server, header)
 	else:
-		header = generate_report_header(user, config['job_search_fields'])
+		header = generate_header(user, config['job_search_fields'])
 		run_report(config, blockers, server, header, test, save)
