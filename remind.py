@@ -39,14 +39,20 @@ def run_remind(config, blockers, server, header):
 				lcb_num = job_info['lastCompletedBuild']['number']
 				build_info = server.get_build_info(job_name, lcb_num)
 				build_actions = build_info['actions']
-				component = [action['text'] for action in build_actions if 'COMPONENT' in action.get('text', '')]
+				build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
+				run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
+				gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
 
-				# if build was testing specific component, find next most recent build not testing a component
-				while component != []:
+				# find most recent build where the following is NOT true
+				# build has label "RUN MODE: periodic"
+				# build is associated with a gerrit patch (i.e. GERRIT_CHANGE_URL is present)
+				while run_mode != [] or gerrit_patch != []:
 					lcb_num = lcb_num - 1
 					build_info = server.get_build_info(job_name, lcb_num)
 					build_actions = build_info['actions']
-					component = [action['text'] for action in build_actions if 'COMPONENT' in action.get('text', '')]
+					build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
+					run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
+					gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
 
 				lcb_url = build_info['url']
 				lcb_result = build_info['result']
