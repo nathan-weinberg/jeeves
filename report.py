@@ -3,8 +3,9 @@ from smtplib import SMTP
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from functions import generate_html_file, get_bugs_dict, \
-	get_bugs_set, get_jenkins_jobs, get_jira_dict, get_jira_set, \
-	get_osp_version, get_other_blockers, percent
+	get_bugs_set, get_jenkins_job_info, get_jenkins_jobs, \
+	get_jira_dict, get_jira_set, get_osp_version, \
+	get_other_blockers, percent
 
 
 def run_report(config, blockers, server, header, test, save):
@@ -48,114 +49,74 @@ def run_report(config, blockers, server, header, test, save):
 			print('No OSP version could be found in job {}. Skipping...'.format(job_name))
 			continue
 
-		# get all relevant info from jenkins
-		try:
-			job_info = server.get_job_info(job_name)
-			job_url = job_info['url']
-			lcb_num = job_info['lastCompletedBuild']['number']
-			build_info = server.get_build_info(job_name, lcb_num)
-			build_actions = build_info['actions']
-			build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
-			run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
-			gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
+		# get job info from jenkins API
+		jenkins_api_info = get_jenkins_job_info(server, job_name)
 
-			# find most recent build where the following is NOT true
-			# build has label "RUN MODE: periodic"
-			# build is associated with a gerrit patch (i.e. GERRIT_CHANGE_URL is present)
-			while run_mode != [] or gerrit_patch != []:
-				lcb_num = lcb_num - 1
-				build_info = server.get_build_info(job_name, lcb_num)
-				build_actions = build_info['actions']
-				build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
-				run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
-				gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
+		# if jeeves was unable to collect any good jenkins api info, skip job
+		if jenkins_api_info:
 
-			lcb_url = build_info['url']
-			lcb_result = build_info['result']
-			compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')]
+			# take action based on last completed build result
+			if jenkins_api_info['lcb_result'] == "SUCCESS" or jenkins_api_info['lcb_result'] == "NO_KNOWN_BUILDS":
+				if jenkins_api_info['lcb_result'] == "SUCCESS":
+					num_success += 1
+				else:
+					num_missing += 1
 
-			# No compose could be found; likely a failed job where the 'core_puddle' var was never calculated
-			if compose == []:
-				compose = "Could not find compose"
-			else:
-				compose = compose[0]
-
-		except Exception as e:
-
-			# No "Last Completed Build" found
-			if job_info['builds'] == []:
-				lcb_num = None
-				compose = "N/A"
-				lcb_url = None
-				lcb_result = "NO_KNOWN_BUILDS"
-
-			# Unknown error, skip job
-			else:
-				print("Jenkins API call error on job {}: {}".format(job_name, e))
-				continue
-
-		# take action based on last completed build result
-		if lcb_result == "SUCCESS" or lcb_result == "NO_KNOWN_BUILDS":
-			if lcb_result == "SUCCESS":
-				num_success += 1
-			if lcb_result == "NO_KNOWN_BUILDS":
-				num_missing += 1
-
-			bugs = [{'bug_name': 'N/A', 'bug_url': None}]
-			tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
-			other = [{'other_name': 'N/A', 'other_url': None}]
-
-		elif lcb_result == "UNSTABLE" or lcb_result == "FAILURE":
-			if lcb_result == "UNSTABLE":
-				num_unstable += 1
-			if lcb_result == "FAILURE":
-				num_failure += 1
-
-			# get all related bugs to job
-			try:
-				bug_ids = blockers[job_name]['bz']
-				all_bugs.extend(bug_ids)
-				bugs = list(map(all_bugs_dict.get, bug_ids))
-			except:
-				bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
-
-			# get all related tickets to job
-			try:
-				ticket_ids = blockers[job_name]['jira']
-				all_tickets.extend(ticket_ids)
-				tickets = list(map(all_jira_dict.get, ticket_ids))
-			except:
-				tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
-
-			# get any "other" artifact for job
-			try:
-				other = get_other_blockers(blockers, job_name)
-			except:
+				bugs = [{'bug_name': 'N/A', 'bug_url': None}]
+				tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
 				other = [{'other_name': 'N/A', 'other_url': None}]
 
-		else:
-			lcb_result = "ERROR"
-			num_error += 1
-			bugs = [{'bug_name': 'N/A', 'bug_url': None}]
-			tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
-			other = [{'other_name': 'N/A', 'other_url': None}]
+			elif jenkins_api_info['lcb_result'] == "UNSTABLE" or jenkins_api_info['lcb_result'] == "FAILURE":
+				if jenkins_api_info['lcb_result'] == "UNSTABLE":
+					num_unstable += 1
+				else:
+					num_failure += 1
 
-		# build row
-		row = {
-			'osp_version': osp_version,
-			'job_name': job_name,
-			'job_url': job_url,
-			'lcb_num': lcb_num,
-			'lcb_url': lcb_url,
-			'compose': compose,
-			'lcb_result': lcb_result,
-			'bugs': bugs,
-			'tickets': tickets,
-			'other': other
-		}
+				# get all related bugs to job
+				try:
+					bug_ids = blockers[job_name]['bz']
+					all_bugs.extend(bug_ids)
+					bugs = list(map(all_bugs_dict.get, bug_ids))
+				except:
+					bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
 
-		# append row to rows
-		rows.append(row)
+				# get all related tickets to job
+				try:
+					ticket_ids = blockers[job_name]['jira']
+					all_tickets.extend(ticket_ids)
+					tickets = list(map(all_jira_dict.get, ticket_ids))
+				except:
+					tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
+
+				# get any "other" artifact for job
+				try:
+					other = get_other_blockers(blockers, job_name)
+				except:
+					other = [{'other_name': 'N/A', 'other_url': None}]
+
+			else:
+				jenkins_api_info['lcb_result'] = "ERROR"
+				num_error += 1
+				bugs = [{'bug_name': 'N/A', 'bug_url': None}]
+				tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
+				other = [{'other_name': 'N/A', 'other_url': None}]
+
+			# build row
+			row = {
+				'osp_version': osp_version,
+				'job_name': job_name,
+				'job_url': jenkins_api_info['job_url'],
+				'lcb_num': jenkins_api_info['lcb_num'],
+				'lcb_url': jenkins_api_info['lcb_url'],
+				'compose': jenkins_api_info['compose'],
+				'lcb_result': jenkins_api_info['lcb_result'],
+				'bugs': bugs,
+				'tickets': tickets,
+				'other': other
+			}
+
+			# append row to rows
+			rows.append(row)
 
 	# sort rows by descending OSP version
 	rows = sorted(rows, key=lambda row: row['osp_version'], reverse=True)

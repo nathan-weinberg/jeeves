@@ -94,6 +94,70 @@ def get_bugs_set(blockers):
 	return bug_set
 
 
+def get_jenkins_job_info(server, job_name):
+	''' takes in jenkins server object and job name
+		returns dict of API info for given job if success
+		returns False if failure
+	'''
+
+	# set default value for job_info for cased exception handling
+	job_info = {}
+
+	try:
+		job_info = server.get_job_info(job_name)
+		job_url = job_info['url']
+		lcb_num = job_info['lastCompletedBuild']['number']
+		build_info = server.get_build_info(job_name, lcb_num)
+		build_actions = build_info['actions']
+		build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
+		run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
+		gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
+
+		# find most recent build where the following is NOT true
+		# build has label "RUN MODE: periodic"
+		# build is associated with a gerrit patch (i.e. GERRIT_CHANGE_URL is present)
+		while run_mode != [] or gerrit_patch != []:
+			lcb_num = lcb_num - 1
+			build_info = server.get_build_info(job_name, lcb_num)
+			build_actions = build_info['actions']
+			build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
+			run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
+			gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
+
+		lcb_url = build_info['url']
+		lcb_result = build_info['result']
+		compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')]
+
+		# No compose could be found; likely a failed job where the 'core_puddle' var was never calculated
+		if compose == []:
+			compose = "Could not find compose"
+		else:
+			compose = compose[0]
+
+	except Exception as e:
+
+		# No "Last Completed Build" found
+		if job_info.get('builds') == []:
+			lcb_num = None
+			lcb_url = None
+			compose = "N/A"
+			lcb_result = "NO_KNOWN_BUILDS"
+
+		# Unknown error, skip job
+		else:
+			print("Jenkins API call error on job {}: {}".format(job_name, e))
+			return False
+
+	jenkins_api_info = {
+		'job_url': job_url,
+		'lcb_num': lcb_num,
+		'lcb_url': lcb_url,
+		'compose': compose,
+		'lcb_result': lcb_result,
+	}
+	return jenkins_api_info
+
+
 def get_jenkins_jobs(server, job_search_fields):
 	''' takes in a Jenkins server object and job_search_fields string
 		returns list of jobs with given search field as part of their name
