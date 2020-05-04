@@ -50,6 +50,10 @@ def get_bugs_dict(bug_ids, config):
 	# initialize bug dictionary
 	bugs = {}
 
+	# API connection does not work if '/' present at end of URL string
+	parsed_bz_url = config['bz_url'].rstrip('/')
+	bz_api = None
+
 	# iterate through bug ids from set
 	for bug_id in bug_ids:
 
@@ -62,15 +66,16 @@ def get_bugs_dict(bug_ids, config):
 		# get bug info from bugzilla API
 		try:
 
-			# hotfix: API call does not work if '/' present at end of URL string
-			parsed_bz_url = config['bz_url'].rstrip('/')
+			# initialize connection if it has not yet been done (either first iteration or previously failed)
+			if bz_api is None:
+				bz_api = bugzilla.Bugzilla(parsed_bz_url)
 
-			bz_api = bugzilla.Bugzilla(parsed_bz_url)
 			bug = bz_api.getbug(bug_id)
 			bug_name = bug.summary
 		except Exception as e:
 			print("Bugzilla API Call Error: ", e)
 			bug_name = "BZ#" + str(bug_id)
+			bz_api = None
 		finally:
 			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
 			bugs[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
@@ -122,13 +127,13 @@ def get_jira_dict(ticket_ids, config):
 	# initialize ticket dictionary
 	tickets = {}
 
-	# initialize connection
+	# initialize jira variable and config options
 	auth = (config['jira_username'], config['jira_password'])
 	options = {
 		"server": config['jira_url'],
 		"verify": config['certificate']
 	}
-	jira = JIRA(auth=auth, options=options)
+	jira = None
 
 	# iterate through ticket ids from set
 	for ticket_id in ticket_ids:
@@ -141,11 +146,17 @@ def get_jira_dict(ticket_ids, config):
 
 		# get ticket info from jira API
 		try:
+
+			# initialize connection if it has not yet been done (either first iteration or previously failed)
+			if jira is None:
+				jira = JIRA(auth=auth, options=options)
+
 			issue = jira.issue(ticket_id)
 			ticket_name = issue.fields.summary
 		except Exception as e:
 			print("Jira API Call Error: ", e)
 			ticket_name = ticket_id
+			jira = None
 		finally:
 			ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
 			tickets[ticket_id] = {
