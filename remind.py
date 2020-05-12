@@ -2,7 +2,8 @@ import jinja2
 from smtplib import SMTP
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from functions import generate_html_file, get_osp_version, has_blockers
+from functions import generate_html_file, get_osp_version, \
+	get_jenkins_job_info, has_blockers
 
 
 def run_remind(config, blockers, server, header):
@@ -26,71 +27,31 @@ def run_remind(config, blockers, server, header):
 		rows = []
 		for job_name in blockers:
 			owners = blockers[job_name].get('owners', [])
+			osp_version = get_osp_version(job_name)
 
 			# skip if current owner is not owner of this job
 			if owner not in owners:
 				continue
 
-			# get all relevant info from jenkins
-			osp_version = get_osp_version(job_name)
-			try:
-				job_info = server.get_job_info(job_name)
-				job_url = job_info['url']
-				lcb_num = job_info['lastCompletedBuild']['number']
-				build_info = server.get_build_info(job_name, lcb_num)
-				build_actions = build_info['actions']
-				build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
-				run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
-				gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
+			# get job info from jenkins API
+			jenkins_api_info = get_jenkins_job_info(server, job_name)
 
-				# find most recent build where the following is NOT true
-				# build has label "RUN MODE: periodic"
-				# build is associated with a gerrit patch (i.e. GERRIT_CHANGE_URL is present)
-				while run_mode != [] or gerrit_patch != []:
-					lcb_num = lcb_num - 1
-					build_info = server.get_build_info(job_name, lcb_num)
-					build_actions = build_info['actions']
-					build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
-					run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
-					gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
+			# if jeeves was unable to collect any good jenkins API info, skip job
+			if jenkins_api_info:
 
-				lcb_url = build_info['url']
-				lcb_result = build_info['result']
-				compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')]
-
-				# No compose could be found; likely a failed job where the 'core_puddle' var was never calculated
-				if compose == []:
-					compose = "Could not find compose"
-				else:
-					compose = compose[0]
-
-			except Exception as e:
-
-				# No "Last Completed Build" found
-				if job_info['builds'] == []:
-					lcb_num = None
-					compose = "N/A"
-					lcb_url = None
-					lcb_result = "NO_KNOWN_BUILDS"
-
-				# Unknown error, skip job
-				else:
-					print("Jenkins API call error on job {}: {}".format(job_name, e))
-					continue
-
-			# only care about jobs with UNSTABLE or FAILURE status that have no blockers
-			if lcb_result == "UNSTABLE" or lcb_result == "FAILURE":
-				if not has_blockers(blockers, job_name):
-					row = {
-						'osp_version': osp_version,
-						'job_name': job_name,
-						'job_url': job_url,
-						'lcb_num': lcb_num,
-						'lcb_url': lcb_url,
-						'compose': compose,
-						'lcb_result': lcb_result,
-					}
-					rows.append(row)
+				# only care about jobs with UNSTABLE or FAILURE status that have no blockers
+				if jenkins_api_info['lcb_result'] == "UNSTABLE" or jenkins_api_info['lcb_result'] == "FAILURE":
+					if not has_blockers(blockers, job_name):
+						row = {
+							'osp_version': osp_version,
+							'job_name': job_name,
+							'job_url': jenkins_api_info['job_url'],
+							'lcb_num': jenkins_api_info['lcb_num'],
+							'lcb_url': jenkins_api_info['lcb_url'],
+							'compose': jenkins_api_info['compose'],
+							'lcb_result': jenkins_api_info['lcb_result'],
+						}
+						rows.append(row)
 
 		# if no rows were generated, all jobs belonging to owner are already triaged
 		if rows != []:
