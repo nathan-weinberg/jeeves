@@ -165,6 +165,11 @@ def get_jenkins_jobs(server, job_search_fields):
 
 	# parse list of search fields
 	fields = job_search_fields.split(',')
+	fields_length = len(fields)
+
+	# remove spacing from strings
+	for i in range(fields_length):
+		fields[i] = fields[i].strip(' ')
 
 	# fetch all jobs from server
 	all_jobs = server.get_jobs()
