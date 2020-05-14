@@ -61,5 +61,8 @@ Jeeves has a small but growing test suite driven by [pytest](https://docs.pytest
 
 To run tests simply run the `pytest` command within the Jeeves directory.
 
+## Contributing
+Please see contribution guidelines in [CONTRIBUTING.md](CONTRIBUTING.md)
+
 ## Notes
 Jeeves was designed for use by Red Hat OpenStack QE and the organization's production CI environment - while the project can be used for other Jenkins environments, it may require some tweaking to work as expected.
