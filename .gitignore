@@ -5,7 +5,7 @@ dev.py
 *.crt
 .venv/
 .vscode/
-report.html
+*.html
 __pycache__/
 .pytest_cache
 archive/
