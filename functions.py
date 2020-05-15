@@ -10,6 +10,8 @@ from jira import JIRA
 
 def generate_header(user, source, remind=False):
 	''' generates header
+		if remind is true, header source should be blocker_file
+		if remind is false, header source should be job_search_fields
 	'''
 	user_properties = user['property']
 	user_email_address = [prop['address'] for prop in user_properties if prop['_class'] == 'hudson.tasks.Mailer$UserProperty'][0]
@@ -89,8 +91,17 @@ def get_bugs_set(blockers):
 	'''
 	bug_set = set()
 	for job in blockers:
-		bz = blockers[job]['bz']
-		bug_set.update(bz)
+
+		# try to fetch 'bz' field from job
+		try:
+			bz = blockers[job]['bz']
+			bug_set.update(bz)
+
+		# failure means data was not formatted correctly for given job - log and skip
+		except Exception as e:
+			print("Error getting bug IDs from blockers file for job {}: {}".format(job, e))
+			continue
+
 	return bug_set
 
 
@@ -246,8 +257,17 @@ def get_jira_set(blockers):
 	'''
 	jira_set = set()
 	for job in blockers:
-		jira = blockers[job]['jira']
-		jira_set.update(jira)
+
+		# try to fetch 'jira' field from job
+		try:
+			jira = blockers[job]['jira']
+			jira_set.update(jira)
+
+		# failure means data was not formatted correctly for given job - log and skip
+		except Exception as e:
+			print("Error getting jira IDs from blockers file for job {}: {}".format(job, e))
+			continue
+
 	return jira_set
 
 
