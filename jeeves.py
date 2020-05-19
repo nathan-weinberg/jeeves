@@ -29,7 +29,7 @@ if __name__ == '__main__':
 	save = args.save
 	remind_flag = args.remind
 
-	# load configuration data
+	# load configuration data - if YAML format is invalid, log and end program execution
 	try:
 		with open(config_file, 'r') as file:
 			config = yaml.safe_load(file)
@@ -37,7 +37,7 @@ if __name__ == '__main__':
 		print("Error loading configuration data: ", e)
 		sys.exit()
 
-	# load blocker data
+	# load blocker data - if YAML format is invalid, log and end program execution
 	try:
 		with open(blocker_file, 'r') as file:
 			blockers = yaml.safe_load(file)
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 		print("Error loading blocker configuration data: ", e)
 		sys.exit()
 
-	# connect to jenkins server
+	# connect to jenkins server - if not possible, log and end program execution
 	try:
 		server = jenkins.Jenkins(config['jenkins_url'], username=config['jenkins_username'], password=config['jenkins_api_token'])
 		user = server.get_whoami()

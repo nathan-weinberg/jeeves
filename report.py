@@ -13,7 +13,7 @@ def run_report(config, blockers, server, header, test, save):
 	# fetch all relevant jobs
 	jobs = get_jenkins_jobs(server, config['job_search_fields'])
 
-	# exit if no jobs found
+	# log and exit if no jobs found - no reason to send empty report
 	num_jobs_fetched = len(jobs)
 	if num_jobs_fetched == 0:
 		print("No jobs found with given search field. Exiting...")
