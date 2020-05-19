@@ -68,4 +68,12 @@ If changes were requested on your Pull Request, update it in the following way t
 3. Run `$ git commit --amend` to amend the commit with the requested changes
 4. Run `$ git push -f origin <your-working-branch>` to update the Pull Request
 
+## Testing someone else's Pull Request
+If you want to test a Pull Rquest put up by a Collaborator other than yourself:
+
+1. Navigate to your local repo and ensure you've commited or stashed any changes.
+2. Scroll to the bottom of the Pull Request and click on "command line instructions", right next to the Merge button.
+3. **IMPORTANT:** Run the commands **under Step 1 only** to checkout a new branch on your local repo with the changes present in the Pull Request.
+4. Test the PR - once you're done simply delete the branch you just created.
+
 Happy contributing!
