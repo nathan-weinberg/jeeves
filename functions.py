@@ -232,7 +232,11 @@ def get_jira_dict(ticket_ids, config):
 				'ticket_name': ticket_name,
 				'ticket_url': ticket_url
 			}
-	jira.close()
+
+	# close Jira connection if open
+	if jira is not None:
+		jira.close()
+
 	return tickets
 
 
