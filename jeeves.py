@@ -8,7 +8,7 @@ import argparse
 
 from report import run_report
 from remind import run_remind
-from functions import generate_header
+from functions import generate_header, validate_config
 
 os.environ['PYTHONHTTPSVERIFY'] = '0'
 
@@ -33,6 +33,7 @@ if __name__ == '__main__':
 	try:
 		with open(config_file, 'r') as file:
 			config = yaml.safe_load(file)
+			validate_config(config)
 	except Exception as e:
 		print("Error loading configuration data: ", e)
 		sys.exit()
