@@ -156,7 +156,7 @@ def get_jenkins_job_info(server, job_name):
 
 		# Unknown error, skip job
 		else:
-			print("Jenkins API call error on job {}: {}".format(job_name, e))
+			print("Jenkins API call error on job {}: {} - skipping...".format(job_name, e))
 			return False
 
 	jenkins_api_info = {

@@ -41,6 +41,8 @@ def run_report(config, blockers, server, header, test, save):
 	all_bugs = []
 	all_tickets = []
 	for job in jobs:
+
+		# get name and osp version from job object
 		job_name = job['name']
 		osp_version = get_osp_version(job_name)
 
@@ -95,6 +97,7 @@ def run_report(config, blockers, server, header, test, save):
 					other = [{'other_name': 'N/A', 'other_url': None}]
 
 			else:
+				print("job {} had lcb_result {}: reporting as error job".format(job_name, jenkins_api_info['lcb_result']))
 				jenkins_api_info['lcb_result'] = "ERROR"
 				num_error += 1
 				bugs = [{'bug_name': 'N/A', 'bug_url': None}]
