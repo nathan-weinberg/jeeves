@@ -108,12 +108,19 @@
 			<li>{{summary.total_success}}</li>
 			<li>{{summary.total_unstable}}</li>
 			<li>{{summary.total_failure}}</li>
+
 			{% if summary.total_missing %}
 			<li>{{summary.total_missing}}</li>
 			{% endif %}
+
+			{% if summary.total_aborted %}
+			<li>{{summary.total_aborted}}</li>
+			{% endif %}
+
 			{% if summary.total_error %}
 			<li>{{summary.total_error}}</li>
 			{% endif %}
+
 			<li>{{summary.total_bugs}}</li>
 			<li>{{summary.total_tickets}}</li>
 		</ul>
