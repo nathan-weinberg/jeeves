@@ -36,6 +36,7 @@ def run_report(config, blockers, server, header, test, save):
 	num_unstable = 0
 	num_failure = 0
 	num_missing = 0
+	num_aborted = 0
 	num_error = 0
 	rows = []
 	all_bugs = []
@@ -58,17 +59,19 @@ def run_report(config, blockers, server, header, test, save):
 		if jenkins_api_info:
 
 			# take action based on last completed build result
-			if jenkins_api_info['lcb_result'] == "SUCCESS" or jenkins_api_info['lcb_result'] == "NO_KNOWN_BUILDS":
+			if jenkins_api_info['lcb_result'] in ["SUCCESS", "NO_KNOWN_BUILDS", "ABORTED"]:
 				if jenkins_api_info['lcb_result'] == "SUCCESS":
 					num_success += 1
-				else:
+				elif jenkins_api_info['lcb_result'] == "NO_KNOWN_BUILDS":
 					num_missing += 1
+				else:
+					num_aborted += 1
 
 				bugs = [{'bug_name': 'N/A', 'bug_url': None}]
 				tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
 				other = [{'other_name': 'N/A', 'other_url': None}]
 
-			elif jenkins_api_info['lcb_result'] == "UNSTABLE" or jenkins_api_info['lcb_result'] == "FAILURE":
+			elif jenkins_api_info['lcb_result'] in ["UNSTABLE", "FAILURE"]:
 				if jenkins_api_info['lcb_result'] == "UNSTABLE":
 					num_unstable += 1
 				else:
@@ -154,6 +157,12 @@ def run_report(config, blockers, server, header, test, save):
 		summary['total_missing'] = "Total NO_KNOWN_BUILDS:  {}/{} = {}%".format(num_missing, num_jobs, percent(num_missing, num_jobs))
 	else:
 		summary['total_missing'] = False
+
+	# include abort report if needed
+	if num_aborted > 0:
+		summary['total_aborted'] = "Total ABORTED:  {}/{} = {}%".format(num_aborted, num_jobs, percent(num_aborted, num_jobs))
+	else:
+		summary['total_aborted'] = False
 
 	# include error report if needed
 	if num_error > 0:
