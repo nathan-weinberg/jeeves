@@ -3,7 +3,7 @@ from smtplib import SMTP
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from functions import generate_html_file, get_osp_version, \
-	get_jenkins_job_info, has_blockers
+	get_jenkins_job_info
 
 
 def run_remind(config, blockers, server, header):
@@ -41,17 +41,16 @@ def run_remind(config, blockers, server, header):
 
 				# only care about jobs with UNSTABLE or FAILURE status that have no blockers
 				if jenkins_api_info['lcb_result'] == "UNSTABLE" or jenkins_api_info['lcb_result'] == "FAILURE":
-					if not has_blockers(blockers, job_name):
-						row = {
-							'osp_version': osp_version,
-							'job_name': job_name,
-							'job_url': jenkins_api_info['job_url'],
-							'lcb_num': jenkins_api_info['lcb_num'],
-							'lcb_url': jenkins_api_info['lcb_url'],
-							'compose': jenkins_api_info['compose'],
-							'lcb_result': jenkins_api_info['lcb_result'],
-						}
-						rows.append(row)
+					row = {
+						'osp_version': osp_version,
+						'job_name': job_name,
+						'job_url': jenkins_api_info['job_url'],
+						'lcb_num': jenkins_api_info['lcb_num'],
+						'lcb_url': jenkins_api_info['lcb_url'],
+						'compose': jenkins_api_info['compose'],
+						'lcb_result': jenkins_api_info['lcb_result'],
+					}
+					rows.append(row)
 
 		# if no rows were generated, all jobs belonging to owner are already triaged
 		if rows != []:
