@@ -38,12 +38,12 @@ To run:
 - `$ ./jeeves.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` if `/usr/bin/python3` is a valid path
 - `$ python3 jeeves.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` otherwise
 - To send report to email specified in `email_to_test` field, add `--test`
-- To save report to 'archive' folder, add `--save`
+- To only save report to 'archive' folder, and not send an email, add `--no-email`
 - To run Jeeves in "reminder" mode, add `--remind`
-    - Note this will override the usage of `--save` and `--test`
+    - Note this will override the usage of `--no-email` and `--test`
 
 #### Reminder Mode
-Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status and have no recorded blockers.
+Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in "blockers.yaml.example". 
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML
