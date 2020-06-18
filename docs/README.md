@@ -17,7 +17,7 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **jira_password**: Your Jira password (note: this field is only required if the tickets you wish to access have restricted view permissions)
 - **certificate**: CRT file to authenticate with Jira server
 - **smtp_host**: SMTP host of your email
-- **email_subject**: Subject of your email report.
+- **email_subject**: Subject of your email report
 - **email_to**: Email address you would like to send your report to. To send the report to multiple emails, seperate them by comma, e.g. recipient1@website1.com,recipient2@website2.org
 - **email_to_test**: Email address to send test reports to (note: this field is only required if you run Jeeves with the `--test` flag)
 
@@ -35,12 +35,13 @@ You can define "owners" for a job in "blockers.yaml" for use with reminder mode.
 
 ## Usage
 To run:
-- `$ ./jeeves.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` if `/usr/bin/python3` is a valid path
-- `$ python3 jeeves.py [optional: --config CONFIG] [optional: --blockers BLOCKERS]` otherwise
+- `$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test] [--remind]`
+- To only save report to the 'archive' folder, and not send an email, add `--no-email`
 - To send report to email specified in `email_to_test` field, add `--test`
-- To only save report to 'archive' folder, and not send an email, add `--no-email`
+	- Note that running Jeeves with the `--test` flag will not save the report to 'archive' folder
+	- As such, running Jeeves with both the `--test` and `--no-email` flags will result in no report being saved and no email being sent
 - To run Jeeves in "reminder" mode, add `--remind`
-    - Note this will override the usage of `--no-email` and `--test`
+    - Note this will override the usage of both `--no-email` and `--test`
 
 #### Reminder Mode
 Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in "blockers.yaml.example". 
@@ -55,6 +56,8 @@ Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkin
 To install packages run:
 
 `$ pip install -r requirements.txt`
+
+It is recommended you do this within a virtual environment.
 
 ## Testing
 Jeeves has a small but growing test suite driven by [pytest](https://docs.pytest.org/en/latest/index.html). Currently all tests reside in the `test_functions.py` file.
