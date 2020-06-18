@@ -8,7 +8,7 @@ from functions import generate_html_file, get_bugs_dict, \
 	get_other_blockers, percent
 
 
-def run_report(config, blockers, server, header, test, save):
+def run_report(config, blockers, server, header, test, no_email):
 
 	# fetch all relevant jobs
 	jobs = get_jenkins_jobs(server, config['job_search_fields'])
@@ -182,42 +182,44 @@ def run_report(config, blockers, server, header, test, save):
 		summary=summary
 	)
 
-	# parse list of email addresses
-	if test:
-		recipients = config['email_to_test'].split(',')
-	else:
-		recipients = config['email_to'].split(',')
+	# save HTML report to file
+	generate_html_file(htmlcode)
+	print('HTML file generated in "archive" folder')
 
-	# construct email
-	msg = MIMEMultipart()
-	msg['From'] = header['user_email_address']
-	msg['Subject'] = config['email_subject']
-	msg['To'] = ", ".join(recipients)
-	msg.attach(MIMEText(htmlcode, 'html'))
+	# if "no email" flag has been passed, do not execute this block
+	if not no_email:
+		try:
 
-	# create SMTP session - if jeeves is unable to do so an HTML file will be generated
-	try:
-		with SMTP(config['smtp_host']) as smtp:
-
-			# start TLS for security
-			smtp.starttls()
-
-			# use ehlo or helo if needed
-			smtp.ehlo_or_helo_if_needed()
-
-			# send email to all addresses
-			response = smtp.sendmail(msg['From'], recipients, msg.as_string())
-
-			# log success if all recipients recieved report, otherwise raise exception
-			if response == {}:
-				print("Report successfully accepted by mail server for delivery")
+			# parse list of email addresses
+			if test:
+				recipients = config['email_to_test'].split(',')
 			else:
-				raise Exception("Mail server cannot deliver report to following recipients: {}".format(response))
+				recipients = config['email_to'].split(',')
 
-	except Exception as e:
-		print("Error sending email report: {}\nHTML file generated".format(e))
-		generate_html_file(htmlcode)
+			# construct email
+			msg = MIMEMultipart()
+			msg['From'] = header['user_email_address']
+			msg['Subject'] = config['email_subject']
+			msg['To'] = ", ".join(recipients)
+			msg.attach(MIMEText(htmlcode, 'html'))
 
-	else:
-		if save:
-			generate_html_file(htmlcode)
+			# create SMTP session
+			with SMTP(config['smtp_host']) as smtp:
+
+				# start TLS for security
+				smtp.starttls()
+
+				# use ehlo or helo if needed
+				smtp.ehlo_or_helo_if_needed()
+
+				# send email to all addresses
+				response = smtp.sendmail(msg['From'], recipients, msg.as_string())
+
+				# log success if all recipients recieved report, otherwise raise exception
+				if response == {}:
+					print("Report successfully accepted by mail server for delivery")
+				else:
+					raise Exception("Mail server cannot deliver report to following recipients: {}".format(response))
+
+		except Exception as e:
+			print('Error sending email report: {}\nSee HTML file saved in "archive" folder'.format(e))
