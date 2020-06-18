@@ -33,13 +33,13 @@ def run_remind(config, blockers, server, header):
 			if owner not in owners:
 				continue
 
-			# get job info from jenkins API
+			# get job info from jenkins API - will return False if an unmanageable error occured
 			jenkins_api_info = get_jenkins_job_info(server, job_name)
 
 			# if jeeves was unable to collect any good jenkins API info, skip job
 			if jenkins_api_info:
 
-				# only care about jobs with UNSTABLE or FAILURE status that have no blockers
+				# only care about jobs with UNSTABLE or FAILURE status
 				if jenkins_api_info['lcb_result'] == "UNSTABLE" or jenkins_api_info['lcb_result'] == "FAILURE":
 					row = {
 						'osp_version': osp_version,
@@ -56,7 +56,7 @@ def run_remind(config, blockers, server, header):
 		if rows != []:
 
 			# initialize jinja2 vars
-			loader = jinja2.FileSystemLoader('./remind_template.html')
+			loader = jinja2.FileSystemLoader('./templates/remind_template.html')
 			env = jinja2.Environment(loader=loader)
 			template = env.get_template('')
 

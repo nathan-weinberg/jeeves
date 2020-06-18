@@ -6,6 +6,8 @@ dev.py
 .venv/
 .vscode/
 *.html
+!report_template.html
+!remind_template.html
 __pycache__/
 .pytest_cache
 archive/
