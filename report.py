@@ -52,7 +52,7 @@ def run_report(config, blockers, server, header, test, no_email):
 			print('No OSP version could be found in job {}. Skipping...'.format(job_name))
 			continue
 
-		# get job info from jenkins API
+		# get job info from jenkins API - will return False if an unmanageable error occured
 		jenkins_api_info = get_jenkins_job_info(server, job_name)
 
 		# if jeeves was unable to collect any good jenkins api info, skip job
@@ -171,7 +171,7 @@ def run_report(config, blockers, server, header, test, no_email):
 		summary['total_error'] = False
 
 	# initialize jinja2 vars
-	loader = jinja2.FileSystemLoader('./report_template.html')
+	loader = jinja2.FileSystemLoader('./templates/report_template.html')
 	env = jinja2.Environment(loader=loader)
 	template = env.get_template('')
 

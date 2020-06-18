@@ -13,8 +13,8 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **job_search_fields**: Filter of Jenkins Jobs to included in report, e.g. DFG-ceph-rhos. To search for multiple fields, seperate them by comma, e.g. DFG-ceph-rhos,DFG-all-unified
 - **bz_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
 - **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
-- **jira_username**: Your Jira username (note: this field is only required if the tickets you wish to access have restricted view permissions)
-- **jira_password**: Your Jira password (note: this field is only required if the tickets you wish to access have restricted view permissions)
+- **jira_username**: Your Jira username
+- **jira_password**: Your Jira password
 - **certificate**: CRT file to authenticate with Jira server
 - **smtp_host**: SMTP host of your email
 - **email_subject**: Subject of your email report
