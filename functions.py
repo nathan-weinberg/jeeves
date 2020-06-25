@@ -73,7 +73,9 @@ def get_bugs_dict(bug_ids, config):
 				bz_api = bugzilla.Bugzilla(parsed_bz_url)
 
 			bug = bz_api.getbug(bug_id)
-			bug_name = bug.summary
+			bug_status = '[' + bug.status + ']'
+			bug_summary = bug.summary
+			bug_name = ' '.join([bug_status, bug_summary])
 		except Exception as e:
 			print("Bugzilla API Call Error: ", e)
 			bug_name = "BZ#" + str(bug_id)
@@ -232,7 +234,9 @@ def get_jira_dict(ticket_ids, config):
 				jira = JIRA(auth=auth, options=options)
 
 			issue = jira.issue(ticket_id)
-			ticket_name = issue.fields.summary
+			ticket_status = '[' + str(issue.fields.status) + ']'
+			ticket_summary = issue.fields.summary
+			ticket_name = ' '.join([ticket_status.upper(), ticket_summary])
 		except Exception as e:
 			print("Jira API Call Error: ", e)
 			ticket_name = ticket_id
