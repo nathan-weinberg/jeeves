@@ -12,34 +12,103 @@
 					<th style="text-align: center;">Last Build Number</th>
 					<th style="text-align: center;">Compose</th>
 					<th style="text-align: center;">Result</th>
-					<th style="text-align: center;">Bugzilla</th>
-					<th style="text-align: center;">Jira</th>
-					<th style="text-align: center;">Other</th>
+					<th style="text-align: center;">Blockers</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for row in rows %}
 				<tr>
+					<!-- OSP Version and Job Name -->
 					<td style="text-align: center;">{{row.osp_version}}</td>
 					<td style="text-align: left;"><a href="{{row.job_url}}">{{row.job_name}}</a></td>	
 
+					<!-- remaining columns (LCB Num, Compose, Result, Blockers) all dependent on result value -->
 					<!-- LCB is "SUCCESS" -->
 					{% if row.lcb_result == "SUCCESS" %}
 						<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
 						<td style="text-align: center;">{{row.compose}}</td>
 						<td style="text-align: center;" bgcolor="#4646ff"><a href="https://www.youtube.com/watch?v=68ugkg9RePc" style="text-decoration: none; color: #000;">{{row.lcb_result}}</a></td>
+						<td style="text-align: center;"><p>N/A</p></td>
 
 					<!-- LCB is "UNSTABLE" -->
 					{% elif row.lcb_result == "UNSTABLE" %}
 						<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
 						<td style="text-align: center;">{{row.compose}}</td>
 						<td style="text-align: center;" bgcolor="#fdd500">{{row.lcb_result}}</td>
+						<td>
+							<p style="text-align: center;"><b>Bugs</b></p>
+							{% for bug in row.bugs %}
+								<ul>
+								{% if bug.bug_url != None %}
+									<li><a href="{{bug.bug_url}}">{{bug.bug_name}}</a></li>
+								{% else %}
+									<li>{{bug.bug_name}}</li>
+								{% endif %}
+								</ul>
+							{% endfor %}
+							<hr>
+							<p style="text-align: center;"><b>Tickets</b></p>
+							{% for ticket in row.tickets %}
+								<ul>
+								{% if ticket.ticket_url != None %}
+									<li><a href="{{ticket.ticket_url}}">{{ticket.ticket_name}}</a></li>
+								{% else %}
+									<li>{{ticket.ticket_name}}</li>
+								{% endif %}
+								</ul>
+							{% endfor %}
+							<hr>
+							<p style="text-align: center;"><b>Other</b></p>
+							{% for other in row.other %}
+								<ul>
+								{% if other.other_url != None %}
+									<li><a href="{{other.other_url}}">{{other.other_name}}</a></li>
+								{% else %}
+									<li>{{other.other_name}}</li>
+								{% endif %}
+								</ul>
+							{% endfor %}
+						</td>
 
 					<!-- LCB is "FAILURE" -->
 					{% elif row.lcb_result == "FAILURE" %}
 						<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
 						<td style="text-align: center;">{{row.compose}}</td>
 						<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
+						<td>
+							<p style="text-align: center;"><b>Bugs</b></p>
+							{% for bug in row.bugs %}
+								<ul>
+								{% if bug.bug_url != None %}
+									<li><a href="{{bug.bug_url}}">{{bug.bug_name}}</a></li>
+								{% else %}
+									<li>{{bug.bug_name}}</li>
+								{% endif %}
+								</ul>
+							{% endfor %}
+							<hr>
+							<p style="text-align: center;"><b>Tickets</b></p>
+							{% for ticket in row.tickets %}
+								<ul>
+								{% if ticket.ticket_url != None %}
+									<li><a href="{{ticket.ticket_url}}">{{ticket.ticket_name}}</a></li>
+								{% else %}
+									<li>{{ticket.ticket_name}}</li>
+								{% endif %}
+								</ul>
+							{% endfor %}
+							<hr>
+							<p style="text-align: center;"><b>Other</b></p>
+							{% for other in row.other %}
+								<ul>
+								{% if other.other_url != None %}
+									<li><a href="{{other.other_url}}">{{other.other_name}}</a></li>
+								{% else %}
+									<li>{{other.other_name}}</li>
+								{% endif %}
+								</ul>
+							{% endfor %}
+						</td>
 
 					<!-- LCB is set to any other state ('NO_KNOWN_BUILDS', 'ERROR') -->
 					{% else %}
@@ -50,57 +119,12 @@
 						{% endif %}
 						<td style="text-align: center;">{{row.compose}}</td>
 						<td style="text-align: center;" bgcolor="#808080">{{row.lcb_result}}</td>
+						<td style="text-align: center;"><p>N/A</p></td>
 					{% endif %}
-
-					<td style="text-align: center;">
-						{% for bug in row.bugs %}
-							{% if bug.bug_url != None %}
-								<a href="{{bug.bug_url}}">{{bug.bug_name}}</a>
-							{% else %}
-								{{bug.bug_name}}
-							{% endif %}
-							{% if loop.index == row.bugs|length %}
-								<br>
-							{% else %}
-								<hr>
-							{% endif %}
-						{% endfor %}
-					</td>				
-
-					<td style="text-align: center;">
-						{% for ticket in row.tickets %}
-							{% if ticket.ticket_url != None %}
-								<a href="{{ticket.ticket_url}}">{{ticket.ticket_name}}</a>
-							{% else %}
-								{{ticket.ticket_name}}
-							{% endif %}
-							{% if loop.index == row.tickets|length %}
-								<br>
-							{% else %}
-								<hr>
-							{% endif %}
-						{% endfor %}
-					</td>
-
-					<td style="text-align: center;">
-						{% for other in row.other %}
-							{% if other.other_url != None %}
-								<a href="{{other.other_url}}">{{other.other_name}}</a>
-							{% else %}
-								{{other.other_name}}
-							{% endif %}
-							{% if loop.index == row.other|length %}
-								<br>
-							{% else %}
-								<hr>
-							{% endif %}
-						{% endfor %}
-					</td>			
-
 				</tr>
 				{% endfor %}
 			</tbody>
-		</table>		
+		</table>
 	</div>
 	<div>
 		<p><b>Summary:</b></p>
@@ -126,6 +150,6 @@
 		</ul>
 	</div>
 	<div>
-		<p style="text-align: center; font-size: smaller;"><a href="https://github.com/nathan-weinberg/jeeves">Report generated by Jeeves</a></p>		
+		<p style="text-align: center; font-size: smaller;"><a href="https://github.com/nathan-weinberg/jeeves">Report generated by Jeeves</a></p>
 	</div>
 </html>
