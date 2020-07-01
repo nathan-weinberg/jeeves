@@ -184,8 +184,8 @@ def run_report(config, blockers, server, header, test, no_email):
 
 	# save HTML report to file if not test run
 	if not test:
-		generate_html_file(htmlcode)
-		print('HTML file generated in "archive" folder')
+		filename = generate_html_file(htmlcode)
+		print('HTML file generated as {}'.format(filename))
 
 	# if "no email" flag has been passed, do not execute this block
 	if not no_email:
