@@ -1,6 +1,5 @@
 ''' Shared library of functions for other Python files
 '''
-
 import os
 import re
 import datetime
@@ -37,11 +36,11 @@ def generate_html_file(htmlcode, remind=False):
 	except FileExistsError:
 		pass
 	reportType = 'reminder' if remind else 'report'
-	filename = './archive/{}_{:%m%d%Y_%H:%M:%S}.html'.format(
+	filename = './archive/{}_{:%Y-%m-%d_%H-%M-%S}.html'.format(
 		reportType, datetime.datetime.now())
 	with open(filename, 'w') as file:
 		file.write(htmlcode)
-	return None
+	return filename
 
 
 def get_bugs_dict(bug_ids, config):
