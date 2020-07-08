@@ -8,7 +8,7 @@ from functions import generate_html_file, get_bugs_dict, \
 	get_other_blockers, percent
 
 
-def run_report(config, blockers, server, header, test, no_email):
+def run_report(config, blockers, server, header, test_email, no_email):
 
 	# fetch all relevant jobs
 	jobs = get_jenkins_jobs(server, config['job_search_fields'])
@@ -183,7 +183,7 @@ def run_report(config, blockers, server, header, test, no_email):
 	)
 
 	# save HTML report to file if not test run
-	if not test:
+	if not test_email:
 		filename = generate_html_file(htmlcode)
 		print('HTML file generated as {}'.format(filename))
 
@@ -192,7 +192,7 @@ def run_report(config, blockers, server, header, test, no_email):
 		try:
 
 			# parse list of email addresses
-			if test:
+			if test_email:
 				recipients = config['email_to_test'].split(',')
 			else:
 				recipients = config['email_to'].split(',')
