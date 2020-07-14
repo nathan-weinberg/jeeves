@@ -19,7 +19,7 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **smtp_host**: SMTP host of your email
 - **email_subject**: Subject of your email report
 - **email_to**: Email address you would like to send your report to. To send the report to multiple emails, seperate them by comma, e.g. recipient1@website1.com,recipient2@website2.org
-- **email_to_test**: Email address to send test reports to (note: this field is only required if you run Jeeves with the `--test` flag)
+- **email_to_test**: Email address to send test reports to (note: this field is only required if you run Jeeves with the `--test-email` flag)
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
@@ -35,13 +35,13 @@ You can define "owners" for a job in "blockers.yaml" for use with reminder mode.
 
 ## Usage
 To run:
-- `$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test] [--remind]`
+- `$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test-email] [--remind]`
 - To only save report to the 'archive' folder, and not send an email, add `--no-email`
-- To send report to email specified in `email_to_test` field, add `--test`
-	- Note that running Jeeves with the `--test` flag will not save the report to 'archive' folder
-	- As such, running Jeeves with both the `--test` and `--no-email` flags will result in no report being saved and no email being sent
+- To send report to email specified in `email_to_test` field, add `--test-email-email`
+	- Note that running Jeeves with the `--test-email` flag will not save the report to 'archive' folder
+	- As such, running Jeeves with both the `--test-email` and `--no-email` flags will result in no report being saved and no email being sent
 - To run Jeeves in "reminder" mode, add `--remind`
-    - Note this will override the usage of both `--no-email` and `--test`
+    - Note this will override the usage of both `--no-email` and `--test-email`
 
 #### Reminder Mode
 Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in "blockers.yaml.example". 
