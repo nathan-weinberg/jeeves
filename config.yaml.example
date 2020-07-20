@@ -5,8 +5,8 @@ jenkins_api_token: mK0s1t87KJEzkRiZFFu20E3PXYH0rPAQ
 job_search_fields: my-job-prefix
 bz_url: https://bugzilla.ourcorporate.com
 jira_url: https://jira.ourcorporate.com
-jira_username: 'user1'
-jira_password: 'coolpassword'
+jira_username: user1
+jira_password: coolpassword
 certificate: our_jira_cert.crt
 smtp_host: smtp.ourcorporate.com
 email_subject: Our CI status report
