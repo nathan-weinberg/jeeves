@@ -11,7 +11,7 @@ from functions import generate_html_file, get_bugs_dict, \
 def run_report(config, blockers, server, header, test_email, no_email):
 
 	# fetch all relevant jobs
-	jobs = get_jenkins_jobs(server, config['job_search_fields'])
+	jobs = get_jenkins_jobs(server, config['job_search_fields'], config['job_search_fields_regex'])
 
 	# log and exit if no jobs found - no reason to send empty report
 	num_jobs_fetched = len(jobs)

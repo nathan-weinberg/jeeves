@@ -170,10 +170,34 @@ def get_jenkins_job_info(server, job_name):
 	return jenkins_api_info
 
 
-def get_jenkins_jobs(server, job_search_fields):
+def get_jenkins_jobs(server, job_search_fields, job_search_fields_regex=""):
 	''' takes in a Jenkins server object and job_search_fields string
 		returns list of jobs with given search field as part of their name
 	'''
+
+	# does job_search_fields_regex contain valid regex?
+	is_valid_regex = False
+
+	if (job_search_fields_regex != None):
+		try:
+			re.compile(job_search_fields_regex)
+			is_valid_regex = True
+		except re.error:
+			is_valid_regex = False
+
+	relevant_jobs = []
+	
+	if (is_valid_regex):
+		# fetch all jobs from server that match the given regex
+		all_jobs = server.get_job_info_regex(job_search_fields_regex)
+
+		# parse out all jobs that do not contain any search field and/or are not OSP10, OSP13, OSP15 or OSP16 jobs
+		supported_versions = ['10', '13', '15', '16', '16.1']
+		for job in all_jobs:
+			job_name = job['name']
+			if any(supported_version in job_name for supported_version in supported_versions):
+				relevant_jobs.append(job)
+				print(job_name)
 
 	# parse list of search fields
 	fields = job_search_fields.split(',')
@@ -187,7 +211,6 @@ def get_jenkins_jobs(server, job_search_fields):
 	all_jobs = server.get_jobs()
 
 	# parse out all jobs that do not contain any search field and/or are not OSP10, OSP13, OSP15 or OSP16 jobs
-	relevant_jobs = []
 	supported_versions = ['10', '13', '15', '16', '16.1']
 	for job in all_jobs:
 		job_name = job['name']
