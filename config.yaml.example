@@ -3,6 +3,7 @@ jenkins_url: https://myjenkins.ourcorporate.com
 jenkins_username: cool_user
 jenkins_api_token: mK0s1t87KJEzkRiZFFu20E3PXYH0rPAQ
 job_search_fields: my-job-prefix
+job_search_fields_regex: my-job-regex
 bz_url: https://bugzilla.ourcorporate.com
 jira_url: https://jira.ourcorporate.com
 jira_username: 'user1'
