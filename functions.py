@@ -121,7 +121,10 @@ def get_jenkins_job_info(server, job_name):
 		lcb_num = job_info['lastCompletedBuild']['number']
 		build_info = server.get_build_info(job_name, lcb_num)
 		build_actions = build_info['actions']
-		build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
+		for action in build_actions:
+			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
+				build_parameters = action['parameters']
+				break
 		run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
 		gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
 
@@ -132,7 +135,10 @@ def get_jenkins_job_info(server, job_name):
 			lcb_num = lcb_num - 1
 			build_info = server.get_build_info(job_name, lcb_num)
 			build_actions = build_info['actions']
-			build_parameters = [action['parameters'] for action in build_actions if action.get('_class') == 'hudson.model.ParametersAction'][0]
+			for action in build_actions:
+				if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
+					build_parameters = action['parameters']
+					break
 			run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
 			gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
 
