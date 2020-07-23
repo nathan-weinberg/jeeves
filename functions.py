@@ -183,19 +183,23 @@ def get_jenkins_jobs(server, job_search_fields):
 	for i in range(fields_length):
 		fields[i] = fields[i].strip(' ')
 
-	# fetch all jobs from server
-	all_jobs = server.get_jobs()
-
-	# parse out all jobs that do not contain any search field and/or are not OSP10, OSP13, OSP15 or OSP16 jobs
+	# check for fields that contain valid regex
 	relevant_jobs = []
 	supported_versions = ['10', '13', '15', '16', '16.1']
-	for job in all_jobs:
-		job_name = job['name']
-		if any(supported_version in job_name for supported_version in supported_versions):
-			for field in fields:
-				if field in job_name:
+	for field in fields:
+		try:
+
+			# fetch all jobs from server that match the given regex or search
+			all_jobs = server.get_job_info_regex(field)
+
+			# parse out all jobs that do not contain any search field and/or are not OSP10, OSP13, OSP15 or OSP16 jobs
+			for job in all_jobs:
+				job_name = job['name']
+				if any(supported_version in job_name for supported_version in supported_versions):
 					relevant_jobs.append(job)
-					break
+
+		except Exception as e:
+			print("Error compiling regex: {} - skipping this search field...".format(e))
 
 	return relevant_jobs
 
