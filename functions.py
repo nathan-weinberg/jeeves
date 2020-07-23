@@ -292,7 +292,6 @@ def get_other_blockers(blockers, job_name):
 	''' takes in blockers object and job name
 		returns list of 'other' blockers
 	'''
-
 	other_blockers = blockers[job_name]['other']
 	other = []
 	for blocker in other_blockers:

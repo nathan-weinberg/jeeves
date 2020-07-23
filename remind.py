@@ -3,7 +3,8 @@ from smtplib import SMTP
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from functions import generate_html_file, get_osp_version, \
-	get_jenkins_job_info
+	get_jenkins_job_info, get_bugs_dict, get_jira_dict, \
+	get_other_blockers
 
 
 def run_remind(config, blockers, server, header):
@@ -41,6 +42,30 @@ def run_remind(config, blockers, server, header):
 
 				# only care about jobs with UNSTABLE or FAILURE status
 				if jenkins_api_info['lcb_result'] == "UNSTABLE" or jenkins_api_info['lcb_result'] == "FAILURE":
+
+					# get all related bugs to job
+					try:
+						bug_ids = blockers[job_name]['bz']
+						bugs_dict = get_bugs_dict(bug_ids, config)
+						bugs = list(map(bugs_dict.get, bug_ids))
+					except:
+						bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
+
+					# get all related tickets to job
+					try:
+						ticket_ids = blockers[job_name]['jira']
+						tickets_dict = get_jira_dict(ticket_ids, config)
+						tickets = list(map(tickets_dict.get, ticket_ids))
+					except:
+						tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
+
+					# get any "other" artifact for job
+					try:
+						other = get_other_blockers(blockers, job_name)
+					except:
+						other = [{'other_name': 'N/A', 'other_url': None}]
+
+					# build row
 					row = {
 						'osp_version': osp_version,
 						'job_name': job_name,
@@ -49,10 +74,15 @@ def run_remind(config, blockers, server, header):
 						'lcb_url': jenkins_api_info['lcb_url'],
 						'compose': jenkins_api_info['compose'],
 						'lcb_result': jenkins_api_info['lcb_result'],
+						'bugs': bugs,
+						'tickets': tickets,
+						'other': other
 					}
+
+					# append row to rows
 					rows.append(row)
 
-		# if no rows were generated, all jobs belonging to owner are already triaged
+		# if no rows were generated, owner has no jobs that were UNSTABLE or FAILED
 		if rows != []:
 
 			# initialize jinja2 vars
@@ -97,4 +127,4 @@ def run_remind(config, blockers, server, header):
 				generate_html_file(htmlcode, remind=True)
 
 		else:
-			print("Owner {} has no untriaged jobs!".format(owner))
+			print("Owner {} has no UNSTABLE or FAILED jobs!".format(owner))
