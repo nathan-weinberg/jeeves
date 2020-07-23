@@ -8,6 +8,7 @@ dev.py
 *.html
 !report_template.html
 !remind_template.html
+!macros.html
 __pycache__/
 .pytest_cache
 archive/

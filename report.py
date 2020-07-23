@@ -146,7 +146,7 @@ def run_report(config, blockers, server, header, test_email, no_email):
 			'labels': ['Success', 'Unstable', 'Failed', 'Aborted', 'Error', 'Missing'],
 			'datasets': [{
 				'backgroundColor': ['green', 'yellow', 'red', 'grey', 'brown', 'purple'],
-				'data': [int(num_success), int(num_unstable), int(num_failure), int(num_aborted), int(num_error), int(num_missing)]
+				'data': [num_success, num_unstable, num_failure, num_aborted, num_error, num_missing]
 			}]
 		}
 	}
@@ -188,9 +188,9 @@ def run_report(config, blockers, server, header, test_email, no_email):
 		summary['total_error'] = False
 
 	# initialize jinja2 vars
-	loader = jinja2.FileSystemLoader('./templates/report_template.html')
+	loader = jinja2.FileSystemLoader('./templates')
 	env = jinja2.Environment(loader=loader)
-	template = env.get_template('')
+	template = env.get_template('report_template.html')
 
 	# generate HTML report
 	htmlcode = template.render(
