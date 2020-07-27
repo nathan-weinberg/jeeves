@@ -1,7 +1,10 @@
+import json
 import jinja2
-from smtplib import SMTP
-from email.mime.text import MIMEText
+
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTP
+from urllib.parse import quote
 from functions import generate_html_file, get_bugs_dict, \
 	get_bugs_set, get_jenkins_job_info, get_jenkins_jobs, \
 	get_jira_dict, get_jira_set, get_osp_version, \
@@ -135,6 +138,20 @@ def run_report(config, blockers, server, header, test_email, no_email):
 	summary['total_success'] = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
+
+	# create chart config
+	chart_config = {
+		'type': 'pie',
+		'data': {
+			'labels': ['Success', 'Unstable', 'Failed', 'Aborted', 'Error', 'Missing'],
+			'datasets': [{
+				'backgroundColor': ['green', 'yellow', 'red', 'grey', 'brown', 'purple'],
+				'data': [int(num_success), int(num_unstable), int(num_failure), int(num_aborted), int(num_error), int(num_missing)]
+			}]
+		}
+	}
+	encoded_config = quote(json.dumps(chart_config))
+	summary['chart_url'] = f'https://quickchart.io/chart?c={encoded_config}'
 
 	# bug metrics
 	all_bugs = [bug_id for bug_id in all_bugs if bug_id != 0]
