@@ -130,11 +130,16 @@ def run_report(config, blockers, server, header, test_email, no_email):
 	# sort rows by descending OSP version
 	rows = sorted(rows, key=lambda row: row['osp_version'], reverse=True)
 
+	# log and exit if no rows built - otherwise program will crash on summary generation
+	num_jobs = len(rows)
+	if num_jobs == 0:
+		print("No rows could be built with data for any of the jobs found with given search field. Exiting...")
+		return None
+
 	# initialize summary
 	summary = {}
 
 	# job result metrics
-	num_jobs = len(rows)
 	summary['total_success'] = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))

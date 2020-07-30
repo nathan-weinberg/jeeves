@@ -1,7 +1,8 @@
 import jinja2
-from smtplib import SMTP
-from email.mime.text import MIMEText
+
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTP
 from functions import generate_html_file, get_osp_version, \
 	get_jenkins_job_info, get_bugs_dict, get_jira_dict, \
 	get_other_blockers
