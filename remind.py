@@ -86,9 +86,9 @@ def run_remind(config, blockers, server, header):
 		if rows != []:
 
 			# initialize jinja2 vars
-			loader = jinja2.FileSystemLoader('./templates/remind_template.html')
+			loader = jinja2.FileSystemLoader('./templates')
 			env = jinja2.Environment(loader=loader)
-			template = env.get_template('')
+			template = env.get_template('remind_template.html')
 
 			# generate HTML report
 			htmlcode = template.render(

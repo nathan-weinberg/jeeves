@@ -37,7 +37,7 @@ You can define "owners" for a job in "blockers.yaml" for use with reminder mode.
 To run:
 - `$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test-email] [--remind]`
 - To only save report to the 'archive' folder, and not send an email, add `--no-email`
-- To send report to email specified in `email_to_test` field, add `--test-email-email`
+- To send report to email specified in `email_to_test` field, add `--test-email`
 	- Note that running Jeeves with the `--test-email` flag will not save the report to 'archive' folder
 	- As such, running Jeeves with both the `--test-email` and `--no-email` flags will result in no report being saved and no email being sent
 - To run Jeeves in "reminder" mode, add `--remind`
