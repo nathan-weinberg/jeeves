@@ -22,12 +22,14 @@ if __name__ == '__main__':
 	parser.add_argument("--no-email", default=False, action='store_true', help='Flag to not send an email of the report')
 	parser.add_argument("--test-email", default=False, action='store_true', help='Flag to send email to test address')
 	parser.add_argument("--remind", default=False, action='store_true', help='Flag to run Jeeves in "reminder" mode. Note this will override --no-email and --save')
+	parser.add_argument("--template", default="report_template.html", type=str, help='The template file under templates directory to use for the HTML report')
 	args = parser.parse_args()
 	config_file = args.config
 	blocker_file = args.blockers
 	test_email = args.test_email
 	no_email = args.no_email
 	remind_flag = args.remind
+	template_file = args.template
 
 	# load configuration data - if YAML format is invalid, log and end program execution
 	try:
@@ -62,4 +64,4 @@ if __name__ == '__main__':
 		run_remind(config, blockers, server, header)
 	else:
 		header = generate_header(user, config['job_search_fields'])
-		run_report(config, blockers, server, header, test_email, no_email)
+		run_report(config, blockers, server, header, test_email, no_email, template_file)

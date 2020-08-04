@@ -35,14 +35,16 @@ You can define "owners" for a job in "blockers.yaml" for use with reminder mode.
 
 ## Usage
 To run:
-- `$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test-email] [--remind]`
+- `$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test-email] [--remind] [--template TEMPLATE]`
 - To only save report to the 'archive' folder, and not send an email, add `--no-email`
 - To send report to email specified in `email_to_test` field, add `--test-email`
 	- Note that running Jeeves with the `--test-email` flag will not save the report to 'archive' folder
 	- As such, running Jeeves with both the `--test-email` and `--no-email` flags will result in no report being saved and no email being sent
 - To run Jeeves in "reminder" mode, add `--remind`
     - Note this will override the usage of both `--no-email` and `--test-email`
-
+- To use a different template for HTML report, add `--template <template file>`.  The template should be in the templates directory.
+    - Note that this flag will be ignored if Jeeves is run in "reminder" mode
+	
 #### Reminder Mode
 Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in "blockers.yaml.example". 
 
