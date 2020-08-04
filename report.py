@@ -1,5 +1,6 @@
 import json
 import jinja2
+import sys
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -11,7 +12,7 @@ from functions import generate_html_file, get_bugs_dict, \
 	get_other_blockers, percent
 
 
-def run_report(config, blockers, server, header, test_email, no_email):
+def run_report(config, blockers, server, header, test_email, no_email, template_file):
 
 	# fetch all relevant jobs
 	jobs = get_jenkins_jobs(server, config['job_search_fields'])
@@ -195,7 +196,11 @@ def run_report(config, blockers, server, header, test_email, no_email):
 	# initialize jinja2 vars
 	loader = jinja2.FileSystemLoader('./templates')
 	env = jinja2.Environment(loader=loader)
-	template = env.get_template('report_template.html')
+	try:
+		template = env.get_template(template_file)
+	except Exception as e:
+		print("Error loading template file: {}\n{}".format(template_file, e))
+		sys.exit()
 
 	# generate HTML report
 	htmlcode = template.render(
