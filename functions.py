@@ -120,6 +120,8 @@ def get_jenkins_job_info(server, job_name):
 		job_url = job_info['url']
 		lcb_num = job_info['lastCompletedBuild']['number']
 		build_info = server.get_build_info(job_name, lcb_num)
+		build_time = build_info.get('timestamp')
+		build_days_ago = (datetime.datetime.now() - datetime.datetime.fromtimestamp(build_time / 1000)).days
 		build_actions = build_info['actions']
 		for action in build_actions:
 			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
@@ -159,6 +161,7 @@ def get_jenkins_job_info(server, job_name):
 			lcb_num = None
 			lcb_url = None
 			compose = "N/A"
+			build_days_ago = "N/A"
 			lcb_result = "NO_KNOWN_BUILDS"
 
 		# Unknown error, skip job
@@ -172,6 +175,7 @@ def get_jenkins_job_info(server, job_name):
 		'lcb_url': lcb_url,
 		'compose': compose,
 		'lcb_result': lcb_result,
+		'build_days_ago': build_days_ago
 	}
 	return jenkins_api_info
 

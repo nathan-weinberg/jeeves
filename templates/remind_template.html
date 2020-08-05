@@ -15,6 +15,7 @@
 						<th style="text-align: center;">OSP Version </th>
 						<th style="text-align: center;">Job Name</th>
 						<th style="text-align: center;">Last Build Number</th>
+						<th style="text-align: center;">Days Since Last Build</th>
 						<th style="text-align: center;">Compose</th>
 						<th style="text-align: center;">Result</th>
 						<th style="text-align: center;">Blockers</th>
@@ -29,6 +30,7 @@
 						<!-- LCB is "UNSTABLE" -->
 						{% if row.lcb_result == "UNSTABLE" %}
 							<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
+							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{row.compose}}</td>
 							<td style="text-align: center;" bgcolor="#fdd500">{{row.lcb_result}}</td>
 							<td>
@@ -38,6 +40,7 @@
 						<!-- LCB is "FAILURE" -->
 						{% elif row.lcb_result == "FAILURE" %}
 							<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
+							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{row.compose}}</td>
 							<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
 							<td>
@@ -51,6 +54,7 @@
 							{% else %}
 								<td style="text-align: center;">{{row.lcb_num}}</td>
 							{% endif %}
+							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{row.compose}}</td>
 							<td style="text-align: center;" bgcolor="#808080">{{row.lcb_result}}</td>
 							<td style="text-align: center;"><p>N/A</p></td>
