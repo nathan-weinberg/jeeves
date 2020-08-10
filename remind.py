@@ -70,6 +70,7 @@ def run_remind(config, blockers, server, header):
 					row = {
 						'osp_version': osp_version,
 						'job_name': job_name,
+						'build_days_ago': jenkins_api_info['build_days_ago'],
 						'job_url': jenkins_api_info['job_url'],
 						'lcb_num': jenkins_api_info['lcb_num'],
 						'lcb_url': jenkins_api_info['lcb_url'],

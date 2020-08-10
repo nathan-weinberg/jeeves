@@ -115,6 +115,7 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 			row = {
 				'osp_version': osp_version,
 				'job_name': job_name,
+				'build_days_ago': jenkins_api_info['build_days_ago'],
 				'job_url': jenkins_api_info['job_url'],
 				'lcb_num': jenkins_api_info['lcb_num'],
 				'lcb_url': jenkins_api_info['lcb_url'],
