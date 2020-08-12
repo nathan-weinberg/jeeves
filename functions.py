@@ -146,7 +146,7 @@ def get_jenkins_job_info(server, job_name):
 
 		lcb_url = build_info['url']
 		lcb_result = build_info['result']
-		compose = [action['text'][13:-4] for action in build_actions if 'core_puddle' in action.get('text', '')]
+		compose = [str(action['html']).split('core_puddle:')[1].split('<')[0].strip() for action in build_actions if 'core_puddle' in action.get('html', '')]
 
 		# No compose could be found; likely a failed job where the 'core_puddle' var was never calculated
 		if compose == []:
