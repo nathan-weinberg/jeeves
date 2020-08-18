@@ -1,6 +1,18 @@
 from functions import *
 
 
+def test_generate_header():
+	pass
+
+
+def test_generate_html_file():
+	pass
+
+
+def get_bugs_dict():
+	pass
+
+
 def test_get_bugs_set():
 	mockers = {
 		'job1': {'bz': [0]},
@@ -8,6 +20,18 @@ def test_get_bugs_set():
 		'job3': {'bz': [123456, 789123]}
 	}
 	assert get_bugs_set(mockers) == {0, 123456, 789123}
+
+
+def test_get_jenkins_job_info():
+	pass
+
+
+def test_get_jenkins_jobs():
+	pass
+
+
+def test_get_jira_dict():
+	pass
 
 
 def test_get_jira_set():
@@ -19,7 +43,7 @@ def test_get_jira_set():
 	assert get_jira_set(mockers) == {0, 'RHOSINFRA-123', 'RHOSENTDFG-456'}
 
 
-def test_get_osp_version_func():
+def test_get_osp_version():
 	assert get_osp_version('DFG-all-unified-16_director-rhel-virthost-3cont_2comp_3ceph-ipv4-geneve-ceph-native-default') == '16'
 	assert get_osp_version('DFG-backup-restore-overcloud-OSP-16-3cont_2comp_3ceph-ipv4-monolithic-broken-node') == '16'
 	assert get_osp_version('DFG-ceph-rhos-16_director-rhel-virthost-3cont_2comp_3ceph-ipv4-geneve-monolithic') == '16'
@@ -34,6 +58,10 @@ def test_get_osp_version_func():
 	assert get_osp_version('DFG-security-keystone-16_director-rhel-virthost-1cont_1comp-ipv4-geneve-lvm-containers') == '16'
 	assert get_osp_version('DFG-upgrades-updates-16-from-passed_phase1-HA-ipv4') == '16'
 	assert get_osp_version('DFG-all-unified-weekly-multijob') is None
+
+
+def test_get_other_blockers():
+	pass
 
 
 def test_has_blockers():
@@ -63,3 +91,7 @@ def test_percent_func():
 	assert percent(0, 1) == 0.0
 	assert percent(1, 2) == 50.0
 	assert percent(1, 1) == 100.0
+
+
+def test_validate_config():
+	pass
