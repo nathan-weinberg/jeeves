@@ -12,3 +12,5 @@ dev.py
 __pycache__/
 .pytest_cache
 archive/
+.coverage
+coverage.xml
