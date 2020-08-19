@@ -1,6 +1,7 @@
 # Jeeves
 ![](https://github.com/nathan-weinberg/jeeves/workflows/flake8/badge.svg)
 ![](https://github.com/nathan-weinberg/jeeves/workflows/pytest/badge.svg)
+[![codecov](https://codecov.io/gh/nathan-weinberg/jeeves/branch/master/graph/badge.svg)](https://codecov.io/gh/nathan-weinberg/jeeves)
 
 ## Purpose
 Jeeves is an automated report generator for Jenkins CI. It generates an HTML report using Jinja2 templating and sends it out over email using Python's smtplib.
