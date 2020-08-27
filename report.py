@@ -201,7 +201,7 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 		template = env.get_template(template_file)
 	except Exception as e:
 		print("Error loading template file: {}\n{}".format(template_file, e))
-		sys.exit()
+		sys.exit(1)
 
 	# generate HTML report
 	htmlcode = template.render(
