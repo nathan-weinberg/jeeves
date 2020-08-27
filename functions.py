@@ -327,7 +327,7 @@ def percent(part, whole):
 	return round(100 * float(part) / float(whole), 1)
 
 
-def validate_config(config):
+def validate_config(config, no_email):
 	''' validates config fields
 		raises exception if required field is not present
 	'''
@@ -340,11 +340,14 @@ def validate_config(config):
 		'jira_url',
 		'jira_username',
 		'jira_password',
-		'certificate',
-		'smtp_host',
-		'email_subject',
-		'email_to'
+		'certificate'
 	]
+
+	if not no_email:
+		required_fields.append('email_subject')
+		required_fields.append('email_to')
+		required_fields.append('smtp_host')
+
 	for field in required_fields:
 		if config.get(field) is None:
 			raise Exception('field "{}" is not defined'.format(field))
