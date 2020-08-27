@@ -38,7 +38,7 @@ if __name__ == '__main__':
 			validate_config(config, no_email)
 	except Exception as e:
 		print("Error loading configuration data: ", e)
-		sys.exit()
+		sys.exit(1)
 
 	# load blocker data - if YAML format is invalid, log and end program execution
 	try:
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 			blockers = yaml.safe_load(file)
 	except Exception as e:
 		print("Error loading blocker configuration data: ", e)
-		sys.exit()
+		sys.exit(1)
 
 	# connect to jenkins server - if not possible, log and end program execution
 	try:
@@ -54,7 +54,7 @@ if __name__ == '__main__':
 		user = server.get_whoami()
 	except Exception as e:
 		print("Error connecting to Jenkins server: ", e)
-		sys.exit()
+		sys.exit(1)
 
 	# execute Jeeves in either 'remind' or 'report' mode
 	# if remind, header source should be blocker_file
