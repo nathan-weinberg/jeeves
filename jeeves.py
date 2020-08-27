@@ -35,7 +35,7 @@ if __name__ == '__main__':
 	try:
 		with open(config_file, 'r') as file:
 			config = yaml.safe_load(file)
-			validate_config(config)
+			validate_config(config, no_email)
 	except Exception as e:
 		print("Error loading configuration data: ", e)
 		sys.exit()
