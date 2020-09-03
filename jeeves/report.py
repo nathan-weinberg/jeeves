@@ -49,6 +49,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 	rows = []
 	all_bugs = []
 	all_tickets = []
+	stats_per_version = {}
 	for job in jobs:
 
 		# get name and osp version from job object
@@ -60,15 +61,26 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			print('No OSP version could be found in job {}. Skipping...'.format(job_name))
 			continue
 
+		if osp_version not in stats_per_version:
+			stats_per_version[osp_version] = {
+				'num_jobs': 0,
+				'num_success': 0,
+				'num_failure': 0,
+				'num_missing': 0,
+				'num_aborted': 0,
+				'num_unstable': 0,
+			}
+
 		# get job info from jenkins API - will return False if an unmanageable error occured
 		jenkins_api_info = get_jenkins_job_info(server, job_name, filter_param_name=fpn, filter_param_value=fpv)
 
 		# if jeeves was unable to collect any good jenkins api info, skip job
 		if jenkins_api_info:
-
+			stats_per_version[osp_version]['num_jobs'] += 1
 			# take action based on last completed build result
 			if jenkins_api_info['lcb_result'] == "SUCCESS":
 				num_success += 1
+				stats_per_version[osp_version]['num_success'] += 1
 				bugs = []
 				tickets = []
 				other = []
@@ -76,12 +88,16 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			elif jenkins_api_info['lcb_result'] in ["UNSTABLE", "FAILURE", "ABORTED", "NO_KNOWN_BUILDS"]:
 				if jenkins_api_info['lcb_result'] == "UNSTABLE":
 					num_unstable += 1
+					stats_per_version[osp_version]['num_unstable'] += 1
 				elif jenkins_api_info['lcb_result'] == "FAILURE":
 					num_failure += 1
+					stats_per_version[osp_version]['num_failure'] += 1
 				elif jenkins_api_info['lcb_result'] == "ABORTED":
 					num_aborted += 1
+					stats_per_version[osp_version]['num_aborted'] += 1
 				else:
 					num_missing += 1
+					stats_per_version[osp_version]['num_missing'] += 1
 
 				# get all related bugs to job
 				try:
@@ -276,6 +292,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		header=header,
 		preamble=preamble,
 		rows=rows,
+		stats_per_version=stats_per_version,
 		summary=summary
 	)
 

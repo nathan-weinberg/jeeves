@@ -128,7 +128,7 @@ def get_osp_version(job_name):
 	''' gets osp version from job name via regex
 		returns None if no version is found
 	'''
-	version = re.search(r'\d+\.*\d*', job_name)
+	version = re.search(r'\d{2}\.*\d*', job_name)
 	if version is None:
 		return None
 	return version.group()

@@ -38,6 +38,19 @@
 							<li>{{summary.total_tickets}}</li>
 						</ul>
 					</td>
+					{% for batch_version in stats_per_version.keys()|sort|reverse|batch(2) %}
+					<td>
+						{% for version in batch_version %}
+						<p><b>Summary for {{ version }}</b></p>
+						<ul>
+							<li> Total number of jobs: {{ stats_per_version[version]['num_jobs'] }} </li>
+							{% for entry in ['num_success', 'num_unstable', 'num_aborted', 'num_failure'] %}
+							<li>{{ entry |replace('num_', '') }}: {{ stats_per_version[version][entry] }}/{{ stats_per_version[version]['num_jobs'] }}</li>
+							{% endfor %}
+						</ul>
+						{% endfor %}
+					</td>
+					{% endfor %}
 				</tr>
 			</table>
 		</div>
