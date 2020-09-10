@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	parser.add_argument("--blockers", default="blockers.yaml", type=str, help='Blockers YAML file to use')
 	parser.add_argument("--no-email", default=False, action='store_true', help='Flag to not send an email of the report')
 	parser.add_argument("--test-email", default=False, action='store_true', help='Flag to send email to test address')
-	parser.add_argument("--remind", default=False, action='store_true', help='Flag to run Jeeves in "reminder" mode. Note this will override --no-email and --save')
+	parser.add_argument("--remind", default=False, action='store_true', help='Flag to run Jeeves in "reminder" mode. Note this will override --no-email and --test-email')
 	parser.add_argument("--template", default="report_template.html", type=str, help='The template file under templates directory to use for the HTML report')
 	args = parser.parse_args()
 	config_file = args.config

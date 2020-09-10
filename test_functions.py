@@ -19,7 +19,7 @@ def test_get_bugs_set():
 		'job2': {'bz': [123456]},
 		'job3': {'bz': [123456, 789123]}
 	}
-	assert get_bugs_set(mockers) == {0, 123456, 789123}
+	assert get_bugs_set(mockers) == {123456, 789123}
 
 
 def test_get_jenkins_job_info():
@@ -40,7 +40,7 @@ def test_get_jira_set():
 		'job2': {'jira': ['RHOSINFRA-123']},
 		'job3': {'jira': ['RHOSINFRA-123', 'RHOSENTDFG-456']}
 	}
-	assert get_jira_set(mockers) == {0, 'RHOSINFRA-123', 'RHOSENTDFG-456'}
+	assert get_jira_set(mockers) == {'RHOSINFRA-123', 'RHOSENTDFG-456'}
 
 
 def test_get_osp_version():

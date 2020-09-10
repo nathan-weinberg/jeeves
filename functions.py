@@ -46,10 +46,11 @@ def generate_html_file(htmlcode, remind=False):
 def get_bugs_dict(bug_ids, config):
 	''' takes in set of bug_ids and returns dictionary with
 		bug_ids as keys and API data as values
+		a bug_id value of 0 will be ignored
 	'''
 
 	# initialize bug dictionary
-	bugs = {}
+	bug_dict = {}
 
 	# API connection does not work if '/' present at end of URL string
 	parsed_bz_url = config['bz_url'].rstrip('/')
@@ -58,10 +59,9 @@ def get_bugs_dict(bug_ids, config):
 	# iterate through bug ids from set
 	for bug_id in bug_ids:
 
-		# 0 should be default in YAML file (i.e. no bugs recorded)
-		# if present reference should be made in bug dict
+		# a bug_id value of 0 is used as a placeholder, not a valid bug
+		# skip as there is no API data to be fetched in this case
 		if bug_id == 0:
-			bugs[0] = {'bug_name': 'No bug on file', 'bug_url': None}
 			continue
 
 		# get bug info from bugzilla API
@@ -81,14 +81,15 @@ def get_bugs_dict(bug_ids, config):
 			bz_api = None
 		finally:
 			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
-			bugs[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
+			bug_dict[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
 
-	return bugs
+	return bug_dict
 
 
 def get_bugs_set(blockers):
-	''' takes in blockers object and generates a set of all unique bug ids
-		including 0 if it is present
+	''' takes in blockers dict and generates a set of all unique bug ids
+		excludes 0 if it is present
+		passing an empty dict will result in an empty set
 	'''
 	bug_set = set()
 	for job in blockers:
@@ -103,6 +104,8 @@ def get_bugs_set(blockers):
 			print("Error getting bug IDs from blockers file for job {}: {}".format(job, e))
 			continue
 
+	# discard bug_id value of 0 from set if present as this is not a valid bug
+	bug_set.discard(0)
 	return bug_set
 
 
@@ -202,7 +205,7 @@ def get_jenkins_jobs(server, job_search_fields):
 			# fetch all jobs from server that match the given regex or search
 			all_jobs = server.get_job_info_regex(field)
 
-			# parse out all jobs that do not contain any search field and/or are not OSP10, OSP13, OSP15 or OSP16 jobs
+			# parse out all jobs that do not contain any search field and/or are not a supported version
 			for job in all_jobs:
 				job_name = job['name']
 				if any(supported_version in job_name for supported_version in supported_versions):
@@ -217,10 +220,11 @@ def get_jenkins_jobs(server, job_search_fields):
 def get_jira_dict(ticket_ids, config):
 	''' takes in set of ticket_ids and returns dictionary with
 		ticket_ids as keys and API data as values
+		a ticket_id with a value of 0 will be ignored
 	'''
 
 	# initialize ticket dictionary
-	tickets = {}
+	ticket_dict = {}
 
 	# initialize jira variable and config options
 	auth = (config['jira_username'], config['jira_password'])
@@ -233,10 +237,9 @@ def get_jira_dict(ticket_ids, config):
 	# iterate through ticket ids from set
 	for ticket_id in ticket_ids:
 
-		# 0 should be default in YAML file (i.e. no tickers recorded)
-		# if there is a 0 entry then that should be the only "ticket", so break
+		# a ticket_id value of 0 is used as a placeholder, not a valid ticket
+		# skip as there is no API data to be fetched in this case
 		if ticket_id == 0:
-			tickets[0] = {'ticket_name': 'No ticket on file', 'ticket_url': None}
 			continue
 
 		# get ticket info from jira API
@@ -256,7 +259,7 @@ def get_jira_dict(ticket_ids, config):
 			jira = None
 		finally:
 			ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
-			tickets[ticket_id] = {
+			ticket_dict[ticket_id] = {
 				'ticket_name': ticket_name,
 				'ticket_url': ticket_url
 			}
@@ -265,12 +268,13 @@ def get_jira_dict(ticket_ids, config):
 	if jira is not None:
 		jira.close()
 
-	return tickets
+	return ticket_dict
 
 
 def get_jira_set(blockers):
 	''' takes in blockers object and generates a set of all unique jira ticket ids
-		including 0 if it is present
+		excluding 0 if it is present
+		passing an empty dict will result in an empty set
 	'''
 	jira_set = set()
 	for job in blockers:
@@ -285,6 +289,8 @@ def get_jira_set(blockers):
 			print("Error getting jira IDs from blockers file for job {}: {}".format(job, e))
 			continue
 
+	# discard ticket_id value of 0 from set if present as this is not a valid ticket
+	jira_set.discard(0)
 	return jira_set
 
 
@@ -302,8 +308,10 @@ def get_other_blockers(blockers, job_name):
 	''' takes in blockers object and job name
 		returns list of 'other' blockers
 	'''
-	other_blockers = blockers[job_name]['other']
 	other = []
+	other_blockers = blockers[job_name].get('other')
+	if other_blockers is None:
+		return other
 	for blocker in other_blockers:
 		other.append({'other_name': blocker.get('name', 'Link'), 'other_url': blocker.get('url', None)})
 	return other
