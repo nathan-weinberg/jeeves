@@ -148,15 +148,41 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 
 	# create chart config
 	chart_config = {
-		'type': 'pie',
+		'type': 'doughnut',
 		'data': {
-			'labels': ['Success', 'Unstable', 'Failed', 'Aborted', 'Error', 'Missing'],
+			'labels': ['Success', 'Aborted', 'Failure', 'Error', 'Unstable', 'Missing'],
 			'datasets': [{
-				'backgroundColor': ['green', 'yellow', 'red', 'grey', 'brown', 'purple'],
-				'data': [num_success, num_unstable, num_failure, num_aborted, num_error, num_missing]
+				'backgroundColor': ['blue', 'black', 'red', 'brown', 'yellow', 'grey'],
+				'data': [num_success, num_aborted, num_failure, num_error, num_unstable, num_missing]
 			}]
+		},
+		'options': {
+		  	'plugins': {
+		    	'datalabels': {
+				'display': 'true',
+				'align': 'middle',
+				'backgroundColor': '#fff',
+		    	'borderRadius': 20,
+		    	'font': {
+					'weight': 'bold',
+		    	}
+		    	},
+		    'doughnutlabel': {
+		      	'labels': [{
+		        'text': num_jobs,
+		        'font': {
+		        	'size': 20,
+		        }
+		    	}, {
+		        	'text': 'Total Jobs',
+					'font': {
+						'size': 15,
+					}
+				}]
+			}
+		  	}
 		}
-	}
+    }
 	encoded_config = quote(json.dumps(chart_config))
 	summary['chart_url'] = f'https://quickchart.io/chart?c={encoded_config}'
 
