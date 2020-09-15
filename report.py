@@ -148,7 +148,7 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 
 	# create chart config
 	chart_config = {
-		'type': 'pie',
+		'type': 'doughnut',
 		'data': {
 			'labels': ['Success', 'Unstable', 'Failed', 'Aborted', 'Error', 'Missing'],
 			'datasets': [{
@@ -157,6 +157,42 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 			}]
 		}
 	}
+	encoded_config = quote(json.dumps(chart_config))
+	summary['chart_url'] = f'https://quickchart.io/chart?c={encoded_config}'
+
+	chart_config = {
+		'type': 'doughnut',
+		'data': {
+			'labels': ['Success', 'Unstable', 'Failed', 'Aborted', 'Error', 'Missing'],
+			'datasets': [{
+				'data': [num_success, num_unstable, num_failure, num_aborted, num_error, num_missing]
+			}]
+		},
+		'options': {
+		  	'plugins': {
+		    	'datalabels': {
+				'display': 'true',
+				'backgroundColor': ['green', 'yellow', 'red', 'grey', 'brown', 'purple'],
+		    	'borderRadius': 3,
+		    	'font': {
+					'color': 'red',
+		        	'weight': 'bold',
+		    	}
+		    	},
+		    'doughnutlabel': {
+		      	'labels': [{
+		        'text': num_jobs,
+		        'font': {
+		        	'size': 20,
+		        	'weight': 'bold',
+		        }
+		    	}, {
+		        	'text': 'Total Jobs'
+				}]
+			}
+		  	}
+		}
+    }
 	encoded_config = quote(json.dumps(chart_config))
 	summary['chart_url'] = f'https://quickchart.io/chart?c={encoded_config}'
 
