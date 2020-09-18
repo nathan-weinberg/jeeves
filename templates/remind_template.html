@@ -32,10 +32,12 @@
 							<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{row.compose}}</td>
-							<td style="text-align: center;" bgcolor="#fdd500">{{row.lcb_result}}</td>
-							<td>
-								{{ blockers(row) }}
-							</td>
+							<td style="text-align: center;" bgcolor="#ffb738">{{row.lcb_result}}</td>
+							{% if row.blocker_bool == False %}
+								<td style="text-align: center;">No blockers have been filed for this job</td>
+							{% else %}
+								<td>{{ blockers(row) }}</td>
+							{% endif %}
 
 						<!-- LCB is "FAILURE" -->
 						{% elif row.lcb_result == "FAILURE" %}
@@ -43,11 +45,13 @@
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{row.compose}}</td>
 							<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
-							<td>
-								{{ blockers(row) }}
-							</td>
+							{% if row.blocker_bool == False %}
+								<td style="text-align: center;">No blockers have been filed for this job</td>
+							{% else %}
+								<td>{{ blockers(row) }}</td>
+							{% endif %}
 
-						<!-- LCB is set to any other state ('NO_KNOWN_BUILDS', 'ERROR') -->
+						<!-- LCB is set to any other state ('ABORTED', 'NO_KNOWN_BUILDS', 'ERROR') -->
 						{% else %}
 							{% if row.lcb_url != None %}
 								<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
@@ -56,8 +60,19 @@
 							{% endif %}
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{row.compose}}</td>
-							<td style="text-align: center;" bgcolor="#808080">{{row.lcb_result}}</td>
-							<td style="text-align: center;"><p>N/A</p></td>
+							{% if row.lcb_result == "ABORTED" %}
+								<td style="text-align: center;" bgcolor="#515151">{{row.lcb_result}}</td>
+							{% elif row.lcb_result == "NO_KNOWN_BUILDS" %}
+								<td style="text-align: center;" bgcolor="#bbbbbb">{{row.lcb_result}}</td>
+							{% else %}
+								<td style="text-align: center;" bgcolor="#704426">{{row.lcb_result}}</td>
+							{% endif %}
+							{% if row.blocker_bool == False %}
+								<td style="text-align: center;">No blockers have been filed for this job</td>
+							{% else %}
+								<td>{{ blockers(row) }}</td>
+							{% endif %}
+
 						{% endif %}
 					</tr>
 					{% endfor %}

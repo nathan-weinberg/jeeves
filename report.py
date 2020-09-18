@@ -33,7 +33,7 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 	all_tickets_set = get_jira_set(blockers) if blockers else {}
 
 	# Create dictionary from the set of all jira tickets with ticket id as key and name and link as value
-	all_jira_dict = get_jira_dict(all_tickets_set, config)
+	all_tickets_dict = get_jira_dict(all_tickets_set, config)
 
 	# iterate through all relevant jobs and build report rows
 	num_success = 0
@@ -63,53 +63,63 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 		if jenkins_api_info:
 
 			# take action based on last completed build result
-			if jenkins_api_info['lcb_result'] in ["SUCCESS", "NO_KNOWN_BUILDS", "ABORTED"]:
-				if jenkins_api_info['lcb_result'] == "SUCCESS":
-					num_success += 1
-				elif jenkins_api_info['lcb_result'] == "NO_KNOWN_BUILDS":
-					num_missing += 1
-				else:
-					num_aborted += 1
+			if jenkins_api_info['lcb_result'] == "SUCCESS":
+				num_success += 1
+				bugs = []
+				tickets = []
+				other = []
 
-				bugs = [{'bug_name': 'N/A', 'bug_url': None}]
-				tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
-				other = [{'other_name': 'N/A', 'other_url': None}]
-
-			elif jenkins_api_info['lcb_result'] in ["UNSTABLE", "FAILURE"]:
+			elif jenkins_api_info['lcb_result'] in ["UNSTABLE", "FAILURE", "ABORTED", "NO_KNOWN_BUILDS"]:
 				if jenkins_api_info['lcb_result'] == "UNSTABLE":
 					num_unstable += 1
-				else:
+				elif jenkins_api_info['lcb_result'] == "FAILURE":
 					num_failure += 1
+				elif jenkins_api_info['lcb_result'] == "ABORTED":
+					num_aborted += 1
+				else:
+					num_missing += 1
 
 				# get all related bugs to job
 				try:
 					bug_ids = blockers[job_name]['bz']
+					if 0 in bug_ids:
+						bug_ids.remove(0)
 					all_bugs.extend(bug_ids)
 					bugs = list(map(all_bugs_dict.get, bug_ids))
-				except:
-					bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
+				except Exception as e:
+					print("Error fetching bugs for job {}: {}".format(job_name, e))
+					bugs = []
 
 				# get all related tickets to job
 				try:
 					ticket_ids = blockers[job_name]['jira']
+					if 0 in ticket_ids:
+						ticket_ids.remove(0)
 					all_tickets.extend(ticket_ids)
-					tickets = list(map(all_jira_dict.get, ticket_ids))
-				except:
-					tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
+					tickets = list(map(all_tickets_dict.get, ticket_ids))
+				except Exception as e:
+					print("Error fetching ticket for job {}: {}".format(job_name, e))
+					tickets = []
 
 				# get any "other" artifact for job
 				try:
 					other = get_other_blockers(blockers, job_name)
-				except:
-					other = [{'other_name': 'N/A', 'other_url': None}]
+				except Exception as e:
+					print("Error fetching other blockers for job {}: {}".format(job_name, e))
+					other = []
 
 			else:
 				print("job {} had lcb_result {}: reporting as error job".format(job_name, jenkins_api_info['lcb_result']))
 				jenkins_api_info['lcb_result'] = "ERROR"
 				num_error += 1
-				bugs = [{'bug_name': 'N/A', 'bug_url': None}]
-				tickets = [{'ticket_name': 'N/A', 'ticket_url': None}]
-				other = [{'other_name': 'N/A', 'other_url': None}]
+				bugs = []
+				tickets = []
+				other = []
+
+			# check if row contains any valid blockers for reporting
+			blocker_bool = True
+			if (len(bugs) == 0) and (len(tickets) == 0) and (len(other) == 0):
+				blocker_bool = False
 
 			# build row
 			row = {
@@ -121,6 +131,7 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 				'lcb_url': jenkins_api_info['lcb_url'],
 				'compose': jenkins_api_info['compose'],
 				'lcb_result': jenkins_api_info['lcb_result'],
+				'blocker_bool': blocker_bool,
 				'bugs': bugs,
 				'tickets': tickets,
 				'other': other
@@ -150,10 +161,10 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 	chart_config = {
 		'type': 'pie',
 		'data': {
-			'labels': ['Success', 'Unstable', 'Failed', 'Aborted', 'Error', 'Missing'],
+			'labels': ['Success', 'Unstable', 'Failed', 'Aborted', 'Missing', 'Error'],
 			'datasets': [{
-				'backgroundColor': ['green', 'yellow', 'red', 'grey', 'brown', 'purple'],
-				'data': [num_success, num_unstable, num_failure, num_aborted, num_error, num_missing]
+				'backgroundColor': ['blue', 'yellow', 'red', 'black', 'grey', 'brown'],
+				'data': [num_success, num_unstable, num_failure, num_aborted, num_missing, num_error]
 			}]
 		}
 	}
@@ -176,17 +187,17 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 		unique_tickets = set(all_tickets)
 		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
 
-	# include missing report if needed
-	if num_missing > 0:
-		summary['total_missing'] = "Total NO_KNOWN_BUILDS:  {}/{} = {}%".format(num_missing, num_jobs, percent(num_missing, num_jobs))
-	else:
-		summary['total_missing'] = False
-
 	# include abort report if needed
 	if num_aborted > 0:
 		summary['total_aborted'] = "Total ABORTED:  {}/{} = {}%".format(num_aborted, num_jobs, percent(num_aborted, num_jobs))
 	else:
 		summary['total_aborted'] = False
+
+	# include missing report if needed
+	if num_missing > 0:
+		summary['total_missing'] = "Total NO_KNOWN_BUILDS:  {}/{} = {}%".format(num_missing, num_jobs, percent(num_missing, num_jobs))
+	else:
+		summary['total_missing'] = False
 
 	# include error report if needed
 	if num_error > 0:
