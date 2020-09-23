@@ -198,7 +198,7 @@ def get_jenkins_jobs(server, job_search_fields):
 
 	# check for fields that contain valid regex
 	relevant_jobs = []
-	supported_versions = ['13', '15', '16.1', '16.2']
+	supported_versions = ['13', '16.1', '16.2']
 	for field in fields:
 		try:
 
