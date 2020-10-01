@@ -1,5 +1,5 @@
-''' Shared library of functions for other Python files
-'''
+# Shared library of functions for other Python files
+
 import os
 import re
 import datetime
@@ -7,8 +7,9 @@ import bugzilla
 from jira import JIRA
 
 
-def generate_header(user, source, remind=False):
+def generate_header(user, source, filter_param_name=None, filter_param_value=None, remind=False):
 	''' generates header
+		takes jenkins user and optionally takes name and value of jenkins param to filter builds by
 		if remind is true, header source should be blocker_file
 		if remind is false, header source should be job_search_fields
 	'''
@@ -23,7 +24,9 @@ def generate_header(user, source, remind=False):
 	header = {
 		'user_email_address': user_email_address,
 		'date': date,
-		'source': source
+		'source': source,
+		'fpn': filter_param_name,
+		'fpv': filter_param_value
 	}
 	return header
 
@@ -109,8 +112,9 @@ def get_bugs_set(blockers):
 	return bug_set
 
 
-def get_jenkins_job_info(server, job_name):
+def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_value=None):
 	''' takes in jenkins server object and job name
+		optionally takes name and value of jenkins param to filter builds by
 		returns dict of API info for given job if success
 		returns False if failure
 	'''
@@ -123,30 +127,27 @@ def get_jenkins_job_info(server, job_name):
 		job_url = job_info['url']
 		lcb_num = job_info['lastCompletedBuild']['number']
 		build_info = server.get_build_info(job_name, lcb_num)
-		build_time = build_info.get('timestamp')
-		build_days_ago = (datetime.datetime.now() - datetime.datetime.fromtimestamp(build_time / 1000)).days
 		build_actions = build_info['actions']
 		for action in build_actions:
 			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
 				build_parameters = action['parameters']
 				break
-		run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
-		gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
 
-		# find most recent build where the following is NOT true
-		# build has label "RUN MODE: periodic"
-		# build is associated with a gerrit patch (i.e. GERRIT_CHANGE_URL is present)
-		while run_mode != [] or gerrit_patch != []:
-			lcb_num = lcb_num - 1
-			build_info = server.get_build_info(job_name, lcb_num)
-			build_actions = build_info['actions']
-			for action in build_actions:
-				if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
-					build_parameters = action['parameters']
-					break
-			run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
-			gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
+		# if desired, get last completed build with custom parameter and value
+		if filter_param_name is not None and filter_param_value is not None:
+			api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
+			while api_param_value != filter_param_value:
+				lcb_num = lcb_num - 1
+				build_info = server.get_build_info(job_name, lcb_num)
+				build_actions = build_info['actions']
+				for action in build_actions:
+					if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
+						build_parameters = action['parameters']
+						break
+				api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
 
+		build_time = build_info.get('timestamp')
+		build_days_ago = (datetime.datetime.now() - datetime.datetime.fromtimestamp(build_time / 1000)).days
 		lcb_url = build_info['url']
 		lcb_result = build_info['result']
 		compose = [str(action['html']).split('core_puddle:')[1].split('<')[0].strip() for action in build_actions if 'core_puddle' in action.get('html', '')]
