@@ -35,6 +35,10 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 	# Create dictionary from the set of all jira tickets with ticket id as key and name and link as value
 	all_tickets_dict = get_jira_dict(all_tickets_set, config)
 
+	# fetch optional config options, return None if not present
+	fpn = config.get('filter_param_name', None)
+	fpv = config.get('filter_param_value', None)
+
 	# iterate through all relevant jobs and build report rows
 	num_success = 0
 	num_unstable = 0
@@ -57,7 +61,7 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 			continue
 
 		# get job info from jenkins API - will return False if an unmanageable error occured
-		jenkins_api_info = get_jenkins_job_info(server, job_name)
+		jenkins_api_info = get_jenkins_job_info(server, job_name, filter_param_name=fpn, filter_param_value=fpv)
 
 		# if jeeves was unable to collect any good jenkins api info, skip job
 		if jenkins_api_info:
@@ -98,7 +102,7 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 					all_tickets.extend(ticket_ids)
 					tickets = list(map(all_tickets_dict.get, ticket_ids))
 				except Exception as e:
-					print("Error fetching ticket for job {}: {}".format(job_name, e))
+					print("Error fetching tickets for job {}: {}".format(job_name, e))
 					tickets = []
 
 				# get any "other" artifact for job

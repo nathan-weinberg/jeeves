@@ -56,12 +56,16 @@ if __name__ == '__main__':
 		print("Error connecting to Jenkins server: ", e)
 		sys.exit(1)
 
-	# execute Jeeves in either 'remind' or 'report' mode
+	# fetch optional config options, return None if not present
+	fpn = config.get('filter_param_name', None)
+	fpv = config.get('filter_param_value', None)
+
+	# generate header and execute Jeeves in either 'remind' or 'report' mode
 	# if remind, header source should be blocker_file
 	# if report, header source should be job_search_fields
 	if remind_flag:
-		header = generate_header(user, blocker_file, remind=True)
+		header = generate_header(user, blocker_file, filter_param_name=fpn, filter_param_value=fpv, remind=True)
 		run_remind(config, blockers, server, header)
 	else:
-		header = generate_header(user, config['job_search_fields'])
+		header = generate_header(user, config['job_search_fields'], filter_param_name=fpn, filter_param_value=fpv)
 		run_report(config, blockers, server, header, test_email, no_email, template_file)
