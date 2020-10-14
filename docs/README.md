@@ -1,6 +1,7 @@
 # Jeeves
-![](https://github.com/nathan-weinberg/jeeves/workflows/flake8/badge.svg)
-![](https://github.com/nathan-weinberg/jeeves/workflows/pytest/badge.svg)
+![flake8](https://github.com/nathan-weinberg/jeeves/workflows/flake8/badge.svg)
+![pytest](https://github.com/nathan-weinberg/jeeves/workflows/pytest/badge.svg)
+[![codecov](https://codecov.io/gh/nathan-weinberg/jeeves/branch/master/graph/badge.svg)](https://codecov.io/gh/nathan-weinberg/jeeves)
 
 ## Purpose
 Jeeves is an automated report generator for Jenkins CI. It generates an HTML report using Jinja2 templating and sends it out over email using Python's smtplib.
@@ -11,6 +12,8 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 - **jenkins_username**: Your Jenkins username
 - **jenkins_api_token**: Your Jenkins API token
 - **job_search_fields**: Filter of Jenkins Jobs to included in report, e.g. DFG-ceph-rhos. To search for multiple fields, seperate them by comma, e.g. DFG-ceph-rhos,DFG-all-unified. Allows for regex searches as well, e.g. ^DFG-ceph,rgw$
+- **filter_param_name**: Optional field that instructs Jeeves to skip any build that lacks the corresponding value of the given build parameter. Must be used on in conjunction with **filter_param_value**
+- **filter_param_value**: Optional field that instructs Jeeves to skip any build that lacks this value for the corresponding build parameter name. Must be used in conjunction with **filter_param_name**
 - **bz_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
 - **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
 - **jira_username**: Your Jira username
@@ -44,7 +47,12 @@ To run:
     - Note this will override the usage of both `--no-email` and `--test-email`
 - To use a different template for HTML report, add `--template <template file>`.  The template should be in the templates directory.
     - Note that this flag will be ignored if Jeeves is run in "reminder" mode
-	
+
+#### Filtering Builds
+By setting values in "config.yaml" for both **filter_param_name** and **filter_param_value**, Jeeves will automically skip any Jenkins builds that lack the given build parameter and value and search for the next latest completed build. Note that this is done by decrementing the build number Jeeves searches for until a build with the given parameter and value is found. Make sure your Jenkins jobs have a linear build history without missing builds if you intend to use this feature.
+
+If you don't wish to use this feature, simply omit the two fields from your "config.yaml" file and Jeeves will simply use the last completed build for a given job.
+
 #### Reminder Mode
 Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in "blockers.yaml.example". 
 

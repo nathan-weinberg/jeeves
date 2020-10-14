@@ -1,5 +1,5 @@
-''' Shared library of functions for other Python files
-'''
+# Shared library of functions for other Python files
+
 import os
 import re
 import datetime
@@ -7,8 +7,9 @@ import bugzilla
 from jira import JIRA
 
 
-def generate_header(user, source, remind=False):
+def generate_header(user, source, filter_param_name=None, filter_param_value=None, remind=False):
 	''' generates header
+		takes jenkins user and optionally takes name and value of jenkins param to filter builds by
 		if remind is true, header source should be blocker_file
 		if remind is false, header source should be job_search_fields
 	'''
@@ -23,7 +24,9 @@ def generate_header(user, source, remind=False):
 	header = {
 		'user_email_address': user_email_address,
 		'date': date,
-		'source': source
+		'source': source,
+		'fpn': filter_param_name,
+		'fpv': filter_param_value
 	}
 	return header
 
@@ -46,10 +49,11 @@ def generate_html_file(htmlcode, remind=False):
 def get_bugs_dict(bug_ids, config):
 	''' takes in set of bug_ids and returns dictionary with
 		bug_ids as keys and API data as values
+		a bug_id value of 0 will be ignored
 	'''
 
 	# initialize bug dictionary
-	bugs = {}
+	bug_dict = {}
 
 	# API connection does not work if '/' present at end of URL string
 	parsed_bz_url = config['bz_url'].rstrip('/')
@@ -58,10 +62,9 @@ def get_bugs_dict(bug_ids, config):
 	# iterate through bug ids from set
 	for bug_id in bug_ids:
 
-		# 0 should be default in YAML file (i.e. no bugs recorded)
-		# if present reference should be made in bug dict
+		# a bug_id value of 0 is used as a placeholder, not a valid bug
+		# skip as there is no API data to be fetched in this case
 		if bug_id == 0:
-			bugs[0] = {'bug_name': 'No bug on file', 'bug_url': None}
 			continue
 
 		# get bug info from bugzilla API
@@ -81,14 +84,15 @@ def get_bugs_dict(bug_ids, config):
 			bz_api = None
 		finally:
 			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
-			bugs[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
+			bug_dict[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
 
-	return bugs
+	return bug_dict
 
 
 def get_bugs_set(blockers):
-	''' takes in blockers object and generates a set of all unique bug ids
-		including 0 if it is present
+	''' takes in blockers dict and generates a set of all unique bug ids
+		excludes 0 if it is present
+		passing an empty dict will result in an empty set
 	'''
 	bug_set = set()
 	for job in blockers:
@@ -103,11 +107,14 @@ def get_bugs_set(blockers):
 			print("Error getting bug IDs from blockers file for job {}: {}".format(job, e))
 			continue
 
+	# discard bug_id value of 0 from set if present as this is not a valid bug
+	bug_set.discard(0)
 	return bug_set
 
 
-def get_jenkins_job_info(server, job_name):
+def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_value=None):
 	''' takes in jenkins server object and job name
+		optionally takes name and value of jenkins param to filter builds by
 		returns dict of API info for given job if success
 		returns False if failure
 	'''
@@ -120,30 +127,27 @@ def get_jenkins_job_info(server, job_name):
 		job_url = job_info['url']
 		lcb_num = job_info['lastCompletedBuild']['number']
 		build_info = server.get_build_info(job_name, lcb_num)
-		build_time = build_info.get('timestamp')
-		build_days_ago = (datetime.datetime.now() - datetime.datetime.fromtimestamp(build_time / 1000)).days
 		build_actions = build_info['actions']
 		for action in build_actions:
 			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
 				build_parameters = action['parameters']
 				break
-		run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
-		gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
 
-		# find most recent build where the following is NOT true
-		# build has label "RUN MODE: periodic"
-		# build is associated with a gerrit patch (i.e. GERRIT_CHANGE_URL is present)
-		while run_mode != [] or gerrit_patch != []:
-			lcb_num = lcb_num - 1
-			build_info = server.get_build_info(job_name, lcb_num)
-			build_actions = build_info['actions']
-			for action in build_actions:
-				if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
-					build_parameters = action['parameters']
-					break
-			run_mode = [action['text'] for action in build_actions if 'RUN_MODE: periodic' in action.get('text', '')]
-			gerrit_patch = [param['value'] for param in build_parameters if 'GERRIT_CHANGE_URL' in param.get('name', '')]
+		# if desired, get last completed build with custom parameter and value
+		if filter_param_name is not None and filter_param_value is not None:
+			api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
+			while api_param_value != filter_param_value:
+				lcb_num = lcb_num - 1
+				build_info = server.get_build_info(job_name, lcb_num)
+				build_actions = build_info['actions']
+				for action in build_actions:
+					if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
+						build_parameters = action['parameters']
+						break
+				api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
 
+		build_time = build_info.get('timestamp')
+		build_days_ago = (datetime.datetime.now() - datetime.datetime.fromtimestamp(build_time / 1000)).days
 		lcb_url = build_info['url']
 		lcb_result = build_info['result']
 		compose = [str(action['html']).split('core_puddle:')[1].split('<')[0].strip() for action in build_actions if 'core_puddle' in action.get('html', '')]
@@ -195,14 +199,14 @@ def get_jenkins_jobs(server, job_search_fields):
 
 	# check for fields that contain valid regex
 	relevant_jobs = []
-	supported_versions = ['13', '15', '16.1']
+	supported_versions = ['13', '16.1', '16.2']
 	for field in fields:
 		try:
 
 			# fetch all jobs from server that match the given regex or search
 			all_jobs = server.get_job_info_regex(field)
 
-			# parse out all jobs that do not contain any search field and/or are not OSP10, OSP13, OSP15 or OSP16 jobs
+			# parse out all jobs that do not contain any search field and/or are not a supported version
 			for job in all_jobs:
 				job_name = job['name']
 				if any(supported_version in job_name for supported_version in supported_versions):
@@ -217,10 +221,11 @@ def get_jenkins_jobs(server, job_search_fields):
 def get_jira_dict(ticket_ids, config):
 	''' takes in set of ticket_ids and returns dictionary with
 		ticket_ids as keys and API data as values
+		a ticket_id with a value of 0 will be ignored
 	'''
 
 	# initialize ticket dictionary
-	tickets = {}
+	ticket_dict = {}
 
 	# initialize jira variable and config options
 	auth = (config['jira_username'], config['jira_password'])
@@ -233,10 +238,9 @@ def get_jira_dict(ticket_ids, config):
 	# iterate through ticket ids from set
 	for ticket_id in ticket_ids:
 
-		# 0 should be default in YAML file (i.e. no tickers recorded)
-		# if there is a 0 entry then that should be the only "ticket", so break
+		# a ticket_id value of 0 is used as a placeholder, not a valid ticket
+		# skip as there is no API data to be fetched in this case
 		if ticket_id == 0:
-			tickets[0] = {'ticket_name': 'No ticket on file', 'ticket_url': None}
 			continue
 
 		# get ticket info from jira API
@@ -256,7 +260,7 @@ def get_jira_dict(ticket_ids, config):
 			jira = None
 		finally:
 			ticket_url = config['jira_url'] + "/browse/" + str(ticket_id)
-			tickets[ticket_id] = {
+			ticket_dict[ticket_id] = {
 				'ticket_name': ticket_name,
 				'ticket_url': ticket_url
 			}
@@ -265,12 +269,13 @@ def get_jira_dict(ticket_ids, config):
 	if jira is not None:
 		jira.close()
 
-	return tickets
+	return ticket_dict
 
 
 def get_jira_set(blockers):
 	''' takes in blockers object and generates a set of all unique jira ticket ids
-		including 0 if it is present
+		excluding 0 if it is present
+		passing an empty dict will result in an empty set
 	'''
 	jira_set = set()
 	for job in blockers:
@@ -285,6 +290,8 @@ def get_jira_set(blockers):
 			print("Error getting jira IDs from blockers file for job {}: {}".format(job, e))
 			continue
 
+	# discard ticket_id value of 0 from set if present as this is not a valid ticket
+	jira_set.discard(0)
 	return jira_set
 
 
@@ -302,8 +309,10 @@ def get_other_blockers(blockers, job_name):
 	''' takes in blockers object and job name
 		returns list of 'other' blockers
 	'''
-	other_blockers = blockers[job_name]['other']
 	other = []
+	other_blockers = blockers[job_name].get('other')
+	if other_blockers is None:
+		return other
 	for blocker in other_blockers:
 		other.append({'other_name': blocker.get('name', 'Link'), 'other_url': blocker.get('url', None)})
 	return other
@@ -327,7 +336,7 @@ def percent(part, whole):
 	return round(100 * float(part) / float(whole), 1)
 
 
-def validate_config(config):
+def validate_config(config, no_email):
 	''' validates config fields
 		raises exception if required field is not present
 	'''
@@ -340,11 +349,14 @@ def validate_config(config):
 		'jira_url',
 		'jira_username',
 		'jira_password',
-		'certificate',
-		'smtp_host',
-		'email_subject',
-		'email_to'
+		'certificate'
 	]
+
+	if not no_email:
+		required_fields.append('email_subject')
+		required_fields.append('email_to')
+		required_fields.append('smtp_host')
+
 	for field in required_fields:
 		if config.get(field) is None:
 			raise Exception('field "{}" is not defined'.format(field))

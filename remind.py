@@ -23,6 +23,10 @@ def run_remind(config, blockers, server, header):
 		print("No owners found in blocker file")
 		return None
 
+	# fetch optional config options, return None if not present
+	fpn = config.get('filter_param_name', None)
+	fpv = config.get('filter_param_value', None)
+
 	# find each job with no blockers including the owner and send email with agg'd list
 	owner_set = set(owner_list)
 	for owner in owner_set:
@@ -36,35 +40,47 @@ def run_remind(config, blockers, server, header):
 				continue
 
 			# get job info from jenkins API - will return False if an unmanageable error occured
-			jenkins_api_info = get_jenkins_job_info(server, job_name)
+			jenkins_api_info = get_jenkins_job_info(server, job_name, filter_param_name=fpn, filter_param_value=fpv)
 
 			# if jeeves was unable to collect any good jenkins API info, skip job
 			if jenkins_api_info:
 
-				# only care about jobs with UNSTABLE or FAILURE status
-				if jenkins_api_info['lcb_result'] == "UNSTABLE" or jenkins_api_info['lcb_result'] == "FAILURE":
+				# only care about jobs without SUCCESS status
+				if jenkins_api_info['lcb_result'] != "SUCCESS":
 
 					# get all related bugs to job
 					try:
 						bug_ids = blockers[job_name]['bz']
+						if 0 in bug_ids:
+							bug_ids.remove(0)
 						bugs_dict = get_bugs_dict(bug_ids, config)
 						bugs = list(map(bugs_dict.get, bug_ids))
-					except:
-						bugs = [{'bug_name': "Could not find relevant bug", 'bug_url': None}]
+					except Exception as e:
+						print("Error fetching bugs for job {}: {}".format(job_name, e))
+						bugs = []
 
 					# get all related tickets to job
 					try:
 						ticket_ids = blockers[job_name]['jira']
+						if 0 in ticket_ids:
+							ticket_ids.remove(0)
 						tickets_dict = get_jira_dict(ticket_ids, config)
 						tickets = list(map(tickets_dict.get, ticket_ids))
-					except:
-						tickets = [{'ticket_name': "Could not find relevant ticket", 'ticket_url': None}]
+					except Exception as e:
+						print("Error fetching ticket for job {}: {}".format(job_name, e))
+						tickets = []
 
 					# get any "other" artifact for job
 					try:
 						other = get_other_blockers(blockers, job_name)
-					except:
-						other = [{'other_name': 'N/A', 'other_url': None}]
+					except Exception as e:
+						print("Error fetching other blockers for job {}: {}".format(job_name, e))
+						other = []
+
+					# check if row contains any valid blockers for reporting
+					blocker_bool = True
+					if (len(bugs) == 0) and (len(tickets) == 0) and (len(other) == 0):
+						blocker_bool = False
 
 					# build row
 					row = {
@@ -76,6 +92,7 @@ def run_remind(config, blockers, server, header):
 						'lcb_url': jenkins_api_info['lcb_url'],
 						'compose': jenkins_api_info['compose'],
 						'lcb_result': jenkins_api_info['lcb_result'],
+						'blocker_bool': blocker_bool,
 						'bugs': bugs,
 						'tickets': tickets,
 						'other': other
@@ -84,8 +101,11 @@ def run_remind(config, blockers, server, header):
 					# append row to rows
 					rows.append(row)
 
-		# if no rows were generated, owner has no jobs that were UNSTABLE or FAILED
+		# if no rows were generated, owner has all passing jobs
 		if rows != []:
+
+			# sort rows by descending OSP version
+			rows = sorted(rows, key=lambda row: row['osp_version'], reverse=True)
 
 			# initialize jinja2 vars
 			loader = jinja2.FileSystemLoader('./templates')
@@ -129,4 +149,4 @@ def run_remind(config, blockers, server, header):
 				generate_html_file(htmlcode, remind=True)
 
 		else:
-			print("Owner {} has no UNSTABLE or FAILED jobs!".format(owner))
+			print("Owner {} has all passing jobs!".format(owner))

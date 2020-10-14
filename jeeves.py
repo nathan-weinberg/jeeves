@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	parser.add_argument("--blockers", default="blockers.yaml", type=str, help='Blockers YAML file to use')
 	parser.add_argument("--no-email", default=False, action='store_true', help='Flag to not send an email of the report')
 	parser.add_argument("--test-email", default=False, action='store_true', help='Flag to send email to test address')
-	parser.add_argument("--remind", default=False, action='store_true', help='Flag to run Jeeves in "reminder" mode. Note this will override --no-email and --save')
+	parser.add_argument("--remind", default=False, action='store_true', help='Flag to run Jeeves in "reminder" mode. Note this will override --no-email and --test-email')
 	parser.add_argument("--template", default="report_template.html", type=str, help='The template file under templates directory to use for the HTML report')
 	args = parser.parse_args()
 	config_file = args.config
@@ -35,10 +35,10 @@ if __name__ == '__main__':
 	try:
 		with open(config_file, 'r') as file:
 			config = yaml.safe_load(file)
-			validate_config(config)
+			validate_config(config, no_email)
 	except Exception as e:
 		print("Error loading configuration data: ", e)
-		sys.exit()
+		sys.exit(1)
 
 	# load blocker data - if YAML format is invalid, log and end program execution
 	try:
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 			blockers = yaml.safe_load(file)
 	except Exception as e:
 		print("Error loading blocker configuration data: ", e)
-		sys.exit()
+		sys.exit(1)
 
 	# connect to jenkins server - if not possible, log and end program execution
 	try:
@@ -54,14 +54,18 @@ if __name__ == '__main__':
 		user = server.get_whoami()
 	except Exception as e:
 		print("Error connecting to Jenkins server: ", e)
-		sys.exit()
+		sys.exit(1)
 
-	# execute Jeeves in either 'remind' or 'report' mode
+	# fetch optional config options, return None if not present
+	fpn = config.get('filter_param_name', None)
+	fpv = config.get('filter_param_value', None)
+
+	# generate header and execute Jeeves in either 'remind' or 'report' mode
 	# if remind, header source should be blocker_file
 	# if report, header source should be job_search_fields
 	if remind_flag:
-		header = generate_header(user, blocker_file, remind=True)
+		header = generate_header(user, blocker_file, filter_param_name=fpn, filter_param_value=fpv, remind=True)
 		run_remind(config, blockers, server, header)
 	else:
-		header = generate_header(user, config['job_search_fields'])
+		header = generate_header(user, config['job_search_fields'], filter_param_name=fpn, filter_param_value=fpv)
 		run_report(config, blockers, server, header, test_email, no_email, template_file)

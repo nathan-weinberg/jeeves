@@ -19,7 +19,7 @@ def test_get_bugs_set():
 		'job2': {'bz': [123456]},
 		'job3': {'bz': [123456, 789123]}
 	}
-	assert get_bugs_set(mockers) == {0, 123456, 789123}
+	assert get_bugs_set(mockers) == {123456, 789123}
 
 
 def test_get_jenkins_job_info():
@@ -40,7 +40,7 @@ def test_get_jira_set():
 		'job2': {'jira': ['RHOSINFRA-123']},
 		'job3': {'jira': ['RHOSINFRA-123', 'RHOSENTDFG-456']}
 	}
-	assert get_jira_set(mockers) == {0, 'RHOSINFRA-123', 'RHOSENTDFG-456'}
+	assert get_jira_set(mockers) == {'RHOSINFRA-123', 'RHOSENTDFG-456'}
 
 
 def test_get_osp_version():
@@ -50,6 +50,7 @@ def test_get_osp_version():
 	assert get_osp_version('DFG-ceph-rhos-16.1_director-rhel-virthost-3cont_2comp_3ceph-ipv4-geneve-monolithic') == '16.1'
 	assert get_osp_version('DFG-compute-nova-16_director-rhel-virthost-1cont_2comp_1ipa-ipv4-geneve-tls-everywhere') == '16'
 	assert get_osp_version('DFG-enterprise-backup_restore-undercloud-controllers-16-3cont_2comp_3ceph-ipv4-rear') == '16'
+	assert get_osp_version('DFG-enterprise-baremetal-16.2_director-3control_2compute_externalceph-titancluster') == '16.2'
 	assert get_osp_version('DFG-df-deployment-16-virthost-3cont_2comp_3ceph-ceph-ipv4-geneve-overcloud-ssl-enable') == '16'
 	assert get_osp_version('DFG-hardware_provisioning-rqci-16_director-rhel-8.1-spineleaf-provision-network-20191205-2116') == '16'
 	assert get_osp_version('DFG-network-networking-ovn-16_director-rhel-virthost-3cont_2comp-ipv6-geneve') == '16'
