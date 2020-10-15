@@ -7,7 +7,7 @@
 Jeeves is an automated report generator for Jenkins CI. It generates an HTML report using Jinja2 templating and sends it out over email using Python's smtplib.
 
 ## Setup
-Create a file named "config.yaml" based off "config.yaml.example" with the following fields filled in:
+Create a file named `config.yaml` based off `config.yaml.example` with the following fields filled in:
 - **jenkins_url**: URL of your Jenkins server
 - **jenkins_username**: Your Jenkins username
 - **jenkins_api_token**: Your Jenkins API token
@@ -27,18 +27,19 @@ Create a file named "config.yaml" based off "config.yaml.example" with the follo
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
 #### Tracking Blockers
-Create a file named "blockers.yaml" based off "blockers.yaml.example" with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
+Create a file named `blockers.yaml` based off `blockers.yaml.example` with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
 
 If you have a blocker for a job that is neither a Bugzilla bug or a Jira ticket, you may add a section to your blockers file called 'other', with each item having two fields - 'name' and 'url'. Both fields are optional - you can include one, the other, or both.
 
 If you wish to use a different blockers file, you can specify it as a command line argument.
 
 #### Tracking Owners
-You can define "owners" for a job in "blockers.yaml" for use with reminder mode. To do so, simply add an "owners" subfield to a job with one or more emails. You can see some examples of this in "blockers.yaml.example". 
+You can define "owners" for a job in `blockers.yaml` for use with reminder mode. To do so, simply add an "owners" subfield to a job with one or more emails. You can see some examples of this in `blockers.yaml.example` 
 
 ## Usage
-To run:
-- `$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test-email] [--remind] [--template TEMPLATE]`
+`$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test-email] [--remind] [--template TEMPLATE]`
+
+For a base run, simply run `$ ./jeeves.py` using the `--config` and `--blocker` flags if needed as detailed above. For details on the additional flags avaliable see below:
 - To only save report to the 'archive' folder, and not send an email, add `--no-email`
 - To send report to email specified in `email_to_test` field, add `--test-email`
 	- Note that running Jeeves with the `--test-email` flag will not save the report to 'archive' folder
@@ -49,12 +50,12 @@ To run:
     - Note that this flag will be ignored if Jeeves is run in "reminder" mode
 
 #### Filtering Builds
-By setting values in "config.yaml" for both **filter_param_name** and **filter_param_value**, Jeeves will automically skip any Jenkins builds that lack the given build parameter and value and search for the next latest completed build. Note that this is done by decrementing the build number Jeeves searches for until a build with the given parameter and value is found. Make sure your Jenkins jobs have a linear build history without missing builds if you intend to use this feature.
+By setting values in `config.yaml` for both **filter_param_name** and **filter_param_value**, Jeeves will automically skip any Jenkins builds that lack the given build parameter and value and search for the next latest completed build. Note that this is done by decrementing the build number Jeeves searches for until a build with the given parameter and value is found. Make sure your Jenkins jobs have a linear build history without missing builds if you intend to use this feature.
 
-If you don't wish to use this feature, simply omit the two fields from your "config.yaml" file and Jeeves will simply use the last completed build for a given job.
+If you don't wish to use this feature, simply omit the two fields from your `config.yaml` file and Jeeves will simply use the last completed build for a given job.
 
 #### Reminder Mode
-Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in "blockers.yaml.example". 
+Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in `blockers.yaml.example` 
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML
