@@ -161,8 +161,15 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
 
-	# Map job color codes to job count
-	jobs_dict = {'#3465a4': (num_success, 'Success'), '#515151': (num_aborted, 'Aborted'), '#ef2929': (num_failure, 'Failure'), '#704426': (num_error, 'Error'), '#ffb738': (num_unstable, 'Unstable'), '#bbbbbb': (num_missing, 'Missing')}
+	# Map color codes with job count and type
+	jobs_dict = {
+		'#3465a4': (num_success, 'Success'),
+		'#515151': (num_aborted, 'Aborted'),
+		'#ef2929': (num_failure, 'Failure'),
+		'#704426': (num_error, 'Error'),
+		'#ffb738': (num_unstable, 'Unstable'),
+		'#bbbbbb': (num_missing, 'Missing')
+	}
 	bg_color_list, data_list, labels_list = [], [], []
 
 	# Filter only available jobs
