@@ -170,9 +170,9 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 		'#ffb738': (num_unstable, 'Unstable'),
 		'#bbbbbb': (num_missing, 'Missing')
 	}
-	bg_color_list, data_list, labels_list = [], [], []
 
 	# Filter only available jobs
+	bg_color_list, data_list, labels_list = [], [], []
 	for key, (job_count, job_label) in jobs_dict.items():
 		if job_count != 0:
 			bg_color_list.append(key)
