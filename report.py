@@ -161,15 +161,59 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
 
+	# Map color codes with job count and type
+	jobs_dict = {
+		'#3465a4': (num_success, 'Success'),
+		'#515151': (num_aborted, 'Aborted'),
+		'#ef2929': (num_failure, 'Failure'),
+		'#704426': (num_error, 'Error'),
+		'#ffb738': (num_unstable, 'Unstable'),
+		'#bbbbbb': (num_missing, 'Missing')
+	}
+
+	# Filter only available jobs
+	bg_color_list, data_list, labels_list = [], [], []
+	for key, (job_count, job_label) in jobs_dict.items():
+		if job_count != 0:
+			bg_color_list.append(key)
+			data_list.append(job_count)
+			labels_list.append(job_label)
+
 	# create chart config
 	chart_config = {
-		'type': 'pie',
+		'type': 'doughnut',
 		'data': {
-			'labels': ['Success', 'Unstable', 'Failed', 'Aborted', 'Missing', 'Error'],
+			'labels': labels_list,
 			'datasets': [{
-				'backgroundColor': ['blue', 'yellow', 'red', 'black', 'grey', 'brown'],
-				'data': [num_success, num_unstable, num_failure, num_aborted, num_missing, num_error]
+				'backgroundColor': bg_color_list,
+				'data': data_list
 			}]
+		},
+		'options': {
+			'plugins': {
+				'datalabels': {
+					'display': 'true',
+					'align': 'middle',
+					'backgroundColor': '#fff',
+					'borderRadius': 20,
+					'font': {
+						'weight': 'bold',
+					}
+				},
+				'doughnutlabel': {
+					'labels': [{
+						'text': num_jobs,
+						'font': {
+							'size': 20,
+						}
+					}, {
+						'text': 'Total Jobs',
+						'font': {
+							'size': 15,
+						}
+					}]
+				}
+			}
 		}
 	}
 	encoded_config = quote(json.dumps(chart_config))
