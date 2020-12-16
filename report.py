@@ -138,7 +138,9 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 				'blocker_bool': blocker_bool,
 				'bugs': bugs,
 				'tickets': tickets,
-				'other': other
+				'other': other,
+				'tempest_tests_failed': jenkins_api_info['tempest_tests_failed'],
+				'tempest_tests_url': jenkins_api_info['job_url'] + str(jenkins_api_info['lcb_num']) + '/testReport'
 			}
 
 			# append row to rows

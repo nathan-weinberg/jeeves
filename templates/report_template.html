@@ -48,6 +48,7 @@
 						<th style="text-align: center;">Days Since Last Build</th>
 						<th style="text-align: center;">Compose</th>
 						<th style="text-align: center;">Result</th>
+						<th style="text-align: center;">Failed Tempest Tests</th>
 						<th style="text-align: center;">Blockers</th>
 					</tr>
 				</thead>
@@ -66,6 +67,13 @@
 							<td style="text-align: center;">{{row.compose}}</td>
 							<td style="text-align: center;" bgcolor="#3465a4"><a href="https://www.youtube.com/watch?v=68ugkg9RePc" style="text-decoration: none; color: #000;">{{row.lcb_result}}</a></td>
 							<td style="text-align: center;"><p>N/A</p></td>
+							{% if row.tempest_tests_failed != None %}
+								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
+							{% else %}
+								<td style="text-align: center;">N/A</td>
+							{% endif %}	
+
+                             
 
 						<!-- LCB is "UNSTABLE" -->
 						{% elif row.lcb_result == "UNSTABLE" %}
@@ -73,6 +81,11 @@
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{row.compose}}</td>
 							<td style="text-align: center;" bgcolor="#ffb738">{{row.lcb_result}}</td>
+							{% if row.tempest_tests_failed != None %}
+								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
+							{% else %}
+								<td style="text-align: center;">N/A</td>
+							{% endif %}								
 							{% if row.blocker_bool == False %}
 								<td style="text-align: center;">No blockers have been filed for this job</td>
 							{% else %}
@@ -85,6 +98,11 @@
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{row.compose}}</td>
 							<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
+							{% if row.tempest_tests_failed != None %}
+								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
+							{% else %}
+								<td style="text-align: center;">N/A</td>
+							{% endif %}								
 							{% if row.blocker_bool == False %}
 								<td style="text-align: center;">No blockers have been filed for this job</td>
 							{% else %}
@@ -107,6 +125,11 @@
 							{% else %}
 								<td style="text-align: center;" bgcolor="#704426">{{row.lcb_result}}</td>
 							{% endif %}
+							{% if row.tempest_tests_failed != None %}
+								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
+							{% else %}
+								<td style="text-align: center;">N/A</td>
+							{% endif %}								
 							{% if row.blocker_bool == False %}
 								<td style="text-align: center;">No blockers have been filed for this job</td>
 							{% else %}

@@ -126,12 +126,14 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		job_info = server.get_job_info(job_name)
 		job_url = job_info['url']
 		lcb_num = job_info['lastCompletedBuild']['number']
+		tempest_tests_failed = None
 		build_info = server.get_build_info(job_name, lcb_num)
 		build_actions = build_info['actions']
 		for action in build_actions:
 			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
 				build_parameters = action['parameters']
-				break
+			elif action.get('_class') == 'hudson.tasks.junit.TestResultAction':
+				tempest_tests_failed = action['failCount']
 
 		# if desired, get last completed build with custom parameter and value
 		if filter_param_name is not None and filter_param_value is not None:
@@ -167,6 +169,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 			compose = "N/A"
 			build_days_ago = "N/A"
 			lcb_result = "NO_KNOWN_BUILDS"
+			tempest_tests_failed = None
 
 		# Unknown error, skip job
 		else:
@@ -179,7 +182,8 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		'lcb_url': lcb_url,
 		'compose': compose,
 		'lcb_result': lcb_result,
-		'build_days_ago': build_days_ago
+		'build_days_ago': build_days_ago,
+		'tempest_tests_failed': tempest_tests_failed
 	}
 	return jenkins_api_info
 
