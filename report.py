@@ -12,7 +12,7 @@ from functions import generate_html_file, get_bugs_dict, \
 	get_other_blockers, percent
 
 
-def run_report(config, blockers, server, header, test_email, no_email, template_file):
+def run_report(config, blockers, preamble_file, server, header, test_email, no_email, template_file):
 
 	# fetch all relevant jobs
 	jobs = get_jenkins_jobs(server, config['job_search_fields'])
@@ -255,6 +255,12 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 	else:
 		summary['total_error'] = False
 
+	# load a preamble for injection if specified
+	preamble = None
+	if preamble_file:
+		with open(preamble_file, 'r') as file:
+			preamble = file.read()
+
 	# initialize jinja2 vars
 	loader = jinja2.FileSystemLoader('./templates')
 	env = jinja2.Environment(loader=loader)
@@ -267,6 +273,7 @@ def run_report(config, blockers, server, header, test_email, no_email, template_
 	# generate HTML report
 	htmlcode = template.render(
 		header=header,
+		preamble=preamble,
 		rows=rows,
 		summary=summary
 	)
