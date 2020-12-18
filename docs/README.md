@@ -34,10 +34,10 @@ If you have a blocker for a job that is neither a Bugzilla bug or a Jira ticket,
 If you wish to use a different blockers file, you can specify it as a command line argument.
 
 #### Tracking Owners
-You can define "owners" for a job in `blockers.yaml` for use with reminder mode. To do so, simply add an "owners" subfield to a job with one or more emails. You can see some examples of this in `blockers.yaml.example` 
+You can define "owners" for a job in `blockers.yaml` for use with reminder mode. To do so, simply add an "owners" subfield to a job with one or more emails. You can see some examples of this in `blockers.yaml.example`
 
 ## Usage
-`$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--no-email] [--test-email] [--remind] [--template TEMPLATE]`
+`$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--preamble PREAMBLE] [--no-email] [--test-email] [--remind] [--template TEMPLATE]`
 
 For a base run, simply run `$ ./jeeves.py` using the `--config` and `--blocker` flags if needed as detailed above. For details on the additional flags avaliable see below:
 - To only save report to the 'archive' folder, and not send an email, add `--no-email`
@@ -47,6 +47,8 @@ For a base run, simply run `$ ./jeeves.py` using the `--config` and `--blocker` 
 - To run Jeeves in "reminder" mode, add `--remind`
     - Note this will override the usage of both `--no-email` and `--test-email`
 - To use a different template for HTML report, add `--template <template file>`.  The template should be in the templates directory.
+    - Note that this flag will be ignored if Jeeves is run in "reminder" mode
+- To add a "preamble" to the report, add `--preamble <preamble file>`. The file should be written in HTML.
     - Note that this flag will be ignored if Jeeves is run in "reminder" mode
 
 #### Filtering Builds
