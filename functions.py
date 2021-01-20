@@ -163,7 +163,8 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 	except Exception as e:
 
 		# No "Last Completed Build" found
-		if job_info.get('builds') == []:
+		# Checks for len <= 1 as running builds are included in the below query
+		if len(job_info.get('builds')) <= 1:
 			lcb_num = None
 			lcb_url = None
 			compose = "N/A"
