@@ -42,3 +42,11 @@
 		{% endfor %}
 	{% endif %}
 {% endmacro %}
+
+{% macro composes(row) %}
+	{% if row.second_compose != None %}
+		<b>First: </b>{{row.compose}}<br><b>Second: </b>{{row.second_compose}}
+	{% else %}
+		{{row.compose}}
+	{% endif %}
+{% endmacro %}
