@@ -91,6 +91,7 @@ def run_remind(config, blockers, server, header):
 						'lcb_num': jenkins_api_info['lcb_num'],
 						'lcb_url': jenkins_api_info['lcb_url'],
 						'compose': jenkins_api_info['compose'],
+						'second_compose': jenkins_api_info['second_compose'],
 						'lcb_result': jenkins_api_info['lcb_result'],
 						'blocker_bool': blocker_bool,
 						'bugs': bugs,

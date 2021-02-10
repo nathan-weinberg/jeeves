@@ -152,13 +152,20 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		build_days_ago = (datetime.datetime.now() - datetime.datetime.fromtimestamp(build_time / 1000)).days
 		lcb_url = build_info['url']
 		lcb_result = build_info['result']
-		compose = [str(action['html']).split('core_puddle:')[1].split('<')[0].strip() for action in build_actions if 'core_puddle' in action.get('html', '')]
+		composes = [str(action['html']).split('core_puddle:')[1].split('<')[0].strip() for action in build_actions if 'core_puddle' in action.get('html', '')]
 
-		# No compose could be found; likely a failed job where the 'core_puddle' var was never calculated
-		if compose == []:
+		# No composes could be found; likely a failed job where the 'core_puddle' var was never calculated
+		if composes == []:
 			compose = "Could not find compose"
+			second_compose = None
+		# Two composes found - job is likely Update or Upgrade
+		elif len(composes) == 2:
+			compose = composes[0]
+			second_compose = composes[1]
+		# One compose found
 		else:
-			compose = compose[0]
+			compose = composes[0]
+			second_compose = None
 
 	except Exception as e:
 
@@ -168,6 +175,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 			lcb_num = None
 			lcb_url = None
 			compose = "N/A"
+			second_compose = None
 			build_days_ago = "N/A"
 			lcb_result = "NO_KNOWN_BUILDS"
 			tempest_tests_failed = None
@@ -182,6 +190,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		'lcb_num': lcb_num,
 		'lcb_url': lcb_url,
 		'compose': compose,
+		'second_compose': second_compose,
 		'lcb_result': lcb_result,
 		'build_days_ago': build_days_ago,
 		'tempest_tests_failed': tempest_tests_failed

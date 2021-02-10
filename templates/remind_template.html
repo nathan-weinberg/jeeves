@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		{% from 'macros.html' import blockers %}
+		{% from 'macros.html' import blockers, composes %}
 	</head>
 	<body>
 		<div>
@@ -35,7 +35,7 @@
 						{% if row.lcb_result == "UNSTABLE" %}
 							<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
-							<td style="text-align: center;">{{row.compose}}</td>
+							<td style="text-align: center;">{{ composes(row) }}</td>
 							<td style="text-align: center;" bgcolor="#ffb738">{{row.lcb_result}}</td>
 							{% if row.tempest_tests_failed != None %}
 								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
@@ -52,7 +52,7 @@
 						{% elif row.lcb_result == "FAILURE" %}
 							<td style="text-align: center;"><a href="{{row.lcb_url}}">{{row.lcb_num}}</a></td>
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
-							<td style="text-align: center;">{{row.compose}}</td>
+							<td style="text-align: center;">{{ composes(row) }}</td>
 							<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
 							{% if row.tempest_tests_failed != None %}
 								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
@@ -73,7 +73,7 @@
 								<td style="text-align: center;">{{row.lcb_num}}</td>
 							{% endif %}
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
-							<td style="text-align: center;">{{row.compose}}</td>
+							<td style="text-align: center;">{{ composes(row) }}</td>
 							{% if row.lcb_result == "ABORTED" %}
 								<td style="text-align: center;" bgcolor="#515151">{{row.lcb_result}}</td>
 							{% elif row.lcb_result == "NO_KNOWN_BUILDS" %}
