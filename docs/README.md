@@ -9,8 +9,6 @@ Jeeves is an automated report generator for Jenkins CI. It generates an HTML rep
 ## Setup
 Create a file named `config.yaml` based off `config.yaml.example` with the following fields filled in:
 - **jenkins_url**: URL of your Jenkins server
-- **jenkins_username**: Your Jenkins username
-- **jenkins_api_token**: Your Jenkins API token
 - **job_search_fields**: Filter of Jenkins Jobs to included in report, e.g. DFG-ceph-rhos. To search for multiple fields, seperate them by comma, e.g. DFG-ceph-rhos,DFG-all-unified. Allows for regex searches as well, e.g. ^DFG-ceph,rgw$
 - **filter_param_name**: Optional field that instructs Jeeves to skip any build that lacks the corresponding value of the given build parameter. Must be used on in conjunction with **filter_param_value**
 - **filter_param_value**: Optional field that instructs Jeeves to skip any build that lacks this value for the corresponding build parameter name. Must be used in conjunction with **filter_param_name**
@@ -21,6 +19,7 @@ Create a file named `config.yaml` based off `config.yaml.example` with the follo
 - **certificate**: CRT file to authenticate with Jira server
 - **smtp_host**: SMTP host of your email
 - **email_subject**: Subject of your email report
+- **email_from**: The email address of the sender
 - **email_to**: Email address you would like to send your report to. To send the report to multiple emails, seperate them by comma, e.g. recipient1@website1.com,recipient2@website2.org
 - **email_to_test**: Email address to send test reports to (note: this field is only required if you run Jeeves with the `--test-email` flag)
 
