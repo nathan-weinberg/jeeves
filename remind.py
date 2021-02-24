@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
 from functions import generate_html_file, get_osp_version, \
-	get_jenkins_job_info, get_bugs_dict, get_jira_dict, \
+	get_jenkins_job_info, get_bugs_dict, get_tickets_dict, \
 	get_other_blockers
 
 
@@ -64,7 +64,7 @@ def run_remind(config, blockers, server, header):
 						ticket_ids = blockers[job_name]['jira']
 						if 0 in ticket_ids:
 							ticket_ids.remove(0)
-						tickets_dict = get_jira_dict(ticket_ids, config)
+						tickets_dict = get_tickets_dict(ticket_ids, config)
 						tickets = list(map(tickets_dict.get, ticket_ids))
 					except Exception as e:
 						print("Error fetching ticket for job {}: {}".format(job_name, e))

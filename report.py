@@ -8,7 +8,7 @@ from smtplib import SMTP
 from urllib.parse import quote
 from functions import generate_html_file, get_bugs_dict, \
 	get_bugs_set, get_jenkins_job_info, get_jenkins_jobs, \
-	get_jira_dict, get_jira_set, get_osp_version, \
+	get_tickets_dict, get_tickets_set, get_osp_version, \
 	get_other_blockers, percent
 
 
@@ -30,10 +30,10 @@ def run_report(config, blockers, preamble_file, server, header, test_email, no_e
 	all_bugs_dict = get_bugs_dict(all_bugs_set, config)
 
 	# Get set from the list of all jira-tickets in all jobs
-	all_tickets_set = get_jira_set(blockers) if blockers else {}
+	all_tickets_set = get_tickets_set(blockers) if blockers else {}
 
 	# Create dictionary from the set of all jira tickets with ticket id as key and name and link as value
-	all_tickets_dict = get_jira_dict(all_tickets_set, config)
+	all_tickets_dict = get_tickets_dict(all_tickets_set, config)
 
 	# fetch optional config options, return None if not present
 	fpn = config.get('filter_param_name', None)

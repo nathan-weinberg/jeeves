@@ -232,7 +232,7 @@ def get_jenkins_jobs(server, job_search_fields):
 	return relevant_jobs
 
 
-def get_jira_dict(ticket_ids, config):
+def get_tickets_dict(ticket_ids, config):
 	''' takes in set of ticket_ids and returns dictionary with
 		ticket_ids as keys and API data as values
 		a ticket_id with a value of 0 will be ignored
@@ -286,7 +286,7 @@ def get_jira_dict(ticket_ids, config):
 	return ticket_dict
 
 
-def get_jira_set(blockers):
+def get_tickets_set(blockers):
 	''' takes in blockers object and generates a set of all unique jira ticket ids
 		excluding 0 if it is present
 		passing an empty dict will result in an empty set

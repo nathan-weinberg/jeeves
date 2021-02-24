@@ -30,17 +30,17 @@ def test_get_jenkins_jobs():
 	pass
 
 
-def test_get_jira_dict():
+def test_get_tickets_dict():
 	pass
 
 
-def test_get_jira_set():
+def test_get_tickets_set():
 	mockers = {
 		'job1': {'jira': [0]},
 		'job2': {'jira': ['RHOSINFRA-123']},
 		'job3': {'jira': ['RHOSINFRA-123', 'RHOSENTDFG-456']}
 	}
-	assert get_jira_set(mockers) == {'RHOSINFRA-123', 'RHOSENTDFG-456'}
+	assert get_tickets_set(mockers) == {'RHOSINFRA-123', 'RHOSENTDFG-456'}
 
 
 def test_get_osp_version():
