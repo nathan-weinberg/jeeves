@@ -3,9 +3,10 @@ import jinja2
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
-from functions import generate_html_file, get_osp_version, \
-	get_jenkins_job_info, get_bugs_dict, get_tickets_dict, \
-	get_other_blockers
+
+from jeeves.common import generate_html_file
+from jeeves.jobs import get_jenkins_job_info, get_osp_version
+from jeeves.blockers import get_bugs_dict, get_tickets_dict, get_other_blockers
 
 
 def run_remind(config, blockers, server, header):

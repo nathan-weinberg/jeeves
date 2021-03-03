@@ -6,9 +6,9 @@ import yaml
 import jenkins
 import argparse
 
-from report import run_report
-from remind import run_remind
-from functions import generate_header, validate_config
+from jeeves.report import run_report
+from jeeves.remind import run_remind
+from jeeves.common import generate_header, validate_config
 
 os.environ['PYTHONHTTPSVERIFY'] = '0'
 
