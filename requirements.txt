@@ -4,4 +4,4 @@ python-jenkins==1.7.0
 python-bugzilla==2.3.0
 jira==2.0.0
 pytest==6.2.2
-pytest-cov==2.10.1
+pytest-cov==2.11.1
