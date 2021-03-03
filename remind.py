@@ -124,7 +124,7 @@ def run_remind(config, blockers, server, header):
 
 			# construct email
 			msg = MIMEMultipart()
-			msg['From'] = header['user_email_address']
+			msg['From'] = config['email_from']
 			msg['Subject'] = "Jeeves Reminder for {}".format(owner)
 			msg['To'] = owner
 			msg.attach(MIMEText(htmlcode, 'html'))

@@ -296,7 +296,7 @@ def run_report(config, blockers, preamble_file, server, header, test_email, no_e
 
 			# construct email
 			msg = MIMEMultipart()
-			msg['From'] = header['user_email_address']
+			msg['From'] = config['email_from']
 			msg['Subject'] = config['email_subject']
 			msg['To'] = ", ".join(recipients)
 			msg.attach(MIMEText(htmlcode, 'html'))
