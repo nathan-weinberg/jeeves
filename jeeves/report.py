@@ -1,15 +1,15 @@
+import sys
 import json
 import jinja2
-import sys
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
 from urllib.parse import quote
-from functions import generate_html_file, get_bugs_dict, \
-	get_bugs_set, get_jenkins_job_info, get_jenkins_jobs, \
-	get_tickets_dict, get_tickets_set, get_osp_version, \
-	get_other_blockers, percent
+
+from jeeves.common import generate_html_file, percent
+from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version
+from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers
 
 
 def run_report(config, blockers, preamble_file, server, header, test_email, no_email, template_file):

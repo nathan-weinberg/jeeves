@@ -71,8 +71,13 @@ To install packages run:
 
 It is recommended you do this within a virtual environment.
 
+## Linting
+Jeeves follows a set of [PEP8](https://www.python.org/dev/peps/pep-0008/) standards in the interest of code clarity and consistency. These rules are enforced with the [flake8](https://flake8.pycqa.org/en/latest/) library. Configuration for linting resides in the `.flake8.ini` file.
+
+To run linting simply run the `flake8` command within the Jeeves directory.
+
 ## Testing
-Jeeves has a small but growing test suite driven by [pytest](https://docs.pytest.org/en/latest/index.html). Currently all tests reside in the `test_functions.py` file.
+Jeeves has a small but growing test suite driven by [pytest](https://docs.pytest.org/en/latest/index.html). Currently all tests reside in the `tests` directory.
 
 To run tests simply run the `pytest` command within the Jeeves directory.
 
