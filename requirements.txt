@@ -1,7 +1,7 @@
 pyyaml==5.4.1
 jinja2==2.11.3
 python-jenkins==1.7.0
-python-bugzilla==2.3.0
+python-bugzilla==3.0.2
 jira==2.0.0
 pytest==6.2.2
 pytest-cov==2.11.1
