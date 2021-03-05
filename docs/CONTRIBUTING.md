@@ -47,13 +47,10 @@ Before you make a Pull Request, make sure you do the following:
 
 1. **Test your code:** Make sure you test your code **thouroughly** before submitting; the higher quality a Pull Request is submitted the shorter the review process will be :) 
 
-2. **Lint your code:** Jeeves has its own set of styling guidelines enforced by `flake8`; you can run these locally with the following commands:
+2. **Lint your code:** Jeeves has its own set of styling guidelines enforced by `flake8`; you can run these locally with the following command:
 
 ```bash
-[jeeves]$ flake8 --ignore=E117,E501,E722,W191 jeeves.py
-[jeeves]$ flake8 --ignore=E117,E501,E722,W191 report.py
-[jeeves]$ flake8 --ignore=E117,E501,E722,W191 remind.py
-[jeeves]$ flake8 --ignore=E117,E501,E722,W191 functions.py
+[jeeves]$ flake8
 ```
 
 3. **Sqaush your commits:** In most cases, only one commit per Pull Request will be allowed. Make sure not to submit Pull Requests with multiple commits unless you've consulted with an admin. If you're not sure how to squash commits, there are several guides online with directions on how to do so.

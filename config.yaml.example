@@ -1,7 +1,5 @@
 ---
 jenkins_url: https://myjenkins.ourcorporate.com
-jenkins_username: cool_user
-jenkins_api_token: mK0s1t87KJEzkRiZFFu20E3PXYH0rPAQ
 job_search_fields: my-job-prefix-or-regex
 filter_param_name: PUBLISH_TO_POLARION
 filter_param_value: True
@@ -12,5 +10,6 @@ jira_password: coolpassword
 certificate: our_jira_cert.crt
 smtp_host: smtp.ourcorporate.com
 email_subject: Our CI status report
+email_from: myemail@ourcorporate.com
 email_to: send_report_to@ourcorporate.com
 email_to_test: my_email_to_test@ourcorporate.com
