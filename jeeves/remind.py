@@ -145,7 +145,7 @@ def run_remind(config, blockers, server, header):
 
 					# log success if all recipients recieved reminder, otherwise raise exception
 					if response == {}:
-						print("Reminder successfully accepted by mail server for delivery")
+						print("Reminder for {} successfully accepted by mail server for delivery".format(owner))
 					else:
 						raise Exception("Mail server cannot deliver reminder to following recipients: {}".format(response))
 
