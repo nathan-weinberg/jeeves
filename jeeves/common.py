@@ -46,10 +46,12 @@ def percent(part, whole):
 	return round(100 * float(part) / float(whole), 1)
 
 
-def validate_config(config, no_email):
+def validate_config(config, no_email, test_email):
 	''' validates config fields
 		raises exception if required field is not present
 	'''
+
+	# these fields are always required
 	required_fields = [
 		'jenkins_url',
 		'job_search_fields',
@@ -58,13 +60,20 @@ def validate_config(config, no_email):
 		'certificate'
 	]
 
+	# fields only required if user is sending email
 	if not no_email:
-		required_fields.append('email_from')
-		required_fields.append('email_subject')
-		required_fields.append('email_to')
 		required_fields.append('smtp_host')
+		required_fields.append('email_subject')
+		required_fields.append('email_from')
+		required_fields.append('email_to')
 
+	# fields only required if user is sending test email
+	if test_email:
+		required_fields.append('email_to_test')
+
+	# check for all required fields
 	for field in required_fields:
 		if config.get(field) is None:
 			raise Exception('field "{}" is not defined'.format(field))
+
 	return None

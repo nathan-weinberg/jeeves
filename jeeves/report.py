@@ -12,7 +12,7 @@ from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version
 from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers
 
 
-def run_report(config, blockers, preamble_file, server, header, test_email, no_email, template_file):
+def run_report(config, blockers, preamble_file, template_file, no_email, test_email, server, header):
 
 	# fetch all relevant jobs
 	jobs = get_jenkins_jobs(server, config['job_search_fields'])

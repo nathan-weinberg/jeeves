@@ -26,29 +26,29 @@ Create a file named `config.yaml` based off `config.yaml.example` with the follo
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
 #### Tracking Blockers
-Create a file named `blockers.yaml` based off `blockers.yaml.example` with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
+Create a file named `blockers.yaml` based off `blockers.yaml.example` with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet).
 
 If you have a blocker for a job that is neither a Bugzilla bug or a Jira ticket, you may add a section to your blockers file called 'other', with each item having two fields - 'name' and 'url'. Both fields are optional - you can include one, the other, or both.
 
 If you wish to use a different blockers file, you can specify it as a command line argument.
 
 #### Tracking Owners
-You can define "owners" for a job in `blockers.yaml` for use with reminder mode. To do so, simply add an "owners" subfield to a job with one or more emails. You can see some examples of this in `blockers.yaml.example`
+You can define "owners" for a job in `blockers.yaml` for use with reminder mode. To do so, simply add an "owners" subfield to a job with one or more emails. You can see some examples of this in `blockers.yaml.example`.
 
 ## Usage
-`$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--preamble PREAMBLE] [--no-email] [--test-email] [--remind] [--template TEMPLATE]`
+`$ ./jeeves.py [-h] [--config CONFIG] [--blockers BLOCKERS] [--preamble PREAMBLE] [--template TEMPLATE] [--mode {report,remind}] [--no-email] [--test-email]`
 
 For a base run, simply run `$ ./jeeves.py` using the `--config` and `--blocker` flags if needed as detailed above. For details on the additional flags avaliable see below:
+- To add a "preamble" to the report, add `--preamble <preamble file>`. The file should be written in HTML.
+    - This flag will be ignored if Jeeves is run in "reminder" mode
+- To use a different template for the report, add `--template <template file>`.  The template should be in the templates directory.
+    - This flag will be ignored if Jeeves is run in "reminder" mode
+- To change which run mode Jeeves will use, add `--mode` along with the run mode you wish to use
+    - Note that running Jeeves in "remind" mode will override the usage of both the `--no-email` flag and the `--test-email` flag
 - To only save report to the 'archive' folder, and not send an email, add `--no-email`
 - To send report to email specified in `email_to_test` field, add `--test-email`
 	- Note that running Jeeves with the `--test-email` flag will not save the report to 'archive' folder
 	- As such, running Jeeves with both the `--test-email` and `--no-email` flags will result in no report being saved and no email being sent
-- To run Jeeves in "reminder" mode, add `--remind`
-    - Note this will override the usage of both `--no-email` and `--test-email`
-- To use a different template for HTML report, add `--template <template file>`.  The template should be in the templates directory.
-    - Note that this flag will be ignored if Jeeves is run in "reminder" mode
-- To add a "preamble" to the report, add `--preamble <preamble file>`. The file should be written in HTML.
-    - Note that this flag will be ignored if Jeeves is run in "reminder" mode
 
 #### Filtering Builds
 By setting values in `config.yaml` for both **filter_param_name** and **filter_param_value**, Jeeves will automically skip any Jenkins builds that lack the given build parameter and value and search for the next latest completed build. Note that this is done by decrementing the build number Jeeves searches for until a build with the given parameter and value is found. Make sure your Jenkins jobs have a linear build history without missing builds if you intend to use this feature.
