@@ -15,29 +15,35 @@ os.environ['PYTHONHTTPSVERIFY'] = '0'
 
 if __name__ == '__main__':
 
-	# argument parsing
+	# initialize argument parser
 	parser = argparse.ArgumentParser(description='An automated report generator for Jenkins CI')
+
+	# set customization flags
 	parser.add_argument("--config", default="config.yaml", type=str, help='Configuration YAML file to use')
 	parser.add_argument("--blockers", default="blockers.yaml", type=str, help='Blockers YAML file to use')
 	parser.add_argument("--preamble", default=False, type=str, help='Preamble HTML file to use')
+	parser.add_argument("--template", default="report_template.html", type=str, help='Template HTML file to use (must be in "templates" directory)')
+
+	# set configuration flags
+	parser.add_argument("--mode", default="report", type=str, choices=['report', 'remind'], help='Flag to specify which mode to run Jeeves in')
 	parser.add_argument("--no-email", default=False, action='store_true', help='Flag to not send an email of the report')
-	parser.add_argument("--test-email", default=False, action='store_true', help='Flag to send email to test address')
-	parser.add_argument("--remind", default=False, action='store_true', help='Flag to run Jeeves in "reminder" mode. Note this will override --no-email and --test-email')
-	parser.add_argument("--template", default="report_template.html", type=str, help='The template file under templates directory to use for the HTML report')
+	parser.add_argument("--test-email", default=False, action='store_true', help='Flag to send email to test email address')
+
+	# parse arguments
 	args = parser.parse_args()
 	config_file = args.config
 	blocker_file = args.blockers
 	preamble_file = args.preamble
-	test_email = args.test_email
-	no_email = args.no_email
-	remind_flag = args.remind
 	template_file = args.template
+	mode = args.mode
+	no_email = args.no_email
+	test_email = args.test_email
 
 	# load configuration data - if YAML format is invalid, log and end program execution
 	try:
 		with open(config_file, 'r') as file:
 			config = yaml.safe_load(file)
-			validate_config(config, no_email)
+			validate_config(config, no_email, test_email)
 	except Exception as e:
 		print("Error loading configuration data: ", e)
 		sys.exit(1)
@@ -64,9 +70,12 @@ if __name__ == '__main__':
 	# generate header and execute Jeeves in either 'remind' or 'report' mode
 	# if remind, header source should be blocker_file
 	# if report, header source should be job_search_fields
-	if remind_flag:
+	if mode == 'report':
+		header = generate_header(config['job_search_fields'], filter_param_name=fpn, filter_param_value=fpv)
+		run_report(config, blockers, preamble_file, template_file, no_email, test_email, server, header)
+	elif mode == 'remind':
 		header = generate_header(blocker_file, filter_param_name=fpn, filter_param_value=fpv, remind=True)
 		run_remind(config, blockers, server, header)
 	else:
-		header = generate_header(config['job_search_fields'], filter_param_name=fpn, filter_param_value=fpv)
-		run_report(config, blockers, preamble_file, server, header, test_email, no_email, template_file)
+		print("Invalid mode selected: ", mode)
+		sys.exit(1)
