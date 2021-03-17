@@ -1,6 +1,13 @@
 ---
 jenkins_url: https://myjenkins.ourcorporate.com
 job_search_fields: my-job-prefix-or-regex
+stage_log:
+    'Clone repo':
+      - '.sh/clone_repo.log'
+    'Build project':
+      - '.sh/build_project.log'
+    'Deploy':
+      - '.sh/deploy.log'
 filter_param_name: PUBLISH_TO_POLARION
 filter_param_value: True
 bz_url: https://bugzilla.ourcorporate.com

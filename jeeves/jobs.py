@@ -4,6 +4,16 @@ import re
 import datetime
 
 
+def _get_stage_failure(build_stages):
+	''' takes in build stages dict
+		returns string with the name of failed stage or 'N/A if there is no failed stage
+	'''
+	for stage in build_stages['stages']:
+		if stage['status'] == 'FAILED':
+			return stage.get('name', 'N/A')
+	return 'N/A'
+
+
 def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_value=None):
 	''' takes in jenkins server object and job name
 		optionally takes name and value of jenkins param to filter builds by
@@ -19,7 +29,12 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		job_url = job_info['url']
 		lcb_num = job_info['lastCompletedBuild']['number']
 		tempest_tests_failed = None
+		stage_failure = 'N/A'
 		build_info = server.get_build_info(job_name, lcb_num)
+		if build_info['result'] == 'FAILURE' or build_info['result'] == 'UNSTABLE':
+			build_stages = server.get_build_stages(job_name, lcb_num)
+			stage_failure = _get_stage_failure(build_stages)
+
 		build_actions = build_info['actions']
 		for action in build_actions:
 			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
@@ -85,7 +100,8 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		'second_compose': second_compose,
 		'lcb_result': lcb_result,
 		'build_days_ago': build_days_ago,
-		'tempest_tests_failed': tempest_tests_failed
+		'tempest_tests_failed': tempest_tests_failed,
+		'stage_failure': stage_failure
 	}
 	return jenkins_api_info
 

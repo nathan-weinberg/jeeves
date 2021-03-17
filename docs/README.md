@@ -12,6 +12,7 @@ Create a file named `config.yaml` based off `config.yaml.example` with the follo
 - **job_search_fields**: Filter of Jenkins Jobs to included in report, e.g. DFG-ceph-rhos. To search for multiple fields, seperate them by comma, e.g. DFG-ceph-rhos,DFG-all-unified. Allows for regex searches as well, e.g. ^DFG-ceph,rgw$
 - **filter_param_name**: Optional field that instructs Jeeves to skip any build that lacks the corresponding value of the given build parameter. Must be used on in conjunction with **filter_param_value**
 - **filter_param_value**: Optional field that instructs Jeeves to skip any build that lacks this value for the corresponding build parameter name. Must be used in conjunction with **filter_param_name**
+- **stage_log**: Optional dict field that instructs Jeeves how to build an url to a log file for a corresponding failed build stage
 - **bz_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
 - **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
 - **jira_username**: Your Jira username
