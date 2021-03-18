@@ -152,9 +152,7 @@ def get_other_blockers(blockers, job_name):
 		returns list of 'other' blockers
 	'''
 	other = []
-	other_blockers = blockers[job_name].get('other')
-	if other_blockers is None:
-		return other
+	other_blockers = blockers[job_name]['other']
 	for blocker in other_blockers:
 		other.append({'other_name': blocker.get('name', 'Link'), 'other_url': blocker.get('url', None)})
 	return other
