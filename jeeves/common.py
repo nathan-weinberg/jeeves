@@ -44,8 +44,8 @@ def generate_failure_stage_log_urls(config, err_stage, job_url, lcb_num):
 	''' generates list of urls for failed build stages
 	'''
 	stage_urls = []
-	if 'stage_log' in config and err_stage in config['stage_log']:
-		for path in config['stage_log'][err_stage]:
+	if 'stage_logs' in config and err_stage in config['stage_logs']:
+		for path in config['stage_logs'][err_stage]:
 			stage_urls.append("{}/{}/artifact/{}".format(job_url, lcb_num, path))
 	if not stage_urls:
 		stage_urls = None

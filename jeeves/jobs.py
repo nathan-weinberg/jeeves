@@ -4,7 +4,7 @@ import re
 import datetime
 
 
-def _get_stage_failure(build_stages):
+def get_stage_failure(build_stages):
 	''' takes in build stages dict
 		returns string with the name of failed stage or 'N/A if there is no failed stage
 	'''
@@ -12,6 +12,18 @@ def _get_stage_failure(build_stages):
 		if stage['status'] == 'FAILED':
 			return stage.get('name', 'N/A')
 	return 'N/A'
+
+
+def generate_failure_stage_log_urls(config, err_stage, job_url, lcb_num):
+	''' generates list of urls for failed build stages
+	'''
+	stage_urls = []
+	if 'stage_logs' in config and err_stage in config['stage_logs']:
+		for path in config['stage_logs'][err_stage]:
+			stage_urls.append("{}/{}/artifact/{}".format(job_url, lcb_num, path))
+	if not stage_urls:
+		stage_urls = None
+	return stage_urls
 
 
 def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_value=None):
@@ -33,7 +45,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		build_info = server.get_build_info(job_name, lcb_num)
 		if build_info['result'] == 'FAILURE' or build_info['result'] == 'UNSTABLE':
 			build_stages = server.get_build_stages(job_name, lcb_num)
-			stage_failure = _get_stage_failure(build_stages)
+			stage_failure = get_stage_failure(build_stages)
 
 		build_actions = build_info['actions']
 		for action in build_actions:
@@ -85,6 +97,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 			second_compose = None
 			build_days_ago = "N/A"
 			lcb_result = "NO_KNOWN_BUILDS"
+			stage_failure = 'N/A'
 			tempest_tests_failed = None
 
 		# Unknown error, skip job
