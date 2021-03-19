@@ -13,9 +13,28 @@ def get_bugs_dict(bug_ids, config):
 	# initialize bug dictionary
 	bug_dict = {}
 
+	bug_ids_to_query = [str(bug_id) for bug_id in bug_ids if bug_id != 0]
+	if len(bug_ids_to_query) == 0:
+		return bug_dict
+
 	# API connection does not work if '/' present at end of URL string
 	parsed_bz_url = config['bz_url'].rstrip('/')
-	bz_api = None
+	bz_api = bugzilla.Bugzilla(parsed_bz_url)
+
+	# Amend the quicksearch operation in order to aggregate search of multiple bug IDs from bugzilla
+	quicksearch_bz_url = parsed_bz_url + "/buglist.cgi?quicksearch="
+	bugs_query_url = quicksearch_bz_url + '+'.join(bug_ids_to_query)
+	bz_query = bz_api.url_to_query(bugs_query_url)
+	# Restrict return values to just id, status, and summary
+	bz_query['include_fields'] = ['id', 'status', 'summary']
+
+	try:
+		bugs = bz_api.query(bz_query)
+		# Create a dictionary based on returned bug ids
+		query_bz_dict = {bug.id: (bug.status, bug.summary) for bug in bugs}
+	except Exception as e:
+		print("Bugzilla API Call Error:", e)
+		query_bz_dict = {}
 
 	# iterate through bug ids from set
 	for bug_id in bug_ids:
@@ -25,24 +44,15 @@ def get_bugs_dict(bug_ids, config):
 		if bug_id == 0:
 			continue
 
-		# get bug info from bugzilla API
-		try:
-
-			# initialize connection if it has not yet been done (either first iteration or previously failed)
-			if bz_api is None:
-				bz_api = bugzilla.Bugzilla(parsed_bz_url)
-
-			bug = bz_api.getbug(bug_id)
-			bug_status = '[' + bug.status + ']'
-			bug_summary = bug.summary
+		bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
+		if query_bz_dict.get(bug_id):
+			bug_status = '[' + query_bz_dict[bug_id][0] + ']'
+			bug_summary = query_bz_dict[bug_id][1]
 			bug_name = ' '.join([bug_status, bug_summary])
-		except Exception as e:
-			print("Bugzilla API Call Error: ", e)
+		else:
 			bug_name = "BZ#" + str(bug_id)
-			bz_api = None
-		finally:
-			bug_url = config['bz_url'] + "/show_bug.cgi?id=" + str(bug_id)
-			bug_dict[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
+
+		bug_dict[bug_id] = {'bug_name': bug_name, 'bug_url': bug_url}
 
 	return bug_dict
 
