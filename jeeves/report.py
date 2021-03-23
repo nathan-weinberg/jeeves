@@ -7,39 +7,9 @@ from email.mime.text import MIMEText
 from smtplib import SMTP
 from urllib.parse import quote
 
-from jeeves.common import generate_html_file, percent
+from jeeves.common import generate_html_file, generate_summary
 from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version
 from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers
-
-
-def generate_common_stats_information(num_success, num_unstable, num_failure, num_covered, num_aborted, num_missing, num_error, num_jobs):
-	summary = {}
-	summary['total_jobs'] = "Total number of jobs: {}".format(num_jobs)
-	summary['total_success'] = "SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
-	summary['total_unstable'] = "UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
-	summary['total_failure'] = "FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
-	if num_covered > 0:
-		summary['total_coverage'] = "Blocker Coverage:  {}/{} = {}%".format(num_covered, num_jobs - num_success, percent(num_covered, num_jobs - num_success))
-	else:
-		summary['total_coverage'] = False
-	# include abort report if needed
-	if num_aborted > 0:
-		summary['total_aborted'] = "ABORTED:  {}/{} = {}%".format(num_aborted, num_jobs, percent(num_aborted, num_jobs))
-	else:
-		summary['total_aborted'] = False
-
-	# include missing report if needed
-	if num_missing > 0:
-		summary['total_missing'] = "NO_KNOWN_BUILDS:  {}/{} = {}%".format(num_missing, num_jobs, percent(num_missing, num_jobs))
-	else:
-		summary['total_missing'] = False
-
-	# include error report if needed
-	if num_error > 0:
-		summary['total_error'] = "ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
-	else:
-		summary['total_error'] = False
-	return summary
 
 
 def run_report(config, blockers, preamble_file, template_file, no_email, test_email, server, header):
@@ -210,11 +180,11 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		return None
 
 	# initialize summary
-	summary = generate_common_stats_information(
+	summary = generate_summary(
 		num_success, num_unstable, num_failure, num_covered, num_aborted, num_missing, num_error, num_jobs)
 	summary_per_version = {}
 	for version, stats in stats_per_version.items():
-		summary_per_version[version] = generate_common_stats_information(
+		summary_per_version[version] = generate_summary(
 			stats['num_success'], stats['num_unstable'], stats['num_failure'], 0, stats['num_aborted'], stats['num_missing'], 0, stats['num_jobs'])
 
 	# Map color codes with job count and type
