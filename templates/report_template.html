@@ -22,34 +22,36 @@
 					<td>
 						<p><b>Summary:</b></p>
 						<ul>
-							<li>{{summary.total_success}}</li>
-							<li>{{summary.total_unstable}}</li>
-							<li>{{summary.total_failure}}</li>
+							<li>Total {{summary.total_success}}</li>
+							<li>Total {{summary.total_unstable}}</li>
+							<li>Total {{summary.total_failure}}</li>
 							{% if summary.total_missing %}
-							<li>{{summary.total_missing}}</li>
+							<li>Total {{summary.total_missing}}</li>
 							{% endif %}
 							{% if summary.total_aborted %}
-							<li>{{summary.total_aborted}}</li>
+							<li>Total {{summary.total_aborted}}</li>
 							{% endif %}
 							{% if summary.total_error %}
-							<li>{{summary.total_error}}</li>
+							<li>Total {{summary.total_error}}</li>
 							{% endif %}
 							<li>{{summary.total_bugs}}</li>
 							<li>{{summary.total_tickets}}</li>
-							<li>{{summary.total_coverage}}</li>
+							<li>Total {{summary.total_coverage}}</li>
 						</ul>
 					</td>
 					{% for sorted_version in stats_per_version.keys()|sort|reverse %}
 					<td>
-						<p><b>Summary for {{ sorted_version }}</b></p>
+						<p><b>Summary for {{ (sorted_version|string).rstrip('.0') }}</b></p>
 						<ul>
-							<li> Total number of jobs: {{ stats_per_version[sorted_version]['num_jobs'] }} </li>
-							{% for entry in ['num_success', 'num_unstable', 'num_aborted', 'num_failure'] %}
-							<li>{{ entry |replace('num_', '') }}: {{ stats_per_version[sorted_version][entry] }}/{{ stats_per_version[sorted_version]['num_jobs'] }}</li>
+							{% for entry,value in stats_per_version[sorted_version].items() %}
+							{% if value %}
+							<li>{{ value }}</li>
+							{% endif %}
 							{% endfor %}
 						</ul>
 					</td>
 					{% endfor %}
+				</tr>
 			</table>
 		</div>
 		<div>
