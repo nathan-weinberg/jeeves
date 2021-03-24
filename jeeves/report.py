@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from smtplib import SMTP
 from urllib.parse import quote
 
-from jeeves.common import generate_html_file, percent
+from jeeves.common import generate_html_file, generate_summary
 from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version
 from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers
 
@@ -50,6 +50,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 	rows = []
 	all_bugs = []
 	all_tickets = []
+	stats_per_version = {}
 	for job in jobs:
 
 		# get name and osp version from job object
@@ -61,15 +62,26 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			print('No OSP version could be found in job {}. Skipping...'.format(job_name))
 			continue
 
+		if osp_version not in stats_per_version:
+			stats_per_version[osp_version] = {
+				'num_jobs': 0,
+				'num_success': 0,
+				'num_failure': 0,
+				'num_missing': 0,
+				'num_aborted': 0,
+				'num_unstable': 0,
+			}
+
 		# get job info from jenkins API - will return False if an unmanageable error occured
 		jenkins_api_info = get_jenkins_job_info(server, job_name, filter_param_name=fpn, filter_param_value=fpv)
 
 		# if jeeves was unable to collect any good jenkins api info, skip job
 		if jenkins_api_info:
-
+			stats_per_version[osp_version]['num_jobs'] += 1
 			# take action based on last completed build result
 			if jenkins_api_info['lcb_result'] == "SUCCESS":
 				num_success += 1
+				stats_per_version[osp_version]['num_success'] += 1
 				bugs = []
 				tickets = []
 				other = []
@@ -77,12 +89,16 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			elif jenkins_api_info['lcb_result'] in ["UNSTABLE", "FAILURE", "ABORTED", "NO_KNOWN_BUILDS"]:
 				if jenkins_api_info['lcb_result'] == "UNSTABLE":
 					num_unstable += 1
+					stats_per_version[osp_version]['num_unstable'] += 1
 				elif jenkins_api_info['lcb_result'] == "FAILURE":
 					num_failure += 1
+					stats_per_version[osp_version]['num_failure'] += 1
 				elif jenkins_api_info['lcb_result'] == "ABORTED":
 					num_aborted += 1
+					stats_per_version[osp_version]['num_aborted'] += 1
 				else:
 					num_missing += 1
+					stats_per_version[osp_version]['num_missing'] += 1
 
 				# get all related bugs to job
 				job_covered = False
@@ -164,13 +180,12 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		return None
 
 	# initialize summary
-	summary = {}
-
-	# job result metrics
-	summary['total_success'] = "Total SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
-	summary['total_unstable'] = "Total UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
-	summary['total_failure'] = "Total FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
-	summary['total_coverage'] = "Total Blocker Coverage:  {}/{} = {}%".format(num_covered, num_jobs - num_success, percent(num_covered, num_jobs - num_success))
+	summary = generate_summary(
+		num_success, num_unstable, num_failure, num_covered, num_aborted, num_missing, num_error, num_jobs)
+	summary_per_version = {}
+	for version, stats in stats_per_version.items():
+		summary_per_version[version] = generate_summary(
+			stats['num_success'], stats['num_unstable'], stats['num_failure'], 0, stats['num_aborted'], stats['num_missing'], 0, stats['num_jobs'])
 
 	# Map color codes with job count and type
 	jobs_dict = {
@@ -246,24 +261,6 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		unique_tickets = set(all_tickets)
 		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
 
-	# include abort report if needed
-	if num_aborted > 0:
-		summary['total_aborted'] = "Total ABORTED:  {}/{} = {}%".format(num_aborted, num_jobs, percent(num_aborted, num_jobs))
-	else:
-		summary['total_aborted'] = False
-
-	# include missing report if needed
-	if num_missing > 0:
-		summary['total_missing'] = "Total NO_KNOWN_BUILDS:  {}/{} = {}%".format(num_missing, num_jobs, percent(num_missing, num_jobs))
-	else:
-		summary['total_missing'] = False
-
-	# include error report if needed
-	if num_error > 0:
-		summary['total_error'] = "Total ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
-	else:
-		summary['total_error'] = False
-
 	# load a preamble for injection if specified
 	preamble = None
 	if preamble_file:
@@ -284,6 +281,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		header=header,
 		preamble=preamble,
 		rows=rows,
+		stats_per_version=summary_per_version,
 		summary=summary
 	)
 
