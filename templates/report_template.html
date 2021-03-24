@@ -41,7 +41,7 @@
 					</td>
 					{% for sorted_version in stats_per_version.keys()|sort|reverse %}
 					<td>
-						<p><b>Summary for {{ (sorted_version|string).rstrip('.0') }}</b></p>
+						<p><b>Summary for {{ sorted_version }}</b></p>
 						<ul>
 							{% for entry,value in stats_per_version[sorted_version].items() %}
 							{% if value %}
