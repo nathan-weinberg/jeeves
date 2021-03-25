@@ -21,6 +21,7 @@
 						<th style="text-align: center;">Days Since Last Build</th>
 						<th style="text-align: center;">Compose</th>
 						<th style="text-align: center;">Result</th>
+						<th style="text-align: center;">Failed Stage</th>
 						<th style="text-align: center;">Failed Tempest Tests</th>
 						<th style="text-align: center;">Blockers</th>
 					</tr>
@@ -54,6 +55,14 @@
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{ composes(row) }}</td>
 							<td style="text-align: center;" bgcolor="#ef2929">{{row.lcb_result}}</td>
+							<td style="text-align: center;"><p>{{ row.stage_name }}</p>
+							{% if row.stage_urls is not none %}
+							{% for url in row.stage_urls %}
+							<br/>
+							<a href="{{ url }}">{{ url.split("/")[-1] }}</a>
+							{% endfor %}
+							{% endif %}
+							</td>
 							{% if row.tempest_tests_failed != None %}
 								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
 							{% else %}
