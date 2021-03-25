@@ -1,6 +1,6 @@
--e git+https://opendev.org/jjb/python-jenkins.git@570a143c74d092efaf9bc68a3bae9b15804f4a63#egg=python-jenkins
 pyyaml==5.4.1
 jinja2==2.11.3
+python-jenkins==1.8.0.0a0
 python-bugzilla==3.0.2
 jira==2.0.0
 pytest==6.2.2
