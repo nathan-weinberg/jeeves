@@ -7,8 +7,8 @@ from email.mime.text import MIMEText
 from smtplib import SMTP
 from urllib.parse import quote
 
-from jeeves.common import generate_failure_stage_log_urls, generate_html_file, generate_summary
-from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version
+from jeeves.common import generate_html_file, generate_summary
+from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version, generate_failure_stage_log_urls
 from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers
 
 

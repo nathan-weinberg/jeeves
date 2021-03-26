@@ -4,8 +4,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
 
-from jeeves.common import generate_html_file, generate_failure_stage_log_urls
-from jeeves.jobs import get_jenkins_job_info, get_osp_version
+from jeeves.common import generate_html_file
+from jeeves.jobs import get_jenkins_job_info, get_osp_version, generate_failure_stage_log_urls
 from jeeves.blockers import get_bugs_dict, get_tickets_dict, get_other_blockers
 
 

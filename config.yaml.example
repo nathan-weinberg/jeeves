@@ -14,10 +14,23 @@ email_from: myemail@ourcorporate.com
 email_to: send_report_to@ourcorporate.com
 email_to_test: my_email_to_test@ourcorporate.com
 stage_logs:
-    'Clone repo':
-      - '.sh/clone_repo.log'
-    'Build project':
-      - '.sh/build_project.log'
-    'Deploy':
-      - '.sh/deploy_first.log'
-      - '.sh/deploy_second.log'
+  'Install InfraRed':
+    - '.sh/ir-install.log'
+  'Cleanup':
+    - '.sh/ir-virsh-cleanup.log'
+  'Provision':
+    - '.sh/ir-virsh-provision.log'
+  'Undercloud':
+    - '.sh/ir-tripleo-undercloud.log'
+  'Introspect':
+    - '.sh/ir-tripleo-overcloud-install-introspect.log'
+  'Tagging':
+    - '.sh/ir-tripleo-overcloud-install-tagging.log'
+  'Overcloud':
+    - '.sh/ir-tripleo-overcloud-install.log'
+  'Run Tempest Tests':
+    - 'tempest-results'
+  'Undercloud FFU Upgrade':
+    - '.sh/ir-tripleo-ffu-undercloud-rhel-upgrade.log'
+    - '.sh/ir-tripleo-undercloud-rhel-upgrade.log'
+    - '.sh/ir-tripleo-undercloud-ffu-upgrade.log'
