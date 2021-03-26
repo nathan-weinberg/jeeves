@@ -25,16 +25,13 @@ def generate_header(source, filter_param_name=None, filter_param_value=None, rem
 	return header
 
 
-def generate_summary(num_success, num_unstable, num_failure, num_covered, num_aborted, num_missing, num_error, num_jobs):
+def generate_summary(num_success, num_unstable, num_failure, num_aborted, num_missing, num_error, num_jobs):
 	summary = {}
 	summary['total_jobs'] = "Total number of jobs: {}".format(num_jobs)
 	summary['total_success'] = "SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
-	if num_covered > 0:
-		summary['total_coverage'] = "Blocker Coverage:  {}/{} = {}%".format(num_covered, num_jobs - num_success, percent(num_covered, num_jobs - num_success))
-	else:
-		summary['total_coverage'] = False
+
 	# include abort report if needed
 	if num_aborted > 0:
 		summary['total_aborted'] = "ABORTED:  {}/{} = {}%".format(num_aborted, num_jobs, percent(num_aborted, num_jobs))
@@ -52,6 +49,7 @@ def generate_summary(num_success, num_unstable, num_failure, num_covered, num_ab
 		summary['total_error'] = "ERROR:  {}/{} = {}%".format(num_error, num_jobs, percent(num_error, num_jobs))
 	else:
 		summary['total_error'] = False
+
 	return summary
 
 
