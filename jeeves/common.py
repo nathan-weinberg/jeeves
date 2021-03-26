@@ -26,6 +26,10 @@ def generate_header(source, filter_param_name=None, filter_param_value=None, rem
 
 
 def generate_summary(num_success, num_unstable, num_failure, num_aborted, num_missing, num_error, num_jobs):
+	""" generates summary based on given parameters
+		overall summary does not display total jobs as this is done in piechart
+		summary per version displays all fields
+	"""
 	summary = {}
 	summary['total_jobs'] = "Total number of jobs: {}".format(num_jobs)
 	summary['total_success'] = "SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))

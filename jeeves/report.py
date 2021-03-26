@@ -305,8 +305,8 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		header=header,
 		preamble=preamble,
 		rows=rows,
-		stats_per_version=summary_per_version,
-		summary=summary
+		summary=summary,
+		summary_per_version=summary_per_version
 	)
 
 	# save HTML report to file if not test run
