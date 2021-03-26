@@ -31,8 +31,8 @@ def generate_summary(num_success, num_unstable, num_failure, num_covered, num_ab
 	summary['total_success'] = "SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
 	summary['total_failure'] = "FAILURE:  {}/{} = {}%".format(num_failure, num_jobs, percent(num_failure, num_jobs))
-	if num_covered > 0:
-		summary['total_coverage'] = "Blocker Coverage:  {}/{} = {}%".format(num_covered, num_jobs - num_success, percent(num_covered, num_jobs - num_success))
+	if num_jobs - (num_success + num_missing) > 0:
+		summary['total_coverage'] = "Blocker Coverage:  {}/{} = {}%".format(num_covered, num_jobs - (num_success + num_missing), percent(num_covered, num_jobs - (num_success + num_missing)))
 	else:
 		summary['total_coverage'] = False
 	# include abort report if needed

@@ -36,7 +36,9 @@
 							{% endif %}
 							<li>{{summary.total_bugs}}</li>
 							<li>{{summary.total_tickets}}</li>
+							{% if summary.total_coverage %}
 							<li>Total {{summary.total_coverage}}</li>
+							{% endif %}
 						</ul>
 					</td>
 					{% for sorted_version in stats_per_version.keys()|sort|reverse %}
