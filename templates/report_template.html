@@ -39,11 +39,11 @@
 							<li>Total {{summary.total_coverage}}</li>
 						</ul>
 					</td>
-					{% for sorted_version in stats_per_version.keys()|sort|reverse %}
+					{% for sorted_version in summary_per_version.keys()|sort|reverse %}
 					<td>
 						<p><b>Summary for {{ sorted_version }}</b></p>
 						<ul>
-							{% for entry,value in stats_per_version[sorted_version].items() %}
+							{% for entry,value in summary_per_version[sorted_version].items() %}
 							{% if value %}
 							<li>{{ value }}</li>
 							{% endif %}

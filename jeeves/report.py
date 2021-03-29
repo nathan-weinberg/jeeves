@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from smtplib import SMTP
 from urllib.parse import quote
 
-from jeeves.common import generate_html_file, generate_summary
+from jeeves.common import generate_html_file, generate_summary, percent
 from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version, generate_failure_stage_log_urls
 from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers
 
@@ -66,10 +66,11 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			stats_per_version[osp_version] = {
 				'num_jobs': 0,
 				'num_success': 0,
+				'num_unstable': 0,
 				'num_failure': 0,
 				'num_missing': 0,
 				'num_aborted': 0,
-				'num_unstable': 0,
+				'num_error': 0
 			}
 
 		# get job info from jenkins API - will return False if an unmanageable error occured
@@ -78,6 +79,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		# if jeeves was unable to collect any good jenkins api info, skip job
 		if jenkins_api_info:
 			stats_per_version[osp_version]['num_jobs'] += 1
+
 			# take action based on last completed build result
 			if jenkins_api_info['lcb_result'] == "SUCCESS":
 				num_success += 1
@@ -139,6 +141,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 				print("job {} had lcb_result {}: reporting as error job".format(job_name, jenkins_api_info['lcb_result']))
 				jenkins_api_info['lcb_result'] = "ERROR"
 				num_error += 1
+				stats_per_version[osp_version]['num_error'] += 1
 				bugs = []
 				tickets = []
 				other = []
@@ -187,14 +190,51 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		print("No rows could be built with data for any of the jobs found with given search field. Exiting...")
 		return None
 
-	# initialize summary
+	# initialize job summary
 	summary = generate_summary(
-		num_success, num_unstable, num_failure, num_covered, num_aborted, num_missing, num_error, num_jobs)
+		num_success,
+		num_unstable,
+		num_failure,
+		num_aborted,
+		num_missing,
+		num_error,
+		num_jobs
+	)
+
+	# initialize job summary per version
 	summary_per_version = {}
 	for version, stats in stats_per_version.items():
 		summary_per_version[version] = generate_summary(
-			stats['num_success'], stats['num_unstable'], stats['num_failure'], 0, stats['num_aborted'], stats['num_missing'], 0, stats['num_jobs'])
+			stats['num_success'],
+			stats['num_unstable'],
+			stats['num_failure'],
+			stats['num_aborted'],
+			stats['num_missing'],
+			stats['num_error'],
+			stats['num_jobs']
+		)
 
+	# generate metrics and append to overall summary
+	# bug metrics
+	all_bugs = [bug_id for bug_id in all_bugs if bug_id != 0]
+	if len(all_bugs) == 0:
+		summary['total_bugs'] = "Blocker Bugs: 0 total"
+	else:
+		unique_bugs = set(all_bugs)
+		summary['total_bugs'] = "Blocker Bugs: {} total, {} unique".format(len(all_bugs), len(unique_bugs))
+
+	# ticket metrics
+	all_tickets = [ticket_id for ticket_id in all_tickets if ticket_id != 0]
+	if len(all_tickets) == 0:
+		summary['total_tickets'] = "Blocker Tickets: 0 total"
+	else:
+		unique_tickets = set(all_tickets)
+		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
+
+	# blocker metrics
+	summary['total_coverage'] = "Blocker Coverage:  {}/{} = {}%".format(num_covered, num_jobs - num_success, percent(num_covered, num_jobs - num_success))
+
+	# generate chart and append to overall summary
 	# Map color codes with job count and type
 	jobs_dict = {
 		'#3465a4': (num_success, 'Success'),
@@ -253,22 +293,6 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 	encoded_config = quote(json.dumps(chart_config))
 	summary['chart_url'] = f'https://quickchart.io/chart?c={encoded_config}'
 
-	# bug metrics
-	all_bugs = [bug_id for bug_id in all_bugs if bug_id != 0]
-	if len(all_bugs) == 0:
-		summary['total_bugs'] = "Blocker Bugs: 0 total"
-	else:
-		unique_bugs = set(all_bugs)
-		summary['total_bugs'] = "Blocker Bugs: {} total, {} unique".format(len(all_bugs), len(unique_bugs))
-
-	# ticket metrics
-	all_tickets = [ticket_id for ticket_id in all_tickets if ticket_id != 0]
-	if len(all_tickets) == 0:
-		summary['total_tickets'] = "Blocker Tickets: 0 total"
-	else:
-		unique_tickets = set(all_tickets)
-		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
-
 	# load a preamble for injection if specified
 	preamble = None
 	if preamble_file:
@@ -289,8 +313,8 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		header=header,
 		preamble=preamble,
 		rows=rows,
-		stats_per_version=summary_per_version,
-		summary=summary
+		summary=summary,
+		summary_per_version=summary_per_version
 	)
 
 	# save HTML report to file if not test run
