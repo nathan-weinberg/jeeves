@@ -224,7 +224,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 		summary['total_tickets'] = "Blocker Tickets: {} total, {} unique".format(len(all_tickets), len(unique_tickets))
 
 	# blocker metrics
-	summary['total_coverage'] = "Blocker Coverage:  {}/{} = {}%".format(num_covered, num_jobs - num_success, percent(num_covered, num_jobs - num_success))
+	summary['total_coverage'] = "Total Blocker Coverage:  {}/{} = {}%".format(num_covered, num_jobs - num_success, percent(num_covered, num_jobs - num_success))
 
 	# generate chart and append to overall summary
 	# Map color codes with job count and type
