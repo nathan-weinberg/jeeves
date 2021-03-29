@@ -30,7 +30,11 @@ def generate_summary(num_success, num_unstable, num_failure, num_aborted, num_mi
 		overall summary does not display total jobs as this is done in piechart
 		summary per version displays all fields
 	"""
+
+	# initialize empty summary
 	summary = {}
+
+	# populate summary with job result data
 	summary['total_jobs'] = "Total number of jobs: {}".format(num_jobs)
 	summary['total_success'] = "SUCCESS:  {}/{} = {}%".format(num_success, num_jobs, percent(num_success, num_jobs))
 	summary['total_unstable'] = "UNSTABLE: {}/{} = {}%".format(num_unstable, num_jobs, percent(num_unstable, num_jobs))
