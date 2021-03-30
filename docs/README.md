@@ -60,8 +60,8 @@ If you don't wish to use this feature, simply omit the two fields from your `con
 Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in `blockers.yaml.example` 
 
 #### Failed Stage Logs
-Jeeves has an option to add to a report urls which point to log file/files for a corresponding failed build stage. Log file/files are mapped to the stage based on the `stage_logs` dict defined in `config.yaml`. In 
-`config.yaml.example` you can find some stages from infrared already mapped to logs files. Take it as a reference how to map logs. Single stage can be mapped to single or multiple log files. It is not required to map all stages from a job to log files. Jeeves will skip adding urls to stages which are defined in the `stage_logs`.
+Jeeves has an option to add URLs to a report which point to one of more log files for a corresponding failed build stage. Log files are mapped to the stage based on the `stage_logs` dict defined in `config.yaml`. In 
+`config.yaml.example` you can find some stages from Infrared already mapped to logs files. Take it as a reference on how to map logs to your reports. A single stage can be mapped to single or multiple log files. It is not required to map all stages from a job to log files. Jeeves will skip adding URLs to stages which are not defined in the `stage_logs`.
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML

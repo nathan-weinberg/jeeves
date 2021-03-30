@@ -86,8 +86,11 @@ def run_remind(config, blockers, server, header):
 					stage_urls = []
 					if jenkins_api_info['stage_failure'] != 'N/A':
 						stage_urls = generate_failure_stage_log_urls(
-							config, jenkins_api_info['stage_failure'],
-							jenkins_api_info['job_url'], jenkins_api_info['lcb_num'])
+							config,
+							jenkins_api_info['stage_failure'],
+							jenkins_api_info['job_url'],
+							jenkins_api_info['lcb_num']
+						)
 
 					# build row
 					row = {
