@@ -43,9 +43,6 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		tempest_tests_failed = None
 		stage_failure = 'N/A'
 		build_info = server.get_build_info(job_name, lcb_num)
-		if build_info['result'] == 'FAILURE' or build_info['result'] == 'UNSTABLE':
-			build_stages = server.get_build_stages(job_name, lcb_num)
-			stage_failure = get_stage_failure(build_stages)
 
 		build_actions = build_info['actions']
 		for action in build_actions:
@@ -72,6 +69,9 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		lcb_url = build_info['url']
 		lcb_result = build_info['result']
 		composes = [str(action['html']).split('core_puddle:')[1].split('<')[0].strip() for action in build_actions if 'core_puddle' in action.get('html', '')]
+		if lcb_result == 'FAILURE':
+			build_stages = server.get_build_stages(job_name, lcb_num)
+			stage_failure = get_stage_failure(build_stages)
 
 		# No composes could be found; likely a failed job where the 'core_puddle' var was never calculated
 		if composes == []:
