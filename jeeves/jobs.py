@@ -6,7 +6,7 @@ import datetime
 
 def get_stage_failure(build_stages):
 	''' takes in build stages dict
-		returns string with the name of failed stage or 'N/A if there is no failed stage
+		returns string with the name of failed stage or 'N/A' if there is no failed stage
 	'''
 	for stage in build_stages['stages']:
 		if stage['status'] == 'FAILED':
