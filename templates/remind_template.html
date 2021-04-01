@@ -38,6 +38,7 @@
 							<td style="text-align: center;">{{row.build_days_ago}}</td>
 							<td style="text-align: center;">{{ composes(row) }}</td>
 							<td style="text-align: center;" bgcolor="#ffb738">{{row.lcb_result}}</td>
+							<td style="text-align: center;"><p>N/A</p></td>
 							{% if row.tempest_tests_failed != None %}
 								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
 							{% else %}
@@ -90,6 +91,7 @@
 							{% else %}
 								<td style="text-align: center;" bgcolor="#704426">{{row.lcb_result}}</td>
 							{% endif %}
+							<td style="text-align: center;"><p>N/A</p></td>
 							{% if row.tempest_tests_failed != None %}
 								<td style="text-align: center;"><a href="{{row.tempest_tests_url}}">{{row.tempest_tests_failed}}</a></td>
 							{% else %}
