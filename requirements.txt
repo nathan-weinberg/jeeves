@@ -3,6 +3,6 @@ jinja2==2.11.3
 python-jenkins==1.7.0
 python-bugzilla==3.0.2
 jira==2.0.0
-pytest==6.2.2
+pytest==6.2.3
 pytest-cov==2.11.1
 flake8==3.9.0
