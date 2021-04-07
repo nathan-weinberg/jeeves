@@ -4,6 +4,28 @@ import re
 import datetime
 
 
+def get_stage_failure(build_stages):
+	''' takes in build stages dict
+		returns string with the name of failed stage or 'N/A' if there is no failed stage
+	'''
+	for stage in build_stages['stages']:
+		if stage['status'] == 'FAILED':
+			return stage.get('name', 'N/A')
+	return 'N/A'
+
+
+def generate_failure_stage_log_urls(config, err_stage, job_url, lcb_num):
+	''' generates list of urls for failed build stages
+	'''
+	stage_urls = []
+	if 'stage_logs' in config and err_stage in config['stage_logs']:
+		for path in config['stage_logs'][err_stage]:
+			stage_urls.append("{}/{}/artifact/{}".format(job_url, lcb_num, path))
+	if not stage_urls:
+		stage_urls = None
+	return stage_urls
+
+
 def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_value=None):
 	''' takes in jenkins server object and job name
 		optionally takes name and value of jenkins param to filter builds by
@@ -19,7 +41,9 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		job_url = job_info['url']
 		lcb_num = job_info['lastCompletedBuild']['number']
 		tempest_tests_failed = None
+		stage_failure = 'N/A'
 		build_info = server.get_build_info(job_name, lcb_num)
+
 		build_actions = build_info['actions']
 		for action in build_actions:
 			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
@@ -45,6 +69,9 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		lcb_url = build_info['url']
 		lcb_result = build_info['result']
 		composes = [str(action['html']).split('core_puddle:')[1].split('<')[0].strip() for action in build_actions if 'core_puddle' in action.get('html', '')]
+		if lcb_result == 'FAILURE':
+			build_stages = server.get_build_stages(job_name, lcb_num)
+			stage_failure = get_stage_failure(build_stages)
 
 		# No composes could be found; likely a failed job where the 'core_puddle' var was never calculated
 		if composes == []:
@@ -70,6 +97,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 			second_compose = None
 			build_days_ago = "N/A"
 			lcb_result = "NO_KNOWN_BUILDS"
+			stage_failure = 'N/A'
 			tempest_tests_failed = None
 
 		# Unknown error, skip job
@@ -85,7 +113,8 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		'second_compose': second_compose,
 		'lcb_result': lcb_result,
 		'build_days_ago': build_days_ago,
-		'tempest_tests_failed': tempest_tests_failed
+		'tempest_tests_failed': tempest_tests_failed,
+		'stage_failure': stage_failure
 	}
 	return jenkins_api_info
 

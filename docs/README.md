@@ -22,6 +22,7 @@ Create a file named `config.yaml` based off `config.yaml.example` with the follo
 - **email_from**: The email address of the sender
 - **email_to**: Email address you would like to send your report to. To send the report to multiple emails, seperate them by comma, e.g. recipient1@website1.com,recipient2@website2.org
 - **email_to_test**: Email address to send test reports to (note: this field is only required if you run Jeeves with the `--test-email` flag)
+- **stage_logs**: Optional dict field that instructs Jeeves how to build URLs to a log files for a corresponding failed build stage
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
@@ -57,6 +58,10 @@ If you don't wish to use this feature, simply omit the two fields from your `con
 
 #### Reminder Mode
 Jeeves has a reminder mode that will send an email to "owners" of jobs in Jenkins that have "UNSTABLE" or "FAILURE" status. You can add as many "owners" as you would like to a given job. You can see some examples of this in `blockers.yaml.example` 
+
+#### Failed Stage Logs
+Jeeves has an option to add URLs to a report which point to one of more log files for a corresponding failed build stage. Log files are mapped to the stage based on the `stage_logs` dict defined in `config.yaml`. In 
+`config.yaml.example` you can find some stages already mapped to logs files. Use it as a reference on how to map logs to your reports. A single stage can be mapped to single or multiple log files. It is not required to map all stages from a job to log files. Jeeves will skip adding URLs to stages which are not defined in the `stage_logs`.
 
 ### Packages
 - [PyYAML](https://pyyaml.org/) for parsing config YAML

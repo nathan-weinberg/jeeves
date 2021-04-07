@@ -8,7 +8,7 @@ from smtplib import SMTP
 from urllib.parse import quote
 
 from jeeves.common import generate_html_file, generate_summary, percent
-from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version
+from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version, generate_failure_stage_log_urls
 from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers
 
 
@@ -151,6 +151,15 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			if (len(bugs) == 0) and (len(tickets) == 0) and (len(other) == 0):
 				blocker_bool = False
 
+			stage_urls = []
+			if jenkins_api_info['stage_failure'] != 'N/A':
+				stage_urls = generate_failure_stage_log_urls(
+					config,
+					jenkins_api_info['stage_failure'],
+					jenkins_api_info['job_url'],
+					jenkins_api_info['lcb_num']
+				)
+
 			# build row
 			row = {
 				'osp_version': osp_version,
@@ -167,7 +176,9 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 				'tickets': tickets,
 				'other': other,
 				'tempest_tests_failed': jenkins_api_info['tempest_tests_failed'],
-				'tempest_tests_url': jenkins_api_info['job_url'] + str(jenkins_api_info['lcb_num']) + '/testReport'
+				'tempest_tests_url': jenkins_api_info['job_url'] + str(jenkins_api_info['lcb_num']) + '/testReport',
+				'stage_name': jenkins_api_info['stage_failure'],
+				'stage_urls': stage_urls
 			}
 
 			# append row to rows
