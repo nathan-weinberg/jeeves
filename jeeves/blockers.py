@@ -172,9 +172,14 @@ def has_blockers(blockers, job_name):
 	''' returns True if job_name in blockers has any defined blockers
 		returns False otherwise
 	'''
-	is_bz = blockers[job_name].get('bz', [0])
-	is_jira = blockers[job_name].get('jira', [0])
-	is_other = blockers[job_name].get('other', [0])
-	if (is_bz == [0]) and (is_jira == [0]) and (is_other == [0]):
-		return False
+	try:
+		blocker_dict = blockers[job_name]
+		is_bz = blocker_dict.get('bz', [0])
+		is_jira = blocker_dict.get('jira', [0])
+		is_other = blocker_dict.get('other', [0])
+		if (is_bz == [0]) and (is_jira == [0]) and (is_other == [0]):
+			return False
+	except Exception:
+			print("No blockers have been filed for job {}".format(job_name))
+			return False
 	return True
