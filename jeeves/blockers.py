@@ -169,7 +169,7 @@ def get_other_blockers(blockers, job_name):
 
 
 def has_blockers(blockers, job_name):
-	''' returns True if job_name in blockers has any defined blockers
+	''' returns True if job_name exists in blockers and has any defined blockers
 		returns False otherwise
 	'''
 	try:
