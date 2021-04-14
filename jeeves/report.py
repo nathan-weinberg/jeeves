@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 from jeeves.common import generate_html_file, generate_summary, percent
 from jeeves.jobs import get_jenkins_job_info, get_jenkins_jobs, get_osp_version, generate_failure_stage_log_urls
-from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers
+from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_tickets_set, get_other_blockers, has_blockers
 
 
 def run_report(config, blockers, preamble_file, template_file, no_email, test_email, server, header):
@@ -103,14 +103,12 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 					stats_per_version[osp_version]['num_missing'] += 1
 
 				# get all related bugs to job
-				job_covered = False
 				try:
 					bug_ids = blockers[job_name]['bz']
 					if 0 in bug_ids:
 						bug_ids.remove(0)
 					all_bugs.extend(bug_ids)
 					bugs = list(map(all_bugs_dict.get, bug_ids))
-					job_covered = True
 				except Exception as e:
 					print("Error fetching bugs for job {}: {}".format(job_name, e))
 					bugs = []
@@ -122,7 +120,6 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 						ticket_ids.remove(0)
 					all_tickets.extend(ticket_ids)
 					tickets = list(map(all_tickets_dict.get, ticket_ids))
-					job_covered = True
 				except Exception as e:
 					print("Error fetching tickets for job {}: {}".format(job_name, e))
 					tickets = []
@@ -130,12 +127,12 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 				# get any "other" artifact for job
 				try:
 					other = get_other_blockers(blockers, job_name)
-					job_covered = True
 				except Exception as e:
 					print("Error fetching other blockers for job {}: {}".format(job_name, e))
 					other = []
 
-				if job_covered:
+				# check if job is covered by any of jira/bz/other
+				if has_blockers(blockers, job_name):
 					num_covered += 1
 			else:
 				print("job {} had lcb_result {}: reporting as error job".format(job_name, jenkins_api_info['lcb_result']))
