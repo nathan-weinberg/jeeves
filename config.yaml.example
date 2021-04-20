@@ -34,3 +34,4 @@ stage_logs:
     - '.sh/ir-tripleo-ffu-undercloud-rhel-upgrade.log'
     - '.sh/ir-tripleo-undercloud-rhel-upgrade.log'
     - '.sh/ir-tripleo-undercloud-ffu-upgrade.log'
+supported_versions: ['13', '16.1', '16.2']

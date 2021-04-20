@@ -119,8 +119,8 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 	return jenkins_api_info
 
 
-def get_jenkins_jobs(server, job_search_fields):
-	''' takes in a Jenkins server object and job_search_fields string
+def get_jenkins_jobs(server, job_search_fields, supported_versions):
+	''' takes in a Jenkins server object, job_search_fields string and supported_versions list
 		returns list of jobs with given search field as part of their name
 	'''
 
@@ -134,7 +134,6 @@ def get_jenkins_jobs(server, job_search_fields):
 
 	# check for fields that contain valid regex
 	relevant_jobs = []
-	supported_versions = ['13', '16.1', '16.2']
 	for field in fields:
 		try:
 

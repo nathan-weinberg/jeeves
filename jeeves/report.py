@@ -14,8 +14,10 @@ from jeeves.blockers import get_bugs_dict, get_bugs_set, get_tickets_dict, get_t
 
 def run_report(config, blockers, preamble_file, template_file, no_email, test_email, server, header):
 
+	# get  supported versions from config or use default one
+	supported_versions = config.get('supported_versions', ['13', '16.1', '16.2'])
 	# fetch all relevant jobs
-	jobs = get_jenkins_jobs(server, config['job_search_fields'])
+	jobs = get_jenkins_jobs(server, config['job_search_fields'], supported_versions)
 
 	# log and exit if no jobs found - no reason to send empty report
 	num_jobs_fetched = len(jobs)
