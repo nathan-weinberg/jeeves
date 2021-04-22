@@ -120,7 +120,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 
 
 def get_jenkins_jobs(server, job_search_fields, supported_versions):
-	''' takes in a Jenkins server object, job_search_fields string and supported_versions list
+	''' takes in a Jenkins server object, job_search_fields string, and supported_versions list
 		returns list of jobs with given search field as part of their name
 	'''
 

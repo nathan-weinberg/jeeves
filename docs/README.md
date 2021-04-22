@@ -22,9 +22,8 @@ Create a file named `config.yaml` based off `config.yaml.example` with the follo
 - **email_from**: The email address of the sender
 - **email_to**: Email address you would like to send your report to. To send the report to multiple emails, seperate them by comma, e.g. recipient1@website1.com,recipient2@website2.org
 - **email_to_test**: Email address to send test reports to (note: this field is only required if you run Jeeves with the `--test-email` flag)
+- **supported_versions**: Optional OSP versions list that instructs Jeeves which OSP versions are supported and should appear in the report
 - **stage_logs**: Optional dict field that instructs Jeeves how to build URLs to a log files for a corresponding failed build stage
-- **supported_versions**: Optional list that instructs Jeeves which osp versions are supported and should
-appear in the report
 
 If you wish to use a different configuration file, you can specify it as a command line argument.
 
