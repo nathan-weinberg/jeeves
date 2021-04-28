@@ -79,6 +79,8 @@ def generate_html_file(htmlcode, remind=False):
 def percent(part, whole):
 	''' basic percent function
 	'''
+	if whole == 0:
+		return 0
 	return round(100 * float(part) / float(whole), 1)
 
 
