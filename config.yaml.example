@@ -13,6 +13,10 @@ email_subject: Our CI status report
 email_from: myemail@ourcorporate.com
 email_to: send_report_to@ourcorporate.com
 email_to_test: my_email_to_test@ourcorporate.com
+supported_versions:
+  - 13
+  - 16.1
+  - 16.2
 stage_logs:
   'Install InfraRed':
     - '.sh/ir-install.log'
