@@ -61,16 +61,20 @@ def generate_summary(num_success, num_unstable, num_failure, num_aborted, num_mi
 	return summary
 
 
-def generate_html_file(htmlcode, remind=False):
-	''' generates HTML file of reminder
+def generate_html_file(htmlcode, remind=False, owner=''):
+	''' generates HTML file from given HTML code
+		if generating file for reminder, owner should be passed as well
 	'''
 	try:
 		os.makedirs('archive')
 	except FileExistsError:
 		pass
-	reportType = 'reminder' if remind else 'report'
+	owner = owner.split('@')[0]
+	reportType = 'reminder_for_{}'.format(owner) if remind else 'report'
 	filename = './archive/{}_{:%Y-%m-%d_%H-%M-%S}.html'.format(
-		reportType, datetime.datetime.now())
+		reportType,
+		datetime.datetime.now()
+	)
 	with open(filename, 'w') as file:
 		file.write(htmlcode)
 	return filename
