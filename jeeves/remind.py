@@ -130,6 +130,7 @@ def run_remind(config, blockers, server, header):
 			# generate HTML report
 			htmlcode = template.render(
 				header=header,
+				owner=owner,
 				rows=rows
 			)
 
