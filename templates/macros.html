@@ -46,10 +46,10 @@
 {% macro composes(row) %}
 	{% if row.second_compose != None %}
 		<p style="text-align: center;"><b>From</b></p>
-			{{ row.compose }}
+			{{row.compose}}
 		<hr />
 		<p style="text-align: center;"><b>To</b></p>
-			{{ row.second_compose }}
+			{{row.second_compose}}
 	{% else %}
 		{{ row.compose }}
 	{% endif %}
