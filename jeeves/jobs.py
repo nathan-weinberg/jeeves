@@ -55,13 +55,19 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		if filter_param_name is not None and filter_param_value is not None:
 			api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
 			while api_param_value != filter_param_value:
-				lcb_num = lcb_num - 1
+				if 'previousBuild' in build_info and build_info['previousBuild'] is not None:
+					lcb_num = build_info['previousBuild']['number']
+				else:
+					# there is no previous build available,
+					# set NO_KNOWN_BUILDS found
+					raise Exception("No filter match")
 				build_info = server.get_build_info(job_name, lcb_num)
 				build_actions = build_info['actions']
 				for action in build_actions:
 					if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
 						build_parameters = action['parameters']
-						break
+					elif action.get('_class') == 'hudson.tasks.junit.TestResultAction':
+						tempest_tests_failed = action['failCount']
 				api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
 
 		build_time = build_info.get('timestamp')
@@ -90,7 +96,8 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 
 		# No "Last Completed Build" found
 		# Checks for len <= 1 as running builds are included in the below query
-		if len(job_info.get('builds')) <= 1:
+		# or check for filter exclusion
+		if len(job_info.get('builds')) <= 1 or str(e) == "No filter match":
 			lcb_num = None
 			lcb_url = None
 			compose = "N/A"
