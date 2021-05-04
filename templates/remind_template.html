@@ -9,7 +9,7 @@
 			{% if header.fpn is not none and header.fpv is not none %}
 				<p style="text-align: center; font-size: smaller;">Filtered job builds by parameter name {{header.fpn}} with value {{header.fpv}}</p>
 			{% endif %}
-			<p style="text-align: center;">Attention user, the following jobs are currently failing in CI. Please ensure each job listed has up-to-date blockers.</p>
+			<p style="text-align: center;">Attention {{owner}}, the following jobs are currently failing in CI. Please ensure each job listed has up-to-date blockers.</p>
 		</div>
 		<div>
 			<table border="1">
