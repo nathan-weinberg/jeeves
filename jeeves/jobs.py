@@ -61,7 +61,7 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 
 		# if desired, get last completed build with custom parameter and value or desired cause action class
 		if ((filter_param_name is not None and filter_param_value is not None) or cause_action_class is not None):
-			while 'previousBuild' in build_info and build_info['previousBuild'] is not None:
+			while True:
 				if cause_action_class is not None:
 					if CAUSE_ACTION_CLASS[cause_action_class] == build_cause:
 						break
@@ -69,6 +69,8 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 					api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
 					if api_param_value == filter_param_value:
 						break
+				if build_info['previousBuild'] is None:
+					raise Exception("No filter match")
 				lcb_num = build_info['previousBuild']['number']
 				build_info = server.get_build_info(job_name, lcb_num)
 				build_actions = build_info['actions']
@@ -79,8 +81,6 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 						build_cause = action['causes'][0].get('_class', '')
 					elif action.get('_class') == 'hudson.tasks.junit.TestResultAction':
 						tempest_tests_failed = action['failCount']
-			if build_info['previousBuild'] is None:
-				raise Exception("No filter match")
 
 		build_time = build_info.get('timestamp')
 		build_days_ago = (datetime.datetime.now() - datetime.datetime.fromtimestamp(build_time / 1000)).days
