@@ -40,6 +40,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 	# fetch optional config options, return None if not present
 	fpn = config.get('filter_param_name', None)
 	fpv = config.get('filter_param_value', None)
+	cac = config.get('cause_action_class', None)
 
 	# iterate through all relevant jobs and build report rows
 	num_success = 0
@@ -76,7 +77,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			}
 
 		# get job info from jenkins API - will return False if an unmanageable error occured
-		jenkins_api_info = get_jenkins_job_info(server, job_name, filter_param_name=fpn, filter_param_value=fpv)
+		jenkins_api_info = get_jenkins_job_info(server, job_name, filter_param_name=fpn, filter_param_value=fpv, cause_action_class=cac)
 
 		# if jeeves was unable to collect any good jenkins api info, skip job
 		if jenkins_api_info:

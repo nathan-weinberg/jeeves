@@ -3,6 +3,12 @@
 import re
 import datetime
 
+CAUSE_ACTION_CLASS = {
+	'timer': 'hudson.triggers.TimerTrigger$TimerTriggerCause',
+	'user': 'hudson.model.Cause$UserIdCause',
+	'upstream': 'hudson.model.Cause$UpstreamCause'
+}
+
 
 def get_stage_failure(build_stages):
 	''' takes in build stages dict
@@ -26,7 +32,7 @@ def generate_failure_stage_log_urls(config, err_stage, job_url, lcb_num):
 	return stage_urls
 
 
-def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_value=None):
+def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_value=None, cause_action_class=None):
 	''' takes in jenkins server object and job name
 		optionally takes name and value of jenkins param to filter builds by
 		returns dict of API info for given job if success
@@ -48,27 +54,33 @@ def get_jenkins_job_info(server, job_name, filter_param_name=None, filter_param_
 		for action in build_actions:
 			if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
 				build_parameters = action['parameters']
+			elif action.get('_class') in ['hudson.model.CauseAction']:
+				build_cause = action['causes'][0].get('_class', '')
 			elif action.get('_class') == 'hudson.tasks.junit.TestResultAction':
 				tempest_tests_failed = action['failCount']
 
-		# if desired, get last completed build with custom parameter and value
-		if filter_param_name is not None and filter_param_value is not None:
-			api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
-			while api_param_value != filter_param_value:
-				if 'previousBuild' in build_info and build_info['previousBuild'] is not None:
-					lcb_num = build_info['previousBuild']['number']
-				else:
-					# there is no previous build available,
-					# set NO_KNOWN_BUILDS found
-					raise Exception("No filter match")
+		# if desired, get last completed build with custom parameter and value or desired cause action class
+		if ((filter_param_name is not None and filter_param_value is not None) or cause_action_class is not None):
+			while 'previousBuild' in build_info and build_info['previousBuild'] is not None:
+				if cause_action_class is not None:
+					if CAUSE_ACTION_CLASS[cause_action_class] == build_cause:
+						break
+				if filter_param_name is not None:
+					api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
+					if api_param_value == filter_param_value:
+						break
+				lcb_num = build_info['previousBuild']['number']
 				build_info = server.get_build_info(job_name, lcb_num)
 				build_actions = build_info['actions']
 				for action in build_actions:
 					if action.get('_class') in ['com.tikal.jenkins.plugins.multijob.MultiJobParametersAction', 'hudson.model.ParametersAction']:
 						build_parameters = action['parameters']
+					elif action.get('_class') in ['hudson.model.CauseAction']:
+						build_cause = action['causes'][0].get('_class', '')
 					elif action.get('_class') == 'hudson.tasks.junit.TestResultAction':
 						tempest_tests_failed = action['failCount']
-				api_param_value = [param['value'] for param in build_parameters if filter_param_name == param.get('name', '')][0]
+			if build_info['previousBuild'] is None:
+				raise Exception("No filter match")
 
 		build_time = build_info.get('timestamp')
 		build_days_ago = (datetime.datetime.now() - datetime.datetime.fromtimestamp(build_time / 1000)).days
