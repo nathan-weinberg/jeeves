@@ -131,6 +131,7 @@ def run_remind(config, blockers, server, header):
 			# generate HTML report
 			htmlcode = template.render(
 				header=header,
+				owner=owner,
 				rows=rows
 			)
 
@@ -162,7 +163,7 @@ def run_remind(config, blockers, server, header):
 
 			except Exception as e:
 				print("Error sending email reminder: {}\nHTML file generated".format(e))
-				generate_html_file(htmlcode, remind=True)
+				generate_html_file(htmlcode, remind=True, owner=owner)
 
 		else:
 			print("Owner {} has all passing jobs!".format(owner))
