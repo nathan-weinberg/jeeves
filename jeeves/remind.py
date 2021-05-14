@@ -27,6 +27,7 @@ def run_remind(config, blockers, server, header):
 	# fetch optional config options, return None if not present
 	fpn = config.get('filter_param_name', None)
 	fpv = config.get('filter_param_value', None)
+	cac = config.get('cause_action_class', None)
 
 	# find each job with no blockers including the owner and send email with agg'd list
 	owner_set = set(owner_list)
@@ -41,7 +42,7 @@ def run_remind(config, blockers, server, header):
 				continue
 
 			# get job info from jenkins API - will return False if an unmanageable error occured
-			jenkins_api_info = get_jenkins_job_info(server, job_name, filter_param_name=fpn, filter_param_value=fpv)
+			jenkins_api_info = get_jenkins_job_info(server, job_name, filter_param_name=fpn, filter_param_value=fpv, cause_action_class=cac)
 
 			# if jeeves was unable to collect any good jenkins API info, skip job
 			if jenkins_api_info:
