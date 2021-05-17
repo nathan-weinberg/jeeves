@@ -110,7 +110,7 @@ def get_tickets_dict(ticket_ids, config):
 
 			# initialize connection if it has not yet been done (either first iteration or previously failed)
 			if jira is None:
-				jira = JIRA(auth=auth, options=options)
+				jira = JIRA(basic_auth=auth, options=options)
 
 			issue = jira.issue(ticket_id)
 			ticket_status = '[' + str(issue.fields.status) + ']'
