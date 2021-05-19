@@ -1,5 +1,5 @@
 pyyaml==5.4.1
-jinja2==3.0.0
+jinja2==3.0.1
 python-jenkins==1.8.0.0a0
 python-bugzilla==3.0.2
 jira==3.0.1
