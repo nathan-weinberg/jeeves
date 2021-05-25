@@ -151,7 +151,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			if (len(bugs) == 0) and (len(tickets) == 0) and (len(other) == 0):
 				blocker_bool = False
 
-			# check if row conatians build number information
+			# check if row contains build number information
 			builds = None
 			if job_name in blockers and 'builds' in blockers[job_name]:
 				builds = blockers[job_name]['builds']
