@@ -12,6 +12,8 @@ job2:
     jira:
         - 'RHOSINFRA-456'
         - 'RHOSINFRA-789'
+    builds:
+        - 2,3
 
 # 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
 job3:
@@ -41,6 +43,15 @@ job5:
     other:
         - name: Experimental Job
         - url: <URL>
+
+# You can have build number for blockers included in report
+job5:
+    bz:
+        - 0
+    jira:
+        - 'RHOSINFRA-753'
+    builds:
+        - 2,3
 
 # If you wish for a job to have an owner, you can specify this as follows
 job6:

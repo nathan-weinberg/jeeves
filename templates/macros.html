@@ -3,11 +3,14 @@
 		<p style="text-align: center;"><b>Bugs</b></p>
 		{% for bug in row.bugs %}
 			<ul>
-			{% if bug.bug_url != None %}
-				<li><a href="{{bug.bug_url}}">{{bug.bug_name}}</a></li>
-			{% else %}
-				<li>{{bug.bug_name}}</li>
-			{% endif %}
+				<li>
+				{% if bug.bug_url != None %}
+					<a href="{{bug.bug_url}}">{{bug.bug_name}}</a>
+				{% else %}
+					{{bug.bug_name}}
+				{% endif %}
+				{{ build_numbers(row) }}
+				</li>
 			</ul>
 		{% endfor %}
 		{% if row.tickets|length > 0 or row.other|length > 0%}
@@ -18,11 +21,14 @@
 		<p style="text-align: center;"><b>Tickets</b></p>
 		{% for ticket in row.tickets %}
 			<ul>
-			{% if ticket.ticket_url != None %}
-				<li><a href="{{ticket.ticket_url}}">{{ticket.ticket_name}}</a></li>
-			{% else %}
-				<li>{{ticket.ticket_name}}</li>
-			{% endif %}
+				<li>
+				{% if ticket.ticket_url != None %}
+					<a href="{{ticket.ticket_url}}">{{ticket.ticket_name}}</a>
+				{% else %}
+					{{ticket.ticket_name}}
+				{% endif %}
+				{{ build_numbers(row) }}
+				</li>
 			</ul>
 		{% endfor %}
 		{% if row.other|length > 0%}
@@ -33,12 +39,25 @@
 		<p style="text-align: center;"><b>Other</b></p>
 		{% for other in row.other %}
 			<ul>
-			{% if other.other_url != None %}
-				<li><a href="{{other.other_url}}">{{other.other_name}}</a></li>
-			{% else %}
-				<li>{{other.other_name}}</li>
-			{% endif %}
+				<li>
+				{% if other.other_url != None %}
+					<a href="{{other.other_url}}">{{other.other_name}}</a>
+				{% else %}
+					{{other.other_name}}
+				{% endif %}
+				{{ build_numbers(row) }}
+				</li>
 			</ul>
+		{% endfor %}
+	{% endif %}
+{% endmacro %}
+
+{% macro build_numbers(row) %}
+	{% if row.builds is defined and row.builds is not none %}
+		: for build
+		{% for build in row.builds %}
+			<a href="{{row.job_url}}/{{ build }}">{{ build }}</a>
+			{{ ", " if not loop.last }}
 		{% endfor %}
 	{% endif %}
 {% endmacro %}
