@@ -31,7 +31,7 @@ If you wish to use a different configuration file, you can specify it as a comma
 #### Tracking Blockers
 Create a file named `blockers.yaml` based off `blockers.yaml.example` with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet).
 
-If you have a blocker for a job that is neither a Bugzilla bug or a Jira ticket, you may add a section to your blockers file called 'other', with each item having two fields - 'name' and 'url'. Both fields are optional - you can include one, the other, or both. You can also add information about build number for FAILED and UNSTABLE builds.
+If you have a blocker for a job that is neither a Bugzilla bug or a Jira ticket, you may add a section to your blockers file called 'other', with each item having two fields - 'name' and 'url'. Both fields are optional - you can include one, the other, or both. You can also add information about build number for FAILED, UNSTABLE,and NO_KNOWN_BUILDS builds.
 
 If you wish to use a different blockers file, you can specify it as a command line argument.
 
