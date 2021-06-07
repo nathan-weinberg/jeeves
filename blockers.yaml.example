@@ -64,7 +64,7 @@ job7:
     jira:
         - 0
 
-# You can have build number for blockers included in report
+# You can have build numbers for blockers included in report
 job8:
     bz:
         - 1
