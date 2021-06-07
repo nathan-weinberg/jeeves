@@ -4,5 +4,5 @@ python-jenkins==1.8.0.0a0
 python-bugzilla==3.0.2
 jira==3.0.1
 pytest==6.2.4
-pytest-cov==2.12.0
+pytest-cov==2.12.1
 flake8==3.9.2
