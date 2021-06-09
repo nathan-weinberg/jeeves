@@ -32,7 +32,9 @@ If you wish to use a different configuration file, you can specify it as a comma
 Create a file named `blockers.yaml` based off `blockers.yaml.example` with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet).
 
 If you have a blocker for a job that is neither a Bugzilla bug or a Jira ticket, you may add a section to your blockers file called 'other', with each item having two fields - 'name' and 'url'. Both fields are optional - you can include one, the other, or both.
+
 You can also add information about build number for FAILED, UNSTABLE, and NO_KNOWN_BUILDS builds.
+If you record the build number for which you have registered the issue, then you can speed up the review process by knowing if that ticket is still "current". This can be very helpful when a build starts to work again, but the blocker file is not updated. Then next time it fails, the last issue registered for that job pops up again. It can take you some time to figure out that it's not relevant anymore. But if you have build number, then you see "99" as your current build number and that the issue was registered to build "80" then you are pretty sure it's outdated.
 
 If you wish to use a different blockers file, you can specify it as a command line argument.
 
