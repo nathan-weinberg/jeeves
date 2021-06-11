@@ -12,7 +12,7 @@ Create a file named `config.yaml` based off `config.yaml.example` with the follo
 - **job_search_fields**: Filter of Jenkins Jobs to included in report, e.g. DFG-ceph-rhos. To search for multiple fields, seperate them by comma, e.g. DFG-ceph-rhos,DFG-all-unified. Allows for regex searches as well, e.g. ^DFG-ceph,rgw$
 - **filter_param_name**: Optional field that instructs Jeeves to skip any build that lacks the corresponding value of the given build parameter. Must be used on in conjunction with **filter_param_value**
 - **filter_param_value**: Optional field that instructs Jeeves to skip any build that lacks this value for the corresponding build parameter name. Must be used in conjunction with **filter_param_name**
-**cause_action_class**: Optional field that instructs Jeeves to skip any build that does not satisfy the 'cause action' which started a job build. Possible values are: timer, user, or upstream
+- **cause_action_class**: Optional field that instructs Jeeves to skip any build that does not satisfy the 'cause action' which started a job build. Possible values are: timer, user, or upstream
 - **bz_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
 - **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
 - **jira_username**: Your Jira username
@@ -32,6 +32,9 @@ If you wish to use a different configuration file, you can specify it as a comma
 Create a file named `blockers.yaml` based off `blockers.yaml.example` with each UNSTABLE and FAILED job containing two sections - 'bz' and 'jira' - and a list of the blocker IDs. 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet).
 
 If you have a blocker for a job that is neither a Bugzilla bug or a Jira ticket, you may add a section to your blockers file called 'other', with each item having two fields - 'name' and 'url'. Both fields are optional - you can include one, the other, or both.
+
+You can also add information about build number for FAILED, UNSTABLE, and NO_KNOWN_BUILDS builds.
+If you record the build number for which you have registered the issue, then you can speed up the review process by knowing if that ticket is still "current". This can be very helpful when a build starts to work again, but the blocker file is not updated. Then next time it fails, the last issue registered for that job pops up again. It can take you some time to figure out that it's not relevant anymore. But if you have build number, then you see "99" as your current build number and that the issue was registered to build "80" then you are pretty sure it's outdated.
 
 If you wish to use a different blockers file, you can specify it as a command line argument.
 

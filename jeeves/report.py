@@ -151,6 +151,11 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 			if (len(bugs) == 0) and (len(tickets) == 0) and (len(other) == 0):
 				blocker_bool = False
 
+			# check if row contains build number information
+			builds = None
+			if job_name in blockers and 'builds' in blockers[job_name]:
+				builds = blockers[job_name]['builds']
+
 			stage_urls = []
 			if jenkins_api_info['stage_failure'] != 'N/A':
 				stage_urls = generate_failure_stage_log_urls(
@@ -175,6 +180,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 				'bugs': bugs,
 				'tickets': tickets,
 				'other': other,
+				'builds': builds,
 				'tempest_tests_failed': jenkins_api_info['tempest_tests_failed'],
 				'tempest_tests_url': jenkins_api_info['job_url'] + str(jenkins_api_info['lcb_num']) + '/testReport',
 				'stage_name': jenkins_api_info['stage_failure'],

@@ -12,6 +12,9 @@ job2:
     jira:
         - 'RHOSINFRA-456'
         - 'RHOSINFRA-789'
+    builds:
+        - 2
+        - 3
 
 # 0 indicates blocker bug/ticket is not on file (either doesn't exist or hasn't been created yet)
 job3:
@@ -60,3 +63,13 @@ job7:
         - 852
     jira:
         - 0
+
+# You can have build numbers for blockers included in report
+job8:
+    bz:
+        - 1
+    jira:
+        - 'RHOSINFRA-754'
+    builds:
+        - 1
+        - 3
