@@ -6,8 +6,12 @@ filter_param_value: True
 cause_action_class: timer
 bz_url: https://bugzilla.ourcorporate.com
 jira_url: https://jira.ourcorporate.com
-jira_username: user1
-jira_password: coolpassword
+# Use one of two options to authenticate to jira
+# Using Personal Access Token is preferred, to use
+# Basic Authentication uncomment jira_username and jira_password
+#jira_username: user1
+#jira_password: coolpassword
+jira_token: personalaccesstoken
 certificate: our_jira_cert.crt
 smtp_host: smtp.ourcorporate.com
 email_subject: Our CI status report

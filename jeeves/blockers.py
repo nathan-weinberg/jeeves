@@ -89,8 +89,13 @@ def get_tickets_dict(ticket_ids, config):
 	# initialize ticket dictionary
 	ticket_dict = {}
 
-	# initialize jira variable and config options
-	auth = (config['jira_username'], config['jira_password'])
+	# check for username in config and use create tuple for basic auth
+	jira_username = config.get('jira_username', None)
+	if jira_username:
+		auth = (config['jira_username'], config['jira_password'])
+	# try to use Personal Access Token instead
+	else:
+		auth = config['jira_token']
 	options = {
 		"server": config['jira_url'],
 		"verify": config['certificate']
@@ -110,7 +115,10 @@ def get_tickets_dict(ticket_ids, config):
 
 			# initialize connection if it has not yet been done (either first iteration or previously failed)
 			if jira is None:
-				jira = JIRA(basic_auth=auth, options=options)
+				if jira_username:
+					jira = JIRA(basic_auth=auth, options=options)
+				else:
+					jira = JIRA(token_auth=auth, options=options)
 
 			issue = jira.issue(ticket_id)
 			ticket_status = '[' + str(issue.fields.status) + ']'

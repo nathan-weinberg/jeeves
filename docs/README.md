@@ -15,8 +15,9 @@ Create a file named `config.yaml` based off `config.yaml.example` with the follo
 - **cause_action_class**: Optional field that instructs Jeeves to skip any build that does not satisfy the 'cause action' which started a job build. Possible values are: timer, user, or upstream
 - **bz_url**: URL of your Bugzilla, e.g. https://bugzilla.redhat.com/
 - **jira_url**: URL of your Jira, e.g. https://projects.engineering.redhat.com/
-- **jira_username**: Your Jira username
-- **jira_password**: Your Jira password
+- **jira_username**: Your Jira username. If included in config.yaml basic auth method is used to authenticate to jira, otherwise Personal Access Token is used and jira_token has to be set.
+- **jira_password**: Your Jira password. Has to be set together with jira_username field.
+- **jira_token**: Your Jira Personal Access Token.
 - **certificate**: CRT file to authenticate with Jira server
 - **smtp_host**: SMTP host of your email
 - **email_subject**: Subject of your email report
