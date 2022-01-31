@@ -176,7 +176,7 @@ def get_osp_version(job_name):
 		if multiple versions detected, the highest number is considered osp version
 		returns osp version as a string or None if no version is found
 	'''
-	versions = re.findall(r'1{1}[0,3,6]{1}\.{1}\d{1}|1{1}[0,3,6]{1}(?=\D+)', job_name)
+	versions = re.findall(r'1{1}[0,3,6,7]{1}\.{1}\d{1}|1{1}[0,3,6,7]{1}(?=\D+)', job_name)
 	if not versions:
 		return None
 	versions_f = map(float, versions)
