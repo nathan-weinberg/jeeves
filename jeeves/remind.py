@@ -28,6 +28,7 @@ def run_remind(config, blockers, server, header):
 	fpn = config.get('filter_param_name', None)
 	fpv = config.get('filter_param_value', None)
 	cac = config.get('cause_action_class', None)
+	filter_version = config.get('filter_version')
 
 	# find each job with no blockers including the owner and send email with agg'd list
 	owner_set = set(owner_list)
@@ -35,7 +36,7 @@ def run_remind(config, blockers, server, header):
 		rows = []
 		for job_name in blockers:
 			owners = blockers[job_name].get('owners', [])
-			osp_version = get_osp_version(job_name)
+			osp_version = get_osp_version(job_name, filter_version)
 
 			# skip if current owner is not owner of this job
 			if owner not in owners:
