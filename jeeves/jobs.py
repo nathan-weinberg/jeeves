@@ -176,6 +176,7 @@ def get_osp_version(job_name, filter_version=None):
 		if multiple versions detected, the highest number is considered osp version
 		returns osp version as a string or None if no version is found
 	'''
+
 	if not filter_version or filter_version is None:
 		filter_version = r'1{1}[0,3,6]{1}\.{1}\d{1}|1{1}[0,3,6]{1}(?=\D+)'
 
