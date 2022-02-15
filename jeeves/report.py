@@ -41,6 +41,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 	fpn = config.get('filter_param_name', None)
 	fpv = config.get('filter_param_value', None)
 	cac = config.get('cause_action_class', None)
+	filter_version = config.get('filter_version')
 
 	# iterate through all relevant jobs and build report rows
 	num_success = 0
@@ -58,7 +59,7 @@ def run_report(config, blockers, preamble_file, template_file, no_email, test_em
 
 		# get name and osp version from job object
 		job_name = job['name']
-		osp_version = get_osp_version(job_name)
+		osp_version = get_osp_version(job_name, filter_version)
 
 		# skip if no OSP version could be found
 		if osp_version is None:

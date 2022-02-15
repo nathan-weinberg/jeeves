@@ -171,12 +171,20 @@ def get_jenkins_jobs(server, job_search_fields, supported_versions):
 	return relevant_jobs
 
 
-def get_osp_version(job_name):
+def get_osp_version(job_name, filter_version=None):
 	''' gets osp version from job name via regex
 		if multiple versions detected, the highest number is considered osp version
 		returns osp version as a string or None if no version is found
 	'''
-	versions = re.findall(r'1{1}[0,3,6,7]{1}\.{1}\d{1}|1{1}[0,3,6,7]{1}(?=\D+)', job_name)
+
+	if not filter_version or filter_version is None:
+		filter_version = r'1{1}[0,3,6]{1}\.{1}\d{1}|1{1}[0,3,6]{1}(?=\D+)'
+
+	versions = re.findall(
+		r'{filter_version}'.format(filter_version=filter_version),
+		job_name
+	)
+
 	if not versions:
 		return None
 	versions_f = map(float, versions)
