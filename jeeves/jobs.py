@@ -187,7 +187,6 @@ def get_osp_version(job_name, filter_version=None):
 
 	if not versions:
 		return None
-
 	versions_f = map(float, versions)
 	max_value = max(versions_f)
 	return '{:g}'.format(max_value)
