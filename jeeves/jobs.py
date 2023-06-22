@@ -144,7 +144,7 @@ def get_jenkins_jobs(server, job_search_fields, supported_versions):
 	'''
 
 	# parse list of search fields
-	fields = job_search_fields.split(',')
+	fields = job_search_fields.split(',') if not type(job_search_fields) is list else job_search_fields
 	fields_length = len(fields)
 
 	# remove spacing from strings
